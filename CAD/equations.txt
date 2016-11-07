@@ -1,0 +1,10 @@
+﻿"smallPulleyTeeth"= 15
+"largePulleyTeeth"= 30
+"eighthThick"= 2.9mm
+"sixteenthThick" = 1.7mm
+"wheelEighthThick"=3.0mm
+"quarterThick"=5.6mm
+"bushingDiam" = 7.85mm
+"plateBoltCircle" = 65mm
+"plateBoltDiam" = 5mm
+
