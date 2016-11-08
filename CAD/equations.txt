@@ -7,9 +7,10 @@
 "puckAngle" = 60.5deg
 "puckDiam" = 76.5mm
 "axlePress" = 5.8mm
-"press" = 0.3mm
+"press" = 0.2mm
 "wheelClear" = 0.3mm
 "10-32clear" = 4.5mm
 "6-32clear" = 3.3mm
 "8-32clear" = 4.0mm
+"wheelHeight" = 24mm
 
