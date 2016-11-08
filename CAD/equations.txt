@@ -4,7 +4,10 @@
 "sixteenthThick" = 1.7mm
 "wheelEighthThick"=3.0mm
 "quarterThick"=5.6mm
-"bushingDiam" = 7.85mm
-"plateBoltCircle" = 65mm
-"plateBoltDiam" = 5mm
+"OD" = 150mm
+"puckAngle" = 60.5deg
+"puckDiam" = 76.5mm
+"axlePress" = 5.8mm
+"press" = 0.3mm
+"wheelClear" = 0.3mm
 
