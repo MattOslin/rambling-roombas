@@ -2,7 +2,6 @@
 "largePulleyTeeth"= 30
 "eighthThick"= 2.9mm
 "sixteenthThick" = 1.7mm
-"wheelEighthThick"=3.0mm
 "quarterThick"=5.6mm
 "OD" = 150mm
 "puckAngle" = 60.5deg
@@ -10,4 +9,7 @@
 "axlePress" = 5.8mm
 "press" = 0.3mm
 "wheelClear" = 0.3mm
+"10-32clear" = 4.5mm
+"6-32clear" = 3.3mm
+"8-32clear" = 4.0mm
 
