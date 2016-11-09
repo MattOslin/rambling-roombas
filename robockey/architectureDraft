@@ -1,0 +1,35 @@
+Files We Need:
+
+motor_driver.h
+	motor_init()  
+	/* PWM should be lower frequency than acrobot <10kHz
+	SLEW rate should be hard set accordingly
+	ignore INV
+	EN or other D1 can be used to pause motors
+
+	 */
+	encoder_read(long int* count)
+	drive(int a, int b)  
+		/* -MAXPWM <= a,b <= MAXPWM 
+		 * should check status (SF) pin of motor
+		 * 
+		 *
+		 */ 
+
+	read_motor_current()
+	motor_disable()
+	/*OPTIONAL*/
+
+puck_detection.h
+adc_driver.h
+shoot.h
+inter_bot_comms.h
+localize.h
+
+
+
+MAIN 
+behavior control given sensor data
+state
+control given drivers
+comm
