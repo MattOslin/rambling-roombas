@@ -36,6 +36,7 @@
 // -----------------------------------------------------------------------------
 
 #define set(reg,bit)		reg |= (1<<(bit))
+#define clear(reg,bit)		reg &= ~(1<<(bit))
 #define clr(reg,bit)		reg &= ~(1<<(bit))
 #define toggle(reg,bit)		reg ^= (1<<(bit))
 
@@ -85,7 +86,7 @@
 // Change the state of the green on-board LED:
 // -----------------------------------------------------------------------------
 
-#define m_green(val)		set(DDRE,2); if(val==OFF){set(PORTE,2);}else if(val==ON){clr(PORTE,2);}else if(val==TOGGLE){toggle(PORTE,2);}
+#define m_green(val)		set(DDRE,2); if(val==OFF){set(PORTE,2);}else if(val==ON){clear(PORTE,2);}else if(val==TOGGLE){toggle(PORTE,2);}
 // "val" must be either OFF, ON, or TOGGLE, as defined above
 
 
@@ -93,7 +94,7 @@
 // Change the state of the red on-board LED:
 // -----------------------------------------------------------------------------
 
-#define m_red(val)			set(DDRE,6); if(val==OFF){set(PORTE,6);}else if(val==ON){clr(PORTE,6);}else if(val==TOGGLE){toggle(PORTE,6);}
+#define m_red(val)			set(DDRE,6); if(val==OFF){set(PORTE,6);}else if(val==ON){clear(PORTE,6);}else if(val==TOGGLE){toggle(PORTE,6);}
 // "val" must be either OFF, ON, or TOGGLE, as defined above
 // note that this takes over control of pin E6 and sets it to an output
 

@@ -1,6 +1,6 @@
 
-#ifndef MOTOR_DRIVER_H_
-#define MOTOR_DRIVER_H_
+#ifndef INIT_H_
+#define INIT_H_
 
 #include "m_general.h"
 #include "m_bus.h"
@@ -14,6 +14,7 @@
 #define TIMER_0_PRSCL 1024
 #define TIMER_1_PRSCL 1
 #define TIMER_3_PRSCL 64
+#define CTRL_FREQ 1000
 
 #define ABS(X)				(X < 0 ?-X : X)
 #define MIN(X,Y)			(X < Y ? X : Y)
@@ -34,6 +35,6 @@ uint32_t millis(void); // Returns current milliseconds count
 
 void usb_read_command(void);
 void motor_GPIO_setup(void);
-void dd_init(void);
+void dd_init(dd *rob);
 
-#endif /* MOTOR_DRIVER_H_ */
+#endif /* INIT_H_ */

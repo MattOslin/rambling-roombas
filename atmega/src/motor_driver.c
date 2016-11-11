@@ -4,12 +4,12 @@
 
 
 // ENABLES MOTOR DRIVER OPERATION
-void dd_enable(*rob) {
+void dd_enable(dd *rob) {
 	set(*(rob->enable.reg),rob->enable.bit);
 }
 
 // STOPS MOTOR DRIVER OPERATION
-void dd_disable() {
+void dd_disable(dd *rob) {
 	clr(*(rob->enable.reg),rob->enable.bit);
 }
 

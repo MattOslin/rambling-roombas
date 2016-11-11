@@ -1,5 +1,7 @@
 #include "init.h"
 
+extern uint32_t milliseconds;
+
 void m2_init() {
 	// SET CLOCK TO 16MHz
 	m_clockdivide(0);

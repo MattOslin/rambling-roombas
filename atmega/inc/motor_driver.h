@@ -61,8 +61,8 @@ typedef struct diffDrive {
 } dd;
 
 void motor_drive(int a, int b);
-void motor_enable();
-void motors_disable();
+void dd_enable();
+void dd_disable();
 void motor_update(motor *m);
 void encoder_update(motor *m);
 void encoder_velocity(motor *m);
