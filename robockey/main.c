@@ -4,35 +4,10 @@
  * Created: 10/25/2016 6:31:06 PM
  * Author : J. Diego Caporale, Matt Oslin, Garrett Wenger, Jake Welde
  */ 
-
-
-#define	F_CPU 16000000	    //CPU Clock Freq [Hz]
-#define PI 3.14159265       // The constant that defines the ratio between diameter and circumference
+#include "init.h"
 #define CTRL_FREQ 1000
-#define TIMER_0_PRSCL 1024
-#define ABS(X)   (X < 0 ?-X : X)
-#define MIN(X,Y) (X < Y ? X : Y)
-#define clr(reg,bit)		reg &= ~(1<<(bit))
 
-// If we want RF
-// #define CHANNEL 1
-// #define MY_ADDRESS 0x5D
-// #define PACKET_LENGTH 3
-
-#include "m_general.h"
-#include "m_bus.h"
-#include "m_usb.h"
-#include "m_rf.h"
-#include "motor_driver.h"
-#include "ADC_driver.h"
-
-
-// Initialize helper functions
-void timer0_init(void);
-void timer3_init(void); // Millisecond timer
-void usb_read_command(void);
-uint32_t millis(void); // Returns current milliseconds count
-motor M1;
+dd robot;
 
 // Global flags for interrupts
 
@@ -45,44 +20,26 @@ volatile uint32_t milliseconds = 0;
 
 
 int main(void) {
-	// SET CLOCK TO 16MHz
-	m_clockdivide(0);
 	
-	// Initialize ADC and Timers
-	adc_init();    // Initializes first ADC read for encoder
-	timer0_init(); // Timer0 is our control loop clock
-	timer3_init();
-	
-	// Initalize all necessary MAEVARM utilities
-	m_bus_init();
-	//m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH); // For RF comms 
-	m_usb_init(); // USB COMs for debug
-	
-	m_green(ON); // Ready LED
-	m_disableJTAG(); //Allows use of some of the portF
+	// Initialize GPIO, ADC, m_bus, interrupts, diffDrive
+	m2_init();
 
-	// Enable global interrupts
-	sei();
-	//Initialize Variables
+	// Initialize diffDrive (motors, encoders, localization)
+	dd_init(&robot);
+
+	// Initialize Variables
 	const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t countUSB = 0; //Used to not bog down processer or terminal with USB Transmissions
 	//unsigned int usbIn, charCount;
-	motor_init();
+	
 
 	//motor *M1;
-	M1.dirControl1 = 2;
-	M1.dirControl2 = 3;
-	M1.dutyCycleRegister = (uint16_t*) (&OCR1C);
-	M1.command = 0;
-	M1.encA.reg = (uint8_t *) (&PIND);
-	M1.encA.bit = 3;
-	M1.encB.reg = (uint8_t *) (&PIND);
-	M1.encB.bit = 5;
+
 	set(DDRC,6);
 	//Main process loop
     while (1) //Stay in this loop forever
     {
-		motor_enable();
+		dd_enable();
 		//Control Loop at CTRL_FREQ frequency//
 		if (CTRLreadyFlag)
 		{
@@ -103,7 +60,7 @@ int main(void) {
 			// Send USB information for DEBUG every 100 control loop cycles
 			if (countUSB%10 == 0) {	
 			  	//m_red(TOGGLE);
-				m_usb_tx_int(M1.veloEncoder);
+				m_usb_tx_int(robot.M1.veloEncoder);
 				m_usb_tx_string("  ");
 // 				m_usb_tx_int(rawADCCounts[2]);
 // 				m_usb_tx_string("  ");
@@ -112,8 +69,8 @@ int main(void) {
 // 				m_usb_tx_int(*(M1.dutyCycleRegister));
 				m_usb_tx_string("\n");
 	 			//m_usb_tx_push();
-				M1.command = /*(M1.command+25)%*/MOTOR_COMMAND_MAX;
-				motor_update(&M1);
+				robot.M1.command = /*(M1.command+25)%*/MOTOR_COMMAND_MAX;
+				motor_update(&(robot.M1));
 			}
 
 			//Iterate countUSB
@@ -128,94 +85,6 @@ int main(void) {
 	}
 }
 
-
-
-
-
-
-
-void timer0_init() {
-	//ENABLE MODE 2 UP TO OCR0A, RESET TO 0x00
-	clr(TCCR0B, WGM02);
-	set(TCCR0A, WGM01);
-	clr(TCCR0A, WGM00);
-	
- 	//SET OCR0A FOR DESIRED FREQ CONTROL
- 	OCR0A = (F_CPU/CTRL_FREQ)/TIMER_0_PRSCL;	
-	
-	//Enable interrupt when TCNT1 Overflows
-	set(TIMSK0 , OCIE0A );
-
-	//ENABLE TIMER 0 WITH 1024 PRESCALER 
-	set(TCCR0B, CS02);
-	clr(TCCR0B, CS01);
-	set(TCCR0B, CS00);
-}
-
-
-void usb_read_command() {	
-	char buff[8];
-	unsigned int indx = 0;
-	int val = 0;
-	int i;
-
-	while(m_usb_rx_available()&&indx<8){
-		buff[indx] = m_usb_rx_char();
-		indx++;
-	}
-	
-	for(i=indx-1; i > 0; i--){
-		val += ((int)buff[i]-'0')*pow(10, indx-i-1);//Introduces mistakes in integer math (rounds down)
-		m_usb_tx_int((int)buff[i]-'0');
-		m_usb_tx_string("\n");
-	}
-	switch(buff[0]){
-		case 'P':
-			//kpth = val;
-			m_usb_tx_string("\n");
-			m_usb_tx_string("KP: ");
-			//m_usb_tx_int(kpth);
-			m_usb_tx_string("\n");
-			break;
-		case 'D':
-			//kdth = val;
-			m_usb_tx_string("\n");
-			m_usb_tx_string("KD: ");
-			//m_usb_tx_int(kdth);
-			m_usb_tx_string("\n");
-			break;
-		case 'B':
-			//beta = val;
-			m_usb_tx_string("\n");
-			m_usb_tx_string("1/Beta: ");
-			//m_usb_tx_int(1.0/beta);
-			m_usb_tx_string("\n");
-			break;
-		default :
-			m_usb_tx_string("NO DATA");
-	}
-}
-
-uint32_t millis(void) {
-	return milliseconds;
-}
-
-void timer3_init(void) {
-	// Count up to OCR3A, then reset
-	clr(TCCR3B, WGM33);
-	set(TCCR3B, WGM32);
-	clr(TCCR3A, WGM32);
-	clr(TCCR3A, WGM30);
-
-	OCR3A = 250; // (16 MHz / 64) * (1 ms) = 250
-
-	set(TIMSK3, OCIE3A); // Interrupt when TCNT0 = OCR0A
-
-	// Timer on, prescaler to /64
-	clr(TCCR3B, CS32); 
-	set(TCCR3B, CS31);
-	set(TCCR3B, CS30);
-}
 
 //INTERRUPT HANDLER ADC
 // Interrupt to inform main loop that ADC is ready to read

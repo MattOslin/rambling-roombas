@@ -9,15 +9,28 @@
 #ifndef MOTOR_DRIVER_H_
 #define MOTOR_DRIVER_H_
 #define MOTOR_COMMAND_MAX 1000
+#define PWM_FREQ 5000		// PWM Frequency (only set freq or max not both)
+#define PWM_MAX (F_CPU/(TIMER_1_PRSCL*PWM_FREQ))	// PWM Duty Cycle max (inversely proportional with frequency)
+#define OL_MOTOR_MATCH 0    // Open loop motor matching calibration
+#define CL_VEL_KP 10
+#define CL_VEL_KI 0
+#define CL_VEL_KD 1
+
 
 typedef struct pin	 {
 	uint8_t *reg;
 	uint8_t bit;
 } pin;
 
-typedef struct motor {
-	int    command;
+typedef struct position {
+	double x;
+	double y;
+	double th;
+} pos;
 
+typedef struct motor {
+
+	int    command;
 	uint16_t *dutyCycleRegister;
 	uint8_t dirControl1;
 	uint8_t dirControl2;
@@ -32,9 +45,21 @@ typedef struct motor {
 	double kp;
 	double ki;
 	double kd;
+
 } motor;
-void timer1_init();
-void motor_init();
+
+typedef struct diffDrive {
+	motor M1;
+	motor M2;
+	pin enable;
+	pin SF;
+	uint8_t fault;
+	pos global;
+	pos velocity;
+	pos goalLoc;
+	pos goalVel;
+} dd;
+
 void motor_drive(int a, int b);
 void motor_enable();
 void motors_disable();
