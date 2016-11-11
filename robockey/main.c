@@ -8,11 +8,10 @@
 
 #define	F_CPU 16000000	    //CPU Clock Freq [Hz]
 #define PI 3.14159265       // The constant that defines the ratio between diameter and circumference
-
-
+#define CTRL_FREQ 1000
+#define TIMER_0_PRSCL 1024
 #define ABS(X)   (X < 0 ?-X : X)
 #define MIN(X,Y) (X < Y ? X : Y)
-#define set(reg,bit)		reg |= (1<<(bit))
 #define clr(reg,bit)		reg &= ~(1<<(bit))
 
 // If we want RF
@@ -23,18 +22,17 @@
 #include "m_general.h"
 #include "m_bus.h"
 #include "m_usb.h"
-//#include "m_imu.h"
 #include "m_rf.h"
 #include "motor_driver.h"
 #include "ADC_driver.h"
 
 
 // Initialize helper functions
-
+void timer0_init(void);
 void timer3_init(void); // Millisecond timer
 void usb_read_command(void);
 uint32_t millis(void); // Returns current milliseconds count
-
+motor M1;
 
 // Global flags for interrupts
 
@@ -42,7 +40,7 @@ volatile bool CTRLreadyFlag = FALSE;	// Frequency control flag for control loop
 //volatile bool isCommandReady = FALSE; // RF command flag
 
 //Global Variable
-volatile uint16_t rawADCCounts[NUMADCS];	// Array of raw ADC values
+uint16_t rawADCCounts[12];	// Array of raw ADC values
 volatile uint32_t milliseconds = 0;
 
 
@@ -65,40 +63,61 @@ int main(void) {
 
 	// Enable global interrupts
 	sei();
-	
 	//Initialize Variables
 	const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t countUSB = 0; //Used to not bog down processer or terminal with USB Transmissions
 	//unsigned int usbIn, charCount;
+	motor_init();
 
+	//motor *M1;
+	M1.dirControl1 = 2;
+	M1.dirControl2 = 3;
+	M1.dutyCycleRegister = (uint16_t*) (&OCR1C);
+	M1.command = 0;
+	M1.encA.reg = (uint8_t *) (&PIND);
+	M1.encA.bit = 3;
+	M1.encB.reg = (uint8_t *) (&PIND);
+	M1.encB.bit = 5;
+	set(DDRC,6);
 	//Main process loop
     while (1) //Stay in this loop forever
     {
+		motor_enable();
 		//Control Loop at CTRL_FREQ frequency//
 		if (CTRLreadyFlag)
 		{
+			
 			//DEBUG CTRL FREQUENCY TEST//
-			//set(PORTC,6);
+			/*toggle(PORTC,6);*/
 			
 			CTRLreadyFlag = FALSE; //Reset flag for interupt
 
 			//LOW PASS FILTER FOR ADC//
-			int i;
-			for(i = 0; i < NUMADCS; i++) {
-				oldFiltADCCounts[i] = filtADCCounts[i];
-				filtADCCounts[i] = alpha*filtADCCounts[i] + (1-alpha)*rawADCCounts[i];
-			}
+// 			int i;
+// 			for(i = 0; i < NUMADCS; i++) {
+// 				oldFiltADCCounts[i] = filtADCCounts[i];
+// 				filtADCCounts[i] = alpha*filtADCCounts[i] + (1-alpha)*rawADCCounts[i];
+// 			}
 
 			// USB DEBUG//
 			// Send USB information for DEBUG every 100 control loop cycles
-			// if (countUSB%100 == 0) {	
-			//  	m_red(TOGGLE);
-			//
-	 		//		m_usb_tx_push();
-			// }
+			if (countUSB%10 == 0) {	
+			  	//m_red(TOGGLE);
+				m_usb_tx_int(M1.veloEncoder);
+				m_usb_tx_string("  ");
+// 				m_usb_tx_int(rawADCCounts[2]);
+// 				m_usb_tx_string("  ");
+// 				m_usb_tx_int(rawADCCounts[3]);
+// 				m_usb_tx_string("  ");
+// 				m_usb_tx_int(*(M1.dutyCycleRegister));
+				m_usb_tx_string("\n");
+	 			//m_usb_tx_push();
+				M1.command = /*(M1.command+25)%*/MOTOR_COMMAND_MAX;
+				motor_update(&M1);
+			}
 
 			//Iterate countUSB
-			//countUSB++;
+			countUSB++;
 
 		}
 		//RF Command inputs
@@ -152,24 +171,24 @@ void usb_read_command() {
 	}
 	switch(buff[0]){
 		case 'P':
-			kpth = val;
+			//kpth = val;
 			m_usb_tx_string("\n");
 			m_usb_tx_string("KP: ");
-			m_usb_tx_int(kpth);
+			//m_usb_tx_int(kpth);
 			m_usb_tx_string("\n");
 			break;
 		case 'D':
-			kdth = val;
+			//kdth = val;
 			m_usb_tx_string("\n");
 			m_usb_tx_string("KD: ");
-			m_usb_tx_int(kdth);
+			//m_usb_tx_int(kdth);
 			m_usb_tx_string("\n");
 			break;
 		case 'B':
-			beta = val;
+			//beta = val;
 			m_usb_tx_string("\n");
 			m_usb_tx_string("1/Beta: ");
-			m_usb_tx_int(1.0/beta);
+			//m_usb_tx_int(1.0/beta);
 			m_usb_tx_string("\n");
 			break;
 		default :
@@ -220,4 +239,9 @@ ISR(TIMER0_COMPA_vect) {
 
 ISR(TIMER3_COMPA_vect) {
 	milliseconds++;
+}
+
+ISR(INT3_vect){
+	encoder_update(&M1);
+	m_red(TOGGLE);	
 }

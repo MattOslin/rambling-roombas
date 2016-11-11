@@ -4,10 +4,28 @@
  * Created: 10/25/2016 6:31:06 PM
  * Author : J. Diego Caporale, Matt Oslin, Garrett Wenger, Jake Welde
  */ 
-
+#include "m_general.h"
 #include "ADC_driver.h"
 
-uint8_t ADCsToRead[NUMADCS];
+#define NUMADCS 4
+const int ADCsToRead[] = {/*ADC0,ADC1,*/ADC4,ADC5,ADC6,ADC7/*,ADC8,ADC9,ADC10,ADC11,ADC12,ADC13*/};
+//Disable Digital Inputs
+void adc_dis_digi()
+{
+	//set(DIDR0, ADC0D);	//F0
+	//set(DIDR0, ADC1D);	//F1
+	set(DIDR0, ADC4D);	//F4
+	set(DIDR0, ADC5D);	//F5
+	set(DIDR0, ADC6D);	//F6
+	set(DIDR0, ADC7D);	//F7
+	// set(DIDR2, ADC8D);	//D4
+	// set(DIDR2, ADC9D);	//D6
+	// set(DIDR2, ADC10D);	//D7
+	// set(DIDR2, ADC11D);	//B4 Used in motor controller
+	// set(DIDR2, ADC12D);	//B5
+	// set(DIDR2, ADC13D);	//B6
+}
+
 
 void adc_init() {
 	//Set voltage reference to Vcc
@@ -20,18 +38,12 @@ void adc_init() {
 	set(ADCSRA, ADPS2);
 	set(ADCSRA, ADPS1);
 
-
 	/*   WHICH ADCS DO YOU WANT TO USE
-	*    COMMENT OUT THE ADCS YOU DON'T WANT
-	*	 DON'T FORGET TO ADJUST #define NUMADCS 
-	***********************************************************************************
-	***********************************************************************************/
-	
-	ADCsToRead = ADC2READ;
+	*    COMMENT OUT THE ADCS YOU DON'T WANT IN THE HEADER FILE*/
 
 	//Disable Digital Inputs 
-	disable_ADC_digi();
-
+	// IN HEADER FILE
+	adc_dis_digi();
 	/***********************************************************************************
 	***********************************************************************************/
 	
@@ -61,11 +73,11 @@ void adc_init() {
 	set(ADCSRA, ADSC);
 }
 
-void adc_read(int rawADCCounts[])
+void adc_read(uint16_t rawADCCounts[])
 {
 	static uint8_t ADCIndex = 0;
 	rawADCCounts[ADCIndex] = ADC;
-
+	toggle(PORTC,6);
 	//Choose which ADC to run next and set ADMUX register
 	ADCIndex = (ADCIndex + 1) % NUMADCS;
 	

@@ -1,31 +1,14 @@
 
+#include "m_general.h"
+#include "motor_driver.h"
+#define F_CPU 16000000
 #define TIMER_1_PRSCL 1		// Timer1 Prescaler
 #define PWM_FREQ 5000		// PWM Frequency (only set freq or max not both)
-#define PWM_MAX (F_CPU/(TIMER_1_PRSCL*PWM_FREQ)	// PWM Duty Cycle max (inversely proportional with frequency)
+#define PWM_MAX (F_CPU/(TIMER_1_PRSCL*PWM_FREQ))	// PWM Duty Cycle max (inversely proportional with frequency)
 #define OL_MOTOR_MATCH 0    // Open loop motor matching calibration
-#define MOTOR_COMMAND_MAX 1000
-#define ABS(X)   (X < 0 ?-X : X)
-#define MIN(X,Y) (X < Y ? X : Y)
 
-#define set(reg,bit)		reg |= (1<<(bit))
-#define clr(reg,bit)		reg &= ~(1<<(bit))
-
-typedef struct motor {
-	int    command;
-	double veloDesired;
-	double prevError;
-	double integError;
-	double dirEncoder;
-	double veloEncoder;
-	double countEncoder;
-	uint8_t *dutyCycleRegister;
-	uint8_t *dirControl1;
-	uint8_t *dirControl2;
-	double kp;
-	double ki;
-	double kd;
-} motor;
-
+#define ABS(X)			(X < 0 ?-X : X)
+#define MIN(X,Y)		(X < Y ? X : Y)
 
 void timer1_init() {
 	//ENABLE GPIO OUTPUT B6,7 for PWM
@@ -46,11 +29,11 @@ void timer1_init() {
 	set(TCCR1A, COM1C1);
 
 	//Set OCRIA Max Frequency (PWM_FREQ Hz) with PWM_MAX resolution for duty cycle
-	OCR1A = PWM_MAX;
+	OCR1A = PWM_MAX ;
 
 	//SET OCR1B Default Duty Cycle to 0;
 	OCR1B = 0;
-	OCR1C = 0;
+	OCR1C = 1600;
 		
 	//ENABLE TIMER 1 WITH PRESCALER = 1
 	clr(TCCR1B, CS12);
@@ -69,10 +52,16 @@ void motor_init() {
 	set(DDRB,5); // M2 IN2: 
 	set(DDRB,6); // M1 PWM D2: 
 	set(DDRB,7); // M2 PWM D2:
-	set(DDRD,3); // M1 Encoder A Interupt
-	set(DDRD,5); // M1 Encoder B
-	set(DDRE,6); // M2 Encoder A Interupt
-	set(DDRC,7); // M2 Encoder B 
+	clr(DDRD,3); // M1 Encoder A Interrupt
+	set(PORTD,3);
+	clr(DDRD,5); // M1 Encoder B
+	set(PORTD,5);
+	clr(EICRA,ISC31);
+	set(EICRA,ISC30);
+	set(EIMSK, INT3);
+
+	//set(DDRE,6); // M2 Encoder A Interrupt
+	//set(DDRC,7); // M2 Encoder B 
 
 	timer1_init(); // Timer1 PWM Used for Motor PWM
 
@@ -111,7 +100,7 @@ void motor_enable() {
 }
 
 // STOPS MOTOR DRIVER OPERATION
-void motor_disable() {
+void motors_disable() {
 	clr(PORTB, 1);
 }
 
@@ -119,15 +108,16 @@ void motor_update(motor *m){
 	
 	if (m->command >= 0)
 	{
-		set(PORTB,dirControl1);
-		clr(PORTB,dirControl2);
+		set(PORTB,m->dirControl1);
+		clr(PORTB,m->dirControl2);
 	}
 	else
 	{
-		clr(PORTB,dirControl1);
-		set(PORTB,dirControl2);
+		clr(PORTB,m->dirControl1);
+		set(PORTB,m->dirControl2);
 	}
-	*(m->dutyCycleRegister) = MIN( ABS(m->command) , MOTOR_COMMAND_MAX );
+	*(m->dutyCycleRegister) = PWM_MAX * MIN( ABS(m->command) , MOTOR_COMMAND_MAX ) / MOTOR_COMMAND_MAX;
+	encoder_velocity(m);
 }
 /*
 *
@@ -136,11 +126,11 @@ void motor_update(motor *m){
 *	encoder_update
 *	do_pid
 */
-void encoder_update(motor *m, int A, int B){
+void encoder_update(motor *m){
 	// Determine direction and update encoder count from the logic levels of the encoder's A and B outputs.
-	if(A == 1){
+	if(check(*(m->encA.reg), m->encA.bit) == 1){
 		// Rising edge of A.
-		if(B == 1){
+		if(check(*(m->encB.reg), m->encB.bit) == 1){
 			m->dirEncoder = 1;
 			m->countEncoder ++;
 		}
@@ -151,7 +141,7 @@ void encoder_update(motor *m, int A, int B){
 	}
 	else{
 		// Falling edge of A.
-		if(B == 1){
+		if(check(*(m->encB.reg), m->encB.bit) == 1){
 			m->dirEncoder = -1;
 			m->countEncoder --;
 		}
@@ -160,6 +150,11 @@ void encoder_update(motor *m, int A, int B){
 			m->countEncoder ++;
 		}
 	}
+}
+void encoder_velocity(motor *m)
+{
+	m->veloEncoder = ABS(m->countEncoder);
+	m->countEncoder = 0;
 }
 void drive_CL(motor *m){
 
