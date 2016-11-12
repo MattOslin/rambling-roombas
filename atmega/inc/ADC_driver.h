@@ -22,17 +22,6 @@
 #define ADC12 12
 #define ADC13 13
 
-/*   WHICH ADCS DO YOU WANT TO USE
-*    COMMENT OUT THE ADCS YOU DON'T WANT
-*	 DON'T FORGET TO ADJUST #define NUMADCS 
-*	 DON'T FORGET TO COMMENT OUT THE FINAL SEMICOLON
-***********************************************************************************
-***********************************************************************************/
-
-
-
-/***********************************************************************************
-***********************************************************************************/
 
 void adc_init();
 void adc_read(uint16_t rawADCCounts[]);

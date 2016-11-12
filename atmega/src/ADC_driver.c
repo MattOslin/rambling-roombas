@@ -7,6 +7,14 @@
 #include "m_general.h"
 #include "ADC_driver.h"
 
+
+/*   WHICH ADCS DO YOU WANT TO USE
+*    COMMENT OUT THE ADCS YOU DON'T WANT
+*	 DON'T FORGET TO ADJUST #define NUMADCS 
+*	 DON'T FORGET TO COMMENT OUT THE FINAL SEMICOLON
+***********************************************************************************
+***********************************************************************************/
+
 #define NUMADCS 4
 const int ADCsToRead[] = {/*ADC0,ADC1,*/ADC4,ADC5,ADC6,ADC7/*,ADC8,ADC9,ADC10,ADC11,ADC12,ADC13*/};
 //Disable Digital Inputs
@@ -26,6 +34,9 @@ void adc_dis_digi()
 	// set(DIDR2, ADC13D);	//B6
 }
 
+/***********************************************************************************
+***********************************************************************************/
+
 
 void adc_init() {
 	//Set voltage reference to Vcc
@@ -33,19 +44,14 @@ void adc_init() {
 	clr(ADMUX, REFS1);
 
 	//Set ADC Prescaler to /128 (125kHz ADCClock at 16MHz Sysclock)
-	//This will translate to 9kHz read speed for all the ADCS (2.4kHz per ADC)
+	//This will translate to 9kHz read speed for all the ADCS (9kHz/NUMADCS per ADC)
 	set(ADCSRA, ADPS0);
 	set(ADCSRA, ADPS2);
 	set(ADCSRA, ADPS1);
 
-	/*   WHICH ADCS DO YOU WANT TO USE
-	*    COMMENT OUT THE ADCS YOU DON'T WANT IN THE HEADER FILE*/
-
 	//Disable Digital Inputs 
-	// IN HEADER FILE
+
 	adc_dis_digi();
-	/***********************************************************************************
-	***********************************************************************************/
 	
 	//Set ADC Interrupt
 	set(ADCSRA, ADIE);
@@ -83,14 +89,15 @@ void adc_read(uint16_t rawADCCounts[])
 	
 	if (ADCsToRead[ADCIndex] < 8)
 	{
-		ADCSRB |= 0 << MUX5; //set(ADCSRB, MUX5);
+		ADCSRB |= 0 << MUX5; //clr(ADCSRB, MUX5);
 	}
 	else
 	{
-		ADCSRB |= 1 << MUX5; //clr(ADCSRB, MUX5);
+		ADCSRB |= 1 << MUX5; //set(ADCSRB, MUX5);
 	}
 	ADMUX = (ADMUX & 0b11111000) + ADCsToRead[ADCIndex] % 8;
 
 	//Start next ADC read
 	set(ADCSRA, ADSC);
 }
+

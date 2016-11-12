@@ -17,47 +17,47 @@ void m2_init() {
 	
 	m_green(ON); // Ready LED
 	m_disableJTAG(); //Allows use of some of the portF
-
+	m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH);
 	// Enable global interrupts
 	sei();
 }
 void dd_init(dd *rob) {
 	motor_GPIO_setup();
 
-	rob->SF.reg = (uint8_t *) (&PORTB);
+	rob->SF.reg = (uint8_t *) (&PINB); // Fault Input Pin B0
 	rob->SF.bit = 0;
 	
-	rob->enable.reg = (uint8_t *) (&PORTB);
+	rob->enable.reg = (uint8_t *) (&PORTB); // GPIO Out to B1
 	rob->enable.bit = 1;
 	/***********
 	 * MOTOR 2 Specifics
 	***********/
-	rob->M1.dirControl1 = 2;
-	rob->M1.dirControl2 = 3;
-	rob->M1.dutyCycleRegister = (uint16_t*) (&OCR1C);
-	rob->M1.command = 0;
-	rob->M1.encA.reg = (uint8_t *) (&PIND);
+	rob->M1.dirControl1 = 2; // GPIO Out to B2
+	rob->M1.dirControl2 = 3; // GPIO Out to B3
+	rob->M1.dutyCycleRegister = (uint16_t*) (&OCR1C); // Register for changing dutycycle
+	rob->M1.command = 0;  // initialize command to motor to zero
+	rob->M1.encA.reg = (uint8_t *) (&PIND); // Encoder A Input Pin D3
 	rob->M1.encA.bit = 3;
-	rob->M1.encB.reg = (uint8_t *) (&PIND);
+	rob->M1.encB.reg = (uint8_t *) (&PIND); // Encoder B Input Pin D5
 	rob->M1.encB.bit = 5;
-	rob->M1.kp = CL_VEL_KP;
-	rob->M1.ki = CL_VEL_KI;
-	rob->M1.kd = CL_VEL_KD;
+	rob->M1.kp = CL_VEL_KP; // Motor gain for closed loop velocity control
+	rob->M1.ki = CL_VEL_KI; //     These parameters are here 
+	rob->M1.kd = CL_VEL_KD; //     to allow for tuning
 
 	/***********
 	 * MOTOR 2 Specifics
 	***********/
-	rob->M2.dirControl1 = 4;
-	rob->M2.dirControl2 = 5;
-	rob->M2.dutyCycleRegister = (uint16_t*) (&OCR1B);
-	rob->M2.command = 0;
-	rob->M2.encA.reg = (uint8_t *) (&PINE);
+	rob->M2.dirControl1 = 4; // GPIO Out to B4
+	rob->M2.dirControl2 = 5; // GPIO Out to B5
+	rob->M2.dutyCycleRegister = (uint16_t*) (&OCR1B); // Register for changing dutycycle
+	rob->M2.command = 0;  // initialize command to motor to zero
+	rob->M2.encA.reg = (uint8_t *) (&PINE); // Encoder A Input Pin E6
 	rob->M2.encA.bit = 6;
-	rob->M2.encB.reg = (uint8_t *) (&PINC);
+	rob->M2.encB.reg = (uint8_t *) (&PINC); // Encoder B Input Pin C7
 	rob->M2.encB.bit = 7;
-	rob->M2.kp = CL_VEL_KP;
-	rob->M2.ki = CL_VEL_KI;
-	rob->M2.kd = CL_VEL_KD;
+	rob->M2.kp = CL_VEL_KP; // Motor gain for closed loop velocity control
+	rob->M2.ki = CL_VEL_KI; //     These parameters are here 
+	rob->M2.kd = CL_VEL_KD; //     to allow for tuning
 }
 
 void motor_GPIO_setup() {
@@ -79,8 +79,8 @@ void motor_GPIO_setup() {
 	clr(DDRD, 5); // M1 Enc B Input Interrupt Pin
 	set(PORTD,5); // M1 Enc B Enable Pull Up
 
-	set(EIMSK,  INT3);
-	clr(EICRA, ISC31);
+	set(EIMSK,  INT3); // M1 Enc A enable interupt
+	clr(EICRA, ISC31); // Set interrupt to trigger on pin change
 	set(EICRA, ISC30);
 
 	// clr(DDRE, 6); // M2 Enc A Input Interrupt Pin
@@ -88,8 +88,8 @@ void motor_GPIO_setup() {
 	// clr(DDRC, 7); // M2 Enc B Input Interrupt Pin
 	// set(PORTC,7); // M2 Enc B Enable Pull Up
 
-	// clr(EICRA, ISC61);
-	// set(EICRA, ISC60);
+	// clr(EICRA, ISC61); M2 Enc A enable interupt
+	// set(EICRA, ISC60); // Set interrupt to trigger on pin change
 	// set(EIMSK,  INT6);
 }
 
@@ -161,47 +161,4 @@ void timer3_init(void) {
 
 uint32_t millis(void) {
 	return milliseconds;
-}
-
-void usb_read_command() {	
-	char buff[8];
-	unsigned int indx = 0;
-	int val = 0;
-	int i;
-
-	while(m_usb_rx_available()&&indx<8){
-		buff[indx] = m_usb_rx_char();
-		indx++;
-	}
-	
-	for(i=indx-1; i > 0; i--){
-		val += ((int)buff[i]-'0')*pow(10, indx-i-1);//Introduces mistakes in integer math (rounds down)
-		m_usb_tx_int((int)buff[i]-'0');
-		m_usb_tx_string("\n");
-	}
-	switch(buff[0]){
-		case 'P':
-			//kpth = val;
-			m_usb_tx_string("\n");
-			m_usb_tx_string("KP: ");
-			//m_usb_tx_int(kpth);
-			m_usb_tx_string("\n");
-			break;
-		case 'D':
-			//kdth = val;
-			m_usb_tx_string("\n");
-			m_usb_tx_string("KD: ");
-			//m_usb_tx_int(kdth);
-			m_usb_tx_string("\n");
-			break;
-		case 'B':
-			//beta = val;
-			m_usb_tx_string("\n");
-			m_usb_tx_string("1/Beta: ");
-			//m_usb_tx_int(1.0/beta);
-			m_usb_tx_string("\n");
-			break;
-		default :
-			m_usb_tx_string("NO DATA");
-	}
 }

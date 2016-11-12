@@ -9,14 +9,13 @@
 dd robot;
 
 // Global flags for interrupts
-
 volatile bool CTRLreadyFlag = FALSE;	// Frequency control flag for control loop
-//volatile bool isCommandReady = FALSE; // RF command flag
+volatile bool isCommandReady = FALSE; // RF command flag
 
 //Global Variable
 uint16_t rawADCCounts[12];	// Array of raw ADC values
 volatile uint32_t milliseconds = 0;
-
+unsigned char buffer[PACKET_LENGTH] = {0};
 
 int main(void) {
 	
@@ -31,10 +30,8 @@ int main(void) {
 	uint16_t countUSB = 0; //Used to not bog down processer or terminal with USB Transmissions
 	//unsigned int usbIn, charCount;
 	
-
-	//motor *M1;
-
 	set(DDRC,6);
+
 	//Main process loop
     while (1) //Stay in this loop forever
     {
@@ -94,11 +91,11 @@ ISR(ADC_vect)
 }
 
 //RF Command Interupt Handler.
-// ISR(INT2_vect){
-// 	isCommandReady = TRUE;
-// 	m_rf_read(buffer,PACKET_LENGTH);// pull the packet
-// 	
-// }
+ISR(INT2_vect){
+	isCommandReady = TRUE;
+	m_rf_read(buffer,PACKET_LENGTH);// pull the packet
+	
+}
 
 //Interrupt for CTRL_FREQ frequency control loop
 ISR(TIMER0_COMPA_vect) {

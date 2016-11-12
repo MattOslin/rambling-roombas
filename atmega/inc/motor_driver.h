@@ -16,23 +16,28 @@
 #define CL_VEL_KI 0
 #define CL_VEL_KD 1
 
-
+// Pin class contains register and bit for set or clearing
 typedef struct pin	 {
-	uint8_t *reg;
-	uint8_t bit;
+	uint8_t *reg;	//register
+	uint8_t bit;	//bit
 } pin;
 
+// Position,
+// contains x, y, and theta values 
+
 typedef struct position {
-	double x;
+	double x;		//
 	double y;
 	double th;
 } pos;
 
+//Motor
+//Contains relavent information for the motor including the following
 typedef struct motor {
 
-	int    command;
-	uint16_t *dutyCycleRegister;
-	uint8_t dirControl1;
+	int    command; // Latest command for motors to acheive
+	uint16_t *dutyCycleRegister; // Register for chaning the duty cycle of PWM pin 
+	uint8_t dirControl1; //  
 	uint8_t dirControl2;
 	pin encA;
 	pin encB;
