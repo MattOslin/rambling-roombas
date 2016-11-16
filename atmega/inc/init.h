@@ -21,6 +21,7 @@
 //Helper Macros
 #define ABS(X)				(X < 0 ?-X : X)
 #define MIN(X,Y)			(X < Y ? X : Y)
+#define MAX(X,Y)			(X > Y ? X : Y)
 #define clr(reg,bit)		reg &= ~(1<<(bit))
 
 

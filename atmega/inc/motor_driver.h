@@ -12,9 +12,10 @@
 #define PWM_FREQ 5000		// PWM Frequency (only set freq or max not both)
 #define PWM_MAX (F_CPU/(TIMER_1_PRSCL*PWM_FREQ))	// PWM Duty Cycle max (inversely proportional with frequency)
 #define OL_MOTOR_MATCH 0    // Open loop motor matching calibration
-#define CL_VEL_KP 10
+#define CL_VEL_KP 3
 #define CL_VEL_KI 0
-#define CL_VEL_KD 1
+#define CL_VEL_KD 0
+#define ALPHA_EN_LPF .05
 
 // Pin class contains register and bit for set or clearing
 typedef struct pin	 {
@@ -66,11 +67,19 @@ typedef struct diffDrive {
 } dd;
 
 void motor_drive(int a, int b);
-void dd_enable();
-void dd_disable();
 void motor_update(motor *m);
 void encoder_update(motor *m);
 void encoder_velocity(motor *m);
 void drive_CL(motor *m);
+void command_update(motor *m, int newCommand);
+
+void dd_toggle(pin *pinToToggle);
+void dd_clear(pin *pinToToggle);
+void dd_set(pin *pinToToggle);
+bool dd_check(pin *pinToToggle);
+void dd_enable(dd *rob);
+void dd_disable(dd *rob);
+void dd_comm_test(dd *rob);
+
 
 #endif /* MOTOR_DRIVER_H_ */

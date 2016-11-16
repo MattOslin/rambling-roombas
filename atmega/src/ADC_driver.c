@@ -83,7 +83,7 @@ void adc_read(uint16_t rawADCCounts[])
 {
 	static uint8_t ADCIndex = 0;
 	rawADCCounts[ADCIndex] = ADC;
-	toggle(PORTC,6);
+	//toggle(PORTC,6);
 	//Choose which ADC to run next and set ADMUX register
 	ADCIndex = (ADCIndex + 1) % NUMADCS;
   clr(ADCSRA,ADEN); // turn off ADC while changing registers to avoid spurious behavior

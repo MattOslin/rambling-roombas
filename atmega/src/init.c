@@ -32,8 +32,8 @@ void dd_init(dd *rob) {
 	/***********
 	 * MOTOR 2 Specifics
 	***********/
-	rob->M1.dirControl1 = 2; // GPIO Out to B2
-	rob->M1.dirControl2 = 3; // GPIO Out to B3
+	rob->M1.dirControl1 = 3; // GPIO Out to B2
+	rob->M1.dirControl2 = 2; // GPIO Out to B3
 	rob->M1.dutyCycleRegister = (uint16_t*) (&OCR1C); // Register for changing dutycycle
 	rob->M1.command = 0;  // initialize command to motor to zero
 	rob->M1.encA.reg = (uint8_t *) (&PIND); // Encoder A Input Pin D3

@@ -3,16 +3,6 @@
 
 
 
-// ENABLES MOTOR DRIVER OPERATION
-void dd_enable(dd *rob) {
-	set(*(rob->enable.reg),rob->enable.bit);
-}
-
-// STOPS MOTOR DRIVER OPERATION
-void dd_disable(dd *rob) {
-	clr(*(rob->enable.reg),rob->enable.bit);
-}
-
 void motor_update(motor *m){
 	
 	if (m->command >= 0)
@@ -63,7 +53,7 @@ void encoder_update(motor *m){
 }
 void encoder_velocity(motor *m)
 {
-	m->veloEncoder = ABS(m->countEncoder);
+	m->veloEncoder =  (1 - ALPHA_EN_LPF) * m->veloEncoder + ALPHA_EN_LPF * m->countEncoder;
 	m->countEncoder = 0;
 }
 void drive_CL(motor *m){
@@ -89,15 +79,55 @@ void drive_CL(motor *m){
 	d_output = m->kd * d_error;
 
 	// Sum the three components of the PID output.
-	output = p_output + i_output + d_output;
+	output = m->command + p_output + i_output + d_output;
 
 	// Update the previous error and the integral error.
 	m->prevError   = p_error;
 	m->integError += p_error;
 
-	m->command = (int) output;
+	command_update(m, (int) output);
 }
+
+void command_update(motor *m, int newCommand){
+	if (newCommand < 0){
+		m->command = MAX(newCommand,-MOTOR_COMMAND_MAX);
+	}
+	else{
+		m->command = MIN(newCommand,MOTOR_COMMAND_MAX);
+	}
+	
+}
+/**********************************************************************
+EVERY THING BELOW HERE MAY NEED TO BE REFACTORED INTO ITS OWN FILE
+***********************************************************************/
+
+// ENABLES MOTOR DRIVER OPERATION
+void dd_enable(dd *rob) {
+	set(*(rob->enable.reg),rob->enable.bit);
+}
+
+// STOPS MOTOR DRIVER OPERATION
+void dd_disable(dd *rob) {
+	clr(*(rob->enable.reg),rob->enable.bit);
+}
+
+void dd_set(pin *pinToToggle) {
+	set(*(pinToToggle->reg),pinToToggle->bit);
+}
+void dd_clear(pin *pinToToggle) {
+	clr(*(pinToToggle->reg),pinToToggle->bit);
+}
+void dd_toggle(pin *pinToToggle) {
+	toggle(*(pinToToggle->reg),pinToToggle->bit);
+}
+bool dd_check(pin *pinToToggle) {
+	return check(*(pinToToggle->reg),pinToToggle->bit);
+}
+
 
 void get_fault_status(dd *rob) {
 	rob->fault = check(*(rob->SF.reg),rob->SF.bit);
+}
+void dd_comm_test(dd *rob) {
+	//
 }

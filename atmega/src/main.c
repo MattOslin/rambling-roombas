@@ -16,7 +16,7 @@ volatile bool isCommandReady = FALSE; // RF command flag
 uint16_t rawADCCounts[12];	// Array of raw ADC values
 volatile uint32_t milliseconds = 0;
 unsigned char buffer[PACKET_LENGTH] = {0};
-
+float speed;
 int main(void) {
 	
 	// Initialize GPIO, ADC, m_bus, interrupts, diffDrive
@@ -35,13 +35,16 @@ int main(void) {
 	//Main process loop
     while (1) //Stay in this loop forever
     {
-		dd_enable();
+		dd_enable(&robot);
 		//Control Loop at CTRL_FREQ frequency//
+		speed = 200; // RPM
+		robot.M1.veloDesired = (speed * 19 * 34 / 60.0) / CTRL_FREQ;
+
 		if (CTRLreadyFlag)
 		{
 			
 			//DEBUG CTRL FREQUENCY TEST//
-			/*toggle(PORTC,6);*/
+			toggle(PORTC,6);
 			
 			CTRLreadyFlag = FALSE; //Reset flag for interupt
 
@@ -51,13 +54,24 @@ int main(void) {
 // 				oldFiltADCCounts[i] = filtADCCounts[i];
 // 				filtADCCounts[i] = alpha*filtADCCounts[i] + (1-alpha)*rawADCCounts[i];
 // 			}
-
+			
+			drive_CL(&(robot.M1));
+			motor_update(&(robot.M1));
 			// USB DEBUG//
 			// Send USB information for DEBUG every 100 control loop cycles
-			if (countUSB%10 == 0) {	
+			if (countUSB%1 == 0) {	
 			  	//m_red(TOGGLE);
-				m_usb_tx_int(robot.M1.veloEncoder);
+			  	m_usb_tx_int( robot.M1.veloDesired);
+			  	m_usb_tx_string("  ");
+				m_usb_tx_int( robot.M1.veloEncoder);
 				m_usb_tx_string("  ");
+				m_usb_tx_int(robot.M1.command);
+				m_usb_tx_string("  ");
+				m_usb_tx_int( robot.M1.prevError);
+				m_usb_tx_string("  ");
+				m_usb_tx_int(1000 * robot.M1.kp);
+				
+
 // 				m_usb_tx_int(rawADCCounts[2]);
 // 				m_usb_tx_string("  ");
 // 				m_usb_tx_int(rawADCCounts[3]);
@@ -65,7 +79,7 @@ int main(void) {
 // 				m_usb_tx_int(*(M1.dutyCycleRegister));
 				m_usb_tx_string("\n");
 	 			//m_usb_tx_push();
-				robot.M1.command = /*(M1.command+25)%*/MOTOR_COMMAND_MAX;
+				//robot.M1.command = /*(M1.command+25)%*/MOTOR_COMMAND_MAX;
 				motor_update(&(robot.M1));
 			}
 

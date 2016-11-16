@@ -2,40 +2,52 @@
 
 extern unsigned char buffer[PACKET_LENGTH];
 
-void rf_parse(unsigned char *buffer) {
+void rf_parse(unsigned char *buffer, dd *robot) {
 	switch(buffer[0]) {
 		case COMM_TEST:
 			//FLASH LEDS
+			dd_comm_test(robot);
 			break;
 		
 		case PLAY:
 			// SET STATE TO PLAY 
+			dd_enable(robot);
 			break;
 			
 		case GOAL_R:
 			// PAUSE
 			// GET SCORE A AND SCORE B FROM BUFFER
+			dd_disable(robot);
 			break;
 
 		case GOAL_B:
 			// PAUSE
 			// GET SCORE A AND SCORE B FROM BUFFER
+			dd_disable(robot);
 			break;
 		
 		case PAUSE:
 			//PAUSE
+			dd_disable(robot);
 			break;
 		
 		case HALFTIME:
 			//PAUSE
+			dd_disable(robot);
 			break;
 
 		case GAME_OVER:
 			//PAUSE
+			dd_disable(robot);
 			break;
 
+		case CONTROLLER:
+			dd_disable(robot);
+			//veloDesired command
+			break;
 		default:
 			//TEAM COMMANDS GO IN THERE OWN CASES
+			dd_disable(robot);
 			break;
 	}
 }
