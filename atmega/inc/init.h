@@ -11,8 +11,9 @@
 #define PI 3.14159265       // The constant that defines the ratio between diameter and circumference
 #define TIMER_0_PRSCL 1024  // Timer Prescalers 
 #define TIMER_1_PRSCL 1
-#define TIMER_3_PRSCL 64
-#define CTRL_FREQ 1000		// Control loop frequency
+#define TIMER_3_PRSCL 1024
+#define TIMER_4_PRSCL 128
+#define CTRL_FREQ 100		// Control loop frequency
 
 #define CHANNEL 1
 #define MY_ADDRESS 20 /*21*/ /*22*/
@@ -31,7 +32,8 @@
 void m2_init(void);
 void timer0_init(void);
 void timer1_init(void);
-void timer3_init(void); // Millisecond timer
+void timer3_init(void); // Ping sensor timer
+void timer4_init(void); // Millisecond timer
 uint32_t millis(void); // Returns current milliseconds count
 void usb_read_command(void);
 void motor_GPIO_setup(void);
