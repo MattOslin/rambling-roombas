@@ -88,10 +88,11 @@ int main(void) {
 
 		}
 		//RF Command inputs
-// 		if (isCommandReady)
-// 		{	
-// 			isCommandReady = FALSE;
-// 		}
+		if (isCommandReady)
+		{	
+			isCommandReady = FALSE;
+			rf_parse(buffer, &robot);
+		}
 	}
 }
 

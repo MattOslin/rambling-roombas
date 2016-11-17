@@ -63,8 +63,8 @@ void dd_init(dd *rob) {
 void motor_GPIO_setup() {
 
 	//ENABLE GPIO OUTPUT B0-7
-	clr(DDRB, 0); // SF: Active Low Fault Detection
-	set(PORTB,0); // SF: Enable Pull Up
+	//clr(DDRB, 0); // SF: Active Low Fault Detection
+	//set(PORTB,0); // SF: Enable Pull Up
 
 	set(DDRB, 1); // EN: Enable Pin
 	set(DDRB, 2); // M1 DIR1 -> IN1 :  
