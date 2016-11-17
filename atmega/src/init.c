@@ -9,7 +9,8 @@ void m2_init() {
 	adc_init();    // Initializes first ADC read for encoder
 	timer0_init(); // Timer0 is our control loop clock
 	timer1_init(); // Timer1 PWM Used for Motor PWM
-	timer3_init(); // Timer3 Used for millis clock
+    timer3_init(); // Timer3 Used for ping sensor triggering pulse
+    timer4_init(); // Timer4 Used for millis clock
 	// Initalize all necessary MAEVARM utilities
 	m_bus_init();
 	//m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH); // For RF comms 
@@ -80,8 +81,10 @@ void dd_init(dd *rob) {
 void motor_GPIO_setup() {
 
 	//ENABLE GPIO OUTPUT B0-7
+
 	//clr(DDRB, 0); // SF: Active Low Fault Detection
 	//set(PORTB,0); // SF: Enable Pull Up
+
 
 	set(DDRB, 1); // EN: Enable Pin
 	set(DDRB, 2); // M1 DIR1 -> IN1 :  
@@ -160,20 +163,46 @@ void timer1_init() {
 }
 
 void timer3_init(void) {
-	// Count up to OCR3A, then reset
-	clr(TCCR3B, WGM33);
-	set(TCCR3B, WGM32);
-	clr(TCCR3A, WGM32);
-	clr(TCCR3A, WGM30);
+  // Mode 7: Up to 0x03FF, PWM mode
+  clr(TCCR3B, WGM33);
+  set(TCCR3B, WGM32);
+  set(TCCR3A, WGM31);
+  set(TCCR3A, WGM30);
 
-	OCR3A = (F_CPU/1000)/TIMER_3_PRSCL; // (16 MHz / 64) * (1 ms) = 250
+  clr(DDRC,7);    // set input capture pin to input
+  set(DDRC,6);    // set output compare pin to output
 
-	set(TIMSK3, OCIE3A); // Interrupt when TCNT0 = OCR0A
+  // output compare: set at rollover, clear at OCR3A
+  set(TCCR3A,COM3A1);
+  clr(TCCR3A,COM3A0);
 
-	// Timer on, prescaler to /64
-	clr(TCCR3B, CS32); 
-	set(TCCR3B, CS31);
-	set(TCCR3B, CS30);
+  OCR3A = 1; // short pulse to trigger sensor
+  clr(TCCR3B,ICES3); // do input capture on falling edge
+
+  set(TIMSK3, ICIE3); // Interrupt on input capture event
+
+  // Timer on, prescaler to 1024
+  set(TCCR3B, CS32);
+  clr(TCCR3B, CS31);
+  set(TCCR3B, CS30);
+}
+
+
+void timer4_init(void) {
+  // Count up to OCR4C, then reset
+  clr(TCCR4D,WGM41);
+  clr(TCCR4D,WGM40);
+
+  OCR4C = 250; // (F_CPU/1000)/TIMER_4_PRSCL; // (16 MHz / 64) * (1 ms) = 250
+
+  set(TIMSK4,TOIE4); // enable overflow interrupt
+
+  // Timer on, prescaler to 128
+  clr(TCCR4B,CS43);
+  set(TCCR4B,CS42);
+  set(TCCR4B,CS41);
+  set(TCCR4B,CS40);
+
 }
 
 uint32_t millis(void) {
