@@ -15,6 +15,7 @@
 #define TIMER_1_PRSCL 1
 #define TIMER_3_PRSCL 64
 #define CTRL_FREQ 100		// Control loop frequency w/1024 timer0 prscl 62 -> 5kHz
+#define POS_THRESH 2 //cm threshold for success
 
 #define CHANNEL 1
 #define MY_ADDRESS 20 /*21*/ /*22*/

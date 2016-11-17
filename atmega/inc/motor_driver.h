@@ -32,11 +32,11 @@ typedef struct motor {
 
 	int    command; // Latest command for motors to acheive
 	uint16_t *dutyCycleRegister; // Register for chaning the duty cycle of PWM pin 
-	uint8_t dirControl1; //  
-	uint8_t dirControl2;
+	pin direct1; //  
+	pin direct2;
 	pin encA;
 	pin encB;
-	double dirEncoder;
+	//double dirEncoder;
 	double veloEncoder;
 	double countEncoder;
 	double veloDesired;

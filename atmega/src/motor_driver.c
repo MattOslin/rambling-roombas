@@ -8,13 +8,13 @@ void motor_update(motor *m){
 
 	if (m->command >= 0)
 	{
-		set(PORTB,m->dirControl1);
-		clr(PORTB,m->dirControl2);
+		set( *(m->direct1.reg), m->direct1.bit );
+		clr( *(m->direct2.reg), m->direct2.bit );
 	}
 	else
 	{
-		clr(PORTB,m->dirControl1);
-		set(PORTB,m->dirControl2);
+		clr( *(m->direct1.reg), m->direct1.bit );
+		set( *(m->direct2.reg), m->direct2.bit );
 	}
 	
 	*(m->dutyCycleRegister) = PWM_MAX * MIN( ABS( m->command ) , MOTOR_COMMAND_MAX ) / MOTOR_COMMAND_MAX;
@@ -32,22 +32,22 @@ void encoder_update(motor *m){
 	if(check(*(m->encA.reg), m->encA.bit) == 1){
 		// Rising edge of A.
 		if(check(*(m->encB.reg), m->encB.bit) == 1){
-			m->dirEncoder = 1;
+			//m->dirEncoder = 1;
 			m->countEncoder ++;
 		}
 		else{
-			m->dirEncoder = -1;
+			//m->dirEncoder = -1;
 			m->countEncoder --;
 		}
 	}
 	else{
 		// Falling edge of A.
 		if(check(*(m->encB.reg), m->encB.bit) == 1){
-			m->dirEncoder = -1;
+			//m->dirEncoder = -1;
 			m->countEncoder --;
 		}
 		else{
-			m->dirEncoder = 1;
+			//m->dirEncoder = 1;
 			m->countEncoder ++;
 		}
 	}
