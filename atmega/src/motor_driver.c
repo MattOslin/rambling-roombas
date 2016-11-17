@@ -2,22 +2,23 @@
 #include "init.h"
 
 
-
 void motor_update(motor *m){
-	
+
+	encoder_velocity(m);
+
 	if (m->command >= 0)
 	{
-		set(PORTB,m->dirControl1);
-		clr(PORTB,m->dirControl2);
+		set( *(m->direct1.reg), m->direct1.bit );
+		clr( *(m->direct2.reg), m->direct2.bit );
 	}
 	else
 	{
-		clr(PORTB,m->dirControl1);
-		set(PORTB,m->dirControl2);
+		clr( *(m->direct1.reg), m->direct1.bit );
+		set( *(m->direct2.reg), m->direct2.bit );
 	}
 	
 	*(m->dutyCycleRegister) = PWM_MAX * MIN( ABS( m->command ) , MOTOR_COMMAND_MAX ) / MOTOR_COMMAND_MAX;
-	encoder_velocity(m);
+	
 }
 /*
 *
@@ -31,22 +32,22 @@ void encoder_update(motor *m){
 	if(check(*(m->encA.reg), m->encA.bit) == 1){
 		// Rising edge of A.
 		if(check(*(m->encB.reg), m->encB.bit) == 1){
-			m->dirEncoder = 1;
+			//m->dirEncoder = 1;
 			m->countEncoder ++;
 		}
 		else{
-			m->dirEncoder = -1;
+			//m->dirEncoder = -1;
 			m->countEncoder --;
 		}
 	}
 	else{
 		// Falling edge of A.
 		if(check(*(m->encB.reg), m->encB.bit) == 1){
-			m->dirEncoder = -1;
+			//m->dirEncoder = -1;
 			m->countEncoder --;
 		}
 		else{
-			m->dirEncoder = 1;
+			//m->dirEncoder = 1;
 			m->countEncoder ++;
 		}
 	}
@@ -69,7 +70,7 @@ void drive_CL(motor *m){
 	float output;	// The sum of the proportional, integral and derivative terms.
 
 	// Calculate the three errors.
-	p_error = m->veloDesired - m->veloEncoder;
+	p_error = MOTOR_SPEED_MAX * ENC_RES * m->veloDesired / CTRL_FREQ - m->veloEncoder;
 	i_error = m->integError;
 	d_error = p_error - m->prevError;
 
@@ -96,38 +97,4 @@ void command_update(motor *m, int newCommand){
 		m->command = MIN(newCommand,MOTOR_COMMAND_MAX);
 	}
 	
-}
-/**********************************************************************
-EVERY THING BELOW HERE MAY NEED TO BE REFACTORED INTO ITS OWN FILE
-***********************************************************************/
-
-// ENABLES MOTOR DRIVER OPERATION
-void dd_enable(dd *rob) {
-	set(*(rob->enable.reg),rob->enable.bit);
-}
-
-// STOPS MOTOR DRIVER OPERATION
-void dd_disable(dd *rob) {
-	clr(*(rob->enable.reg),rob->enable.bit);
-}
-
-void dd_set(pin *pinToToggle) {
-	set(*(pinToToggle->reg),pinToToggle->bit);
-}
-void dd_clear(pin *pinToToggle) {
-	clr(*(pinToToggle->reg),pinToToggle->bit);
-}
-void dd_toggle(pin *pinToToggle) {
-	toggle(*(pinToToggle->reg),pinToToggle->bit);
-}
-bool dd_check(pin *pinToToggle) {
-	return check(*(pinToToggle->reg),pinToToggle->bit);
-}
-
-
-void get_fault_status(dd *rob) {
-	rob->fault = check(*(rob->SF.reg),rob->SF.bit);
-}
-void dd_comm_test(dd *rob) {
-	//
 }

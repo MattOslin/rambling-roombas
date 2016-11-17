@@ -1,6 +1,6 @@
 #include "init.h"
 
-extern unsigned char buffer[PACKET_LENGTH];
+//extern unsigned char buffer[PACKET_LENGTH];
 
 void rf_parse(unsigned char *buffer, dd *robot) {
 	switch(buffer[0]) {
@@ -42,9 +42,19 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			break;
 
 		case CONTROLLER:
-			dd_disable(robot);
-			//veloDesired command
+			dd_enable(robot);
+			robot->veloDesired  = (buffer[1]-128) / 128.0;
+			robot->omegaDesired = (buffer[2]-128) / 128.0;
 			break;
+
+		case CALIBRATE:
+			//calibrate_routine();
+
+			dd_enable(robot);
+			robot->veloDesired = 0;
+			robot->omegaDesired = .1;
+			break;
+
 		default:
 			//TEAM COMMANDS GO IN THERE OWN CASES
 			dd_disable(robot);
