@@ -33,9 +33,10 @@ void dd_enable(dd *rob);
 void dd_disable(dd *rob);
 void dd_comm_test(dd *rob);
 
-bool dd_is_loc(dd *rob);
-void dd_goto_loc(dd *rob);
+bool dd_is_loc(dd*rob , float posThresh);
+void dd_goto_loc(dd *rob, double veloDes);
 void dd_drive(dd *rob);
 void get_fault_status(dd *rob);
 void dd_update(dd *rob);
+
 #endif /* DIFF_DRIVE_H_ */
