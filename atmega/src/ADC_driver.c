@@ -14,20 +14,20 @@
 ***********************************************************************************
 ***********************************************************************************/
 
-#define NUMADCS 8
-const int ADCsToRead[] = {ADC0,ADC1,ADC4,ADC5,ADC6,ADC7,ADC8,ADC9/*,ADC10,ADC11,ADC12,ADC13*/};
+#define NUMADCS 2
+const int ADCsToRead[] = {/*ADC0,ADC1,ADC4,ADC5,ADC6,ADC7,ADC8,*/ADC9, ADC10/*,ADC11,ADC12,ADC13*/};
 //Disable Digital Inputs
 void adc_dis_digi()
 {
-	set(DIDR0, ADC0D);	//F0
-	set(DIDR0, ADC1D);	//F1
-	set(DIDR0, ADC4D);	//F4
-	set(DIDR0, ADC5D);	//F5
-	set(DIDR0, ADC6D);	//F6
-	set(DIDR0, ADC7D);	//F7
-  set(DIDR2, ADC8D);	//D4
+//	set(DIDR0, ADC0D);	//F0
+//	set(DIDR0, ADC1D);	//F1
+//	set(DIDR0, ADC4D);	//F4
+//	set(DIDR0, ADC5D);	//F5
+//	set(DIDR0, ADC6D);	//F6
+//	set(DIDR0, ADC7D);	//F7
+//  set(DIDR2, ADC8D);	//D4
   set(DIDR2, ADC9D);	//D6
-//  set(DIDR2, ADC10D);	//D7
+  set(DIDR2, ADC10D);	//D7
 	// set(DIDR2, ADC11D);	//B4 Used in motor controller
 	// set(DIDR2, ADC12D);	//B5
 	// set(DIDR2, ADC13D);	//B6

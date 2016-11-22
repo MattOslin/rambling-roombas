@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include "m_rf.h"
 
-#define ADDRESS 0x5D
+#define ADDRESS 20
 #define CHANNEL 1
 #define PACKET_LENGTH 10
 
@@ -40,7 +40,7 @@ volatile bool CTRLreadyFlag = FALSE;	// Frequency control flag for control loop
 //volatile bool isCommandReady = FALSE; // RF command flag
 
 volatile uint32_t milliseconds = 0;
-volatile char buffer[PACKET_LENGTH];
+volatile unsigned char buffer[PACKET_LENGTH];
 
 int main(void) {
 	setup();
@@ -148,7 +148,7 @@ void setup(void) {
 	// Initalize all necessary MAEVARM utilities
 	m_bus_init();
 	// m_imu_init(ACCEL_SCALE,GYRO_SCALE);
-	m_rf_open(CHANNEL, 0x5E, PACKET_LENGTH); // For RF comms 
+	m_rf_open(CHANNEL, 21, PACKET_LENGTH); // For RF comms 
 	
 	m_green(ON); // Ready LED
 	m_disableJTAG(); //Allows use of some of the portF

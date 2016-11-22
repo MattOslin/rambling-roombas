@@ -20,35 +20,36 @@ float speed;
 uint16_t ping;
 
 int main(void) {
-	
+
 	// Initialize GPIO, ADC, m_bus, interrupts, diffDrive
 	m2_init();
 
 	// Initialize diffDrive (motors, encoders, localization)
 	dd_init(&robot);
-
+	dd_enable(&robot);
 	// Initialize Variables
-	const float deltaT = 1.0/CTRL_FREQ;
+	//const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t countUSB = 0; //Used to not bog down processer or terminal with USB Transmissions
 	//unsigned int usbIn, charCount;
 
-	set(DDRC,6);
+	//set(DDRD,4);
 
 	//Main process loop
-  while (1) //Stay in this loop forever
-  {
-		dd_enable(&robot);
+    while (1) //Stay in this loop forever
+    {
+		
 		//Control Loop at CTRL_FREQ frequency//
-		speed = 200; // RPM
-		robot.M1.veloDesired = (speed * 19 * 34 / 60.0) / CTRL_FREQ;
-
+		//speed = 200; // RPM
+		//robot.veloDesired = -.5;//(speed * 19 * 34 / 60.0) / CTRL_FREQ;
+		//robot.omegaDesired = .2;
+		
 		if (CTRLreadyFlag)
 		{
-
-			//DEBUG CTRL FREQUENCY TEST//
-			toggle(PORTC,6);
 			
-			CTRLreadyFlag = FALSE; //Reset flag for interupt
+			//DEBUG CTRL FREQUENCY TEST//
+			//toggle(PORTD,4);
+			
+			CTRLreadyFlag = FALSE; //Reset flag for interrupt
 
 			//LOW PASS FILTER FOR ADC//
 // 			int i;
@@ -57,42 +58,60 @@ int main(void) {
 // 				filtADCCounts[i] = alpha*filtADCCounts[i] + (1-alpha)*rawADCCounts[i];
 // 			}
 			
-			drive_CL(&(robot.M1));
-			motor_update(&(robot.M1));
-
+			dd_update(&robot);
+			// command_update(&(robot.M2),-1000);
+			// motor_update(&(robot.M2));
 			// USB DEBUG//
 			// Send USB information for DEBUG every 100 control loop cycles
-			if (countUSB%1 == 0) {
-			  	//m_red(TOGGLE);
-//        m_usb_tx_int(ping);
-//		  	m_usb_tx_string("  ");
-//		  	m_usb_tx_int( robot.M1.veloDesired);
-//		  	m_usb_tx_string("  ");
-//				m_usb_tx_int( robot.M1.veloEncoder);
-//				m_usb_tx_string("  ");
-//				m_usb_tx_int(robot.M1.command);
-//				m_usb_tx_string("  ");
-//				m_usb_tx_int( robot.M1.prevError);
-//				m_usb_tx_string("  ");
-//				m_usb_tx_int(1000 * robot.M1.kp);
-// 				m_usb_tx_int(rawADCCounts[2]);
-// 				m_usb_tx_string("  ");
-// 				m_usb_tx_int(rawADCCounts[3]);
-// 				m_usb_tx_string("  ");
-// 				m_usb_tx_int(*(M1.dutyCycleRegister));
-//				m_usb_tx_string("\n");
-//	 			m_usb_tx_push();
-				//robot.M1.command = /*(M1.command+25)%*/MOTOR_COMMAND_MAX;
-				motor_update(&(robot.M1));
-			}
+			
+			//toggle(PORTD,4);
+		  	//m_red(TOGGLE);
+//        		m_usb_tx_int(ping);
+			m_usb_tx_int(100 * robot.veloDesired);
+			m_usb_tx_string(" ");
+	  		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M1.veloDesired / CTRL_FREQ);
+	  		m_usb_tx_string(" ");//m_usb_tx_int(10);
+			m_usb_tx_int(robot.M1.veloEncoder);
+			m_usb_tx_string(" ");
+			m_usb_tx_int(robot.M1.command);
+
+	  		m_usb_tx_string(" ");
+	  		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M2.veloDesired / CTRL_FREQ);
+	  		m_usb_tx_string(" ");//m_usb_tx_int(10);
+		 //  	m_usb_tx_int(robot.M1.veloDesired);
+		 //  	m_usb_tx_string(" ");
+			m_usb_tx_int(robot.M2.veloEncoder);
+			m_usb_tx_string(" ");
+			m_usb_tx_int(robot.M2.command);
+			m_usb_tx_string(" ");
+			m_usb_tx_hex(buffer[0]);
+			m_usb_tx_string(" ");
+			m_usb_tx_int(buffer[2]);
+			m_usb_tx_string(" ");
+			m_usb_tx_int(buffer[1]);
+			// m_usb_tx_string(" ");
+			// m_usb_tx_int( robot.M1.prevError);
+			//m_usb_tx_string(" ");
+			// m_usb_tx_int(1000 * robot.M1.kp);
+			// m_usb_tx_int(rawADCCounts[2]);
+			// m_usb_tx_string(" ");
+			// m_usb_tx_int(rawADCCounts[3]);
+			// // m_usb_tx_string(" ");
+			// m_usb_tx_int(*(robot.M1.dutyCycleRegister));
+			m_usb_tx_string("\n");
+ 			//m_usb_tx_push();
+			//robot.M1.command = /*(M1.command+25)%*/MOTOR_COMMAND_MAX;
+			//motor_update(&(robot.M1));
+			
 
 			//Iterate countUSB
-			countUSB++;
+			//countUSB++;
 
 		}
 		//RF Command inputs
 		if (isCommandReady)
 		{	
+			m_green(TOGGLE);
 			isCommandReady = FALSE;
 			rf_parse(buffer, &robot);
 		}
@@ -105,7 +124,9 @@ int main(void) {
 // In theory 9.6 kHz (VALIDATED without load)
 ISR(ADC_vect)
 {
+	toggle(PORTD,4);
 	adc_read(rawADCCounts);
+
 }
 
 //RF Command Interupt Handler.
@@ -125,13 +146,17 @@ ISR(TIMER4_OVF_vect) {
 	milliseconds++;
 }
 
-// interrupt for encoders
+//interrupt for encoders
 ISR(INT3_vect){
 	encoder_update(&(robot.M1));
-	m_red(TOGGLE);	
+}
+
+//interrupt for encoders
+ISR(INT6_vect){
+	encoder_update(&(robot.M2));
 }
 
 // interrupt for input capture on ping sensor
 ISR(TIMER3_CAPT_vect) {
-  ping = ICR3;
+	ping = ICR3;
 }

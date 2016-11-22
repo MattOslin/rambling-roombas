@@ -6,27 +6,33 @@ void m2_init() {
 	// SET CLOCK TO 16MHz
 	m_clockdivide(0);
 	// Initialize ADC and Timers
-	adc_init();    // Initializes first ADC read for encoder
+	adc_init();    // Initializes first ADC read for photosensors
+
 	timer0_init(); // Timer0 is our control loop clock
 	timer1_init(); // Timer1 PWM Used for Motor PWM
     timer3_init(); // Timer3 Used for ping sensor triggering pulse
     timer4_init(); // Timer4 Used for millis clock
+
 	// Initalize all necessary MAEVARM utilities
 	m_bus_init();
-	//m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH); // For RF comms 
 	m_usb_init(); // USB COMs for debug
+
+    //while(!m_usb_isconnected()); // wait for a connection
 	
-	m_green(ON); // Ready LED
 	m_disableJTAG(); //Allows use of some of the portF
-	m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH);
+
+	m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH);// For RF comms 
+
 	// Enable global interrupts
 	sei();
+	m_green(ON); // Ready LED
+
 }
 void dd_init(dd *rob) {
 	motor_GPIO_setup();
 
-	rob->SF.reg = (uint8_t *) (&PINB); // Fault Input Pin B0
-	rob->SF.bit = 0;
+	// rob->SF.reg = (uint8_t *) (&PINB); // Fault Input Pin B0
+	// rob->SF.bit = 0;
 	
 	rob->enable.reg = (uint8_t *) (&PORTB); // GPIO Out to B1
 	rob->enable.bit = 1;
@@ -70,8 +76,8 @@ void dd_init(dd *rob) {
 	rob->M2.encA.reg = (uint8_t *) (&PINE); // Encoder A Input Pin E6
 	rob->M2.encA.bit = 6;
 	
-	rob->M2.encB.reg = (uint8_t *) (&PINC); // Encoder B Input Pin C7
-	rob->M2.encB.bit = 7;
+	rob->M2.encB.reg = (uint8_t *) (&PINF); // Encoder B Input Pin F0
+	rob->M2.encB.bit = 0;
 
 	rob->M2.kp = CL_VEL_KP; // Motor gain for closed loop velocity control
 	rob->M2.ki = CL_VEL_KI; //     These parameters are here 
@@ -96,20 +102,20 @@ void motor_GPIO_setup() {
 
 	clr(DDRD, 3); // M1 Enc A Input Interrupt Pin
 	set(PORTD,3); // M1 Enc A Enable Pull Up
-	clr(DDRD, 5); // M1 Enc B Input Interrupt Pin
+	clr(DDRD, 5); // M1 Enc B Input Pin
 	set(PORTD,5); // M1 Enc B Enable Pull Up
 
-	set(EIMSK,  INT3); // M1 Enc A enable interupt
 	clr(EICRA, ISC31); // Set interrupt to trigger on pin change
 	set(EICRA, ISC30);
+	set(EIMSK,  INT3); // M1 Enc A enable interupt
 
 	clr(DDRE, 6); // M2 Enc A Input Interrupt Pin
 	set(PORTE,6); // M2 Enc A Enable Pull Up
-	clr(DDRC, 7); // M2 Enc B Input Interrupt Pin
-	set(PORTC,7); // M2 Enc B Enable Pull Up
+	clr(DDRF, 0); // M2 Enc B Input Pin
+	set(PORTF,0); // M2 Enc B Enable Pull Up
 
-	clr(EICRA, ISC61); // M2 Enc A enable interupt
-	set(EICRA, ISC60); // Set interrupt to trigger on pin change
+	clr(EICRB, ISC61); // M2 Enc A enable interupt
+	set(EICRB, ISC60); // Set interrupt to trigger on pin change
 	set(EIMSK,  INT6);
 }
 
@@ -208,3 +214,50 @@ void timer4_init(void) {
 uint32_t millis(void) {
 	return milliseconds;
 }
+
+float atan2_aprox(float x, float y){
+
+	const float k = .28125;
+
+	if (x == 0 || y == 0){
+		if (x == y){
+			return 0;
+		}
+		else{
+			if (x == 0){
+				return y > 0 ? PI/2 : -PI/2;
+			}
+			else{
+				return x > 0 ? 0 : PI;
+			}
+		}
+	}
+
+	if (ABS(x) > ABS(y)){
+		if( x > 0 ){
+				//1
+				//8
+			return (x * y / ( y * y + k * x * x));
+		}
+		else{
+				//4
+				//5
+			return (PI + x * y / ( y * y + k * x * x));
+		}
+	}
+	else{
+		if( y > 0 ){
+				//2
+				//3
+			return ((PI / 2) - x * y / ( x * x + k * y * y));
+		}
+		else{
+				//6
+				//7
+			return (-(PI / 2) - x * y / ( x * x + k * y * y));
+		}
+	}
+}
+
+
+
