@@ -9,7 +9,8 @@ void m2_init() {
 	adc_init();    // Initializes first ADC read for encoder
 	timer0_init(); // Timer0 is our control loop clock
 	timer1_init(); // Timer1 PWM Used for Motor PWM
-	timer3_init(); // Timer3 Used for millis clock
+    timer3_init(); // Timer3 Used for ping sensor triggering pulse
+    timer4_init(); // Timer4 Used for millis clock
 	// Initalize all necessary MAEVARM utilities
 	m_bus_init();
 	//m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH); // For RF comms 
@@ -29,17 +30,26 @@ void dd_init(dd *rob) {
 	
 	rob->enable.reg = (uint8_t *) (&PORTB); // GPIO Out to B1
 	rob->enable.bit = 1;
+
 	/***********
-	 * MOTOR 2 Specifics
+	 * MOTOR 1 Specifics
 	***********/
-	rob->M1.dirControl1 = 3; // GPIO Out to B2
-	rob->M1.dirControl2 = 2; // GPIO Out to B3
+	rob->M1.direct1.reg = (uint8_t *) (&PORTB);
+	rob->M1.direct1.bit = 3; // GPIO Out to B2
+
+	rob->M1.direct2.reg = (uint8_t *) (&PORTB);
+	rob->M1.direct2.bit = 2; // GPIO Out to B3
+
 	rob->M1.dutyCycleRegister = (uint16_t*) (&OCR1C); // Register for changing dutycycle
+	
 	rob->M1.command = 0;  // initialize command to motor to zero
+	
 	rob->M1.encA.reg = (uint8_t *) (&PIND); // Encoder A Input Pin D3
 	rob->M1.encA.bit = 3;
+	
 	rob->M1.encB.reg = (uint8_t *) (&PIND); // Encoder B Input Pin D5
 	rob->M1.encB.bit = 5;
+	
 	rob->M1.kp = CL_VEL_KP; // Motor gain for closed loop velocity control
 	rob->M1.ki = CL_VEL_KI; //     These parameters are here 
 	rob->M1.kd = CL_VEL_KD; //     to allow for tuning
@@ -47,14 +57,22 @@ void dd_init(dd *rob) {
 	/***********
 	 * MOTOR 2 Specifics
 	***********/
-	rob->M2.dirControl1 = 4; // GPIO Out to B4
-	rob->M2.dirControl2 = 5; // GPIO Out to B5
+	rob->M2.direct1.reg = (uint8_t *) (&PORTB);
+	rob->M2.direct1.bit = 4; // GPIO Out to B4
+
+	rob->M2.direct2.reg = (uint8_t *) (&PORTB);
+	rob->M2.direct2.bit = 5; // GPIO Out to B5
+
 	rob->M2.dutyCycleRegister = (uint16_t*) (&OCR1B); // Register for changing dutycycle
+	
 	rob->M2.command = 0;  // initialize command to motor to zero
+	
 	rob->M2.encA.reg = (uint8_t *) (&PINE); // Encoder A Input Pin E6
 	rob->M2.encA.bit = 6;
+	
 	rob->M2.encB.reg = (uint8_t *) (&PINC); // Encoder B Input Pin C7
 	rob->M2.encB.bit = 7;
+
 	rob->M2.kp = CL_VEL_KP; // Motor gain for closed loop velocity control
 	rob->M2.ki = CL_VEL_KI; //     These parameters are here 
 	rob->M2.kd = CL_VEL_KD; //     to allow for tuning
@@ -63,8 +81,10 @@ void dd_init(dd *rob) {
 void motor_GPIO_setup() {
 
 	//ENABLE GPIO OUTPUT B0-7
+
 	//clr(DDRB, 0); // SF: Active Low Fault Detection
 	//set(PORTB,0); // SF: Enable Pull Up
+
 
 	set(DDRB, 1); // EN: Enable Pin
 	set(DDRB, 2); // M1 DIR1 -> IN1 :  
@@ -83,14 +103,14 @@ void motor_GPIO_setup() {
 	clr(EICRA, ISC31); // Set interrupt to trigger on pin change
 	set(EICRA, ISC30);
 
-	// clr(DDRE, 6); // M2 Enc A Input Interrupt Pin
-	// set(PORTE,6); // M2 Enc A Enable Pull Up
-	// clr(DDRC, 7); // M2 Enc B Input Interrupt Pin
-	// set(PORTC,7); // M2 Enc B Enable Pull Up
+	clr(DDRE, 6); // M2 Enc A Input Interrupt Pin
+	set(PORTE,6); // M2 Enc A Enable Pull Up
+	clr(DDRC, 7); // M2 Enc B Input Interrupt Pin
+	set(PORTC,7); // M2 Enc B Enable Pull Up
 
-	// clr(EICRA, ISC61); M2 Enc A enable interupt
-	// set(EICRA, ISC60); // Set interrupt to trigger on pin change
-	// set(EIMSK,  INT6);
+	clr(EICRA, ISC61); // M2 Enc A enable interupt
+	set(EICRA, ISC60); // Set interrupt to trigger on pin change
+	set(EIMSK,  INT6);
 }
 
 void timer0_init() {
@@ -143,20 +163,46 @@ void timer1_init() {
 }
 
 void timer3_init(void) {
-	// Count up to OCR3A, then reset
-	clr(TCCR3B, WGM33);
-	set(TCCR3B, WGM32);
-	clr(TCCR3A, WGM32);
-	clr(TCCR3A, WGM30);
+  // Mode 7: Up to 0x03FF, PWM mode
+  clr(TCCR3B, WGM33);
+  set(TCCR3B, WGM32);
+  set(TCCR3A, WGM31);
+  set(TCCR3A, WGM30);
 
-	OCR3A = (F_CPU/1000)/TIMER_3_PRSCL; // (16 MHz / 64) * (1 ms) = 250
+  clr(DDRC,7);    // set input capture pin to input
+  set(DDRC,6);    // set output compare pin to output
 
-	set(TIMSK3, OCIE3A); // Interrupt when TCNT0 = OCR0A
+  // output compare: set at rollover, clear at OCR3A
+  set(TCCR3A,COM3A1);
+  clr(TCCR3A,COM3A0);
 
-	// Timer on, prescaler to /64
-	clr(TCCR3B, CS32); 
-	set(TCCR3B, CS31);
-	set(TCCR3B, CS30);
+  OCR3A = 1; // short pulse to trigger sensor
+  clr(TCCR3B,ICES3); // do input capture on falling edge
+
+  set(TIMSK3, ICIE3); // Interrupt on input capture event
+
+  // Timer on, prescaler to 1024
+  set(TCCR3B, CS32);
+  clr(TCCR3B, CS31);
+  set(TCCR3B, CS30);
+}
+
+
+void timer4_init(void) {
+  // Count up to OCR4C, then reset
+  clr(TCCR4D,WGM41);
+  clr(TCCR4D,WGM40);
+
+  OCR4C = 250; // (F_CPU/1000)/TIMER_4_PRSCL; // (16 MHz / 64) * (1 ms) = 250
+
+  set(TIMSK4,TOIE4); // enable overflow interrupt
+
+  // Timer on, prescaler to 128
+  clr(TCCR4B,CS43);
+  set(TCCR4B,CS42);
+  set(TCCR4B,CS41);
+  set(TCCR4B,CS40);
+
 }
 
 uint32_t millis(void) {

@@ -10,7 +10,7 @@ void dd_drive(dd *rob){
 	leftMotorV = rob->veloDesired - rob->omegaDesired * WHEEL_RADIAL_LOC;
 	rightMotorV = rob->veloDesired + rob->omegaDesired * WHEEL_RADIAL_LOC;
 
-	// Normalzie the velocities to the highest velocities if greater than 1
+	// Normalize the velocities to the highest velocities if greater than 1
 
 	if( (ABS(leftMotorV) > 1.0) && (ABS(leftMotorV) > ABS(rightMotorV)) ) {
 		rightMotorV /= ABS(leftMotorV);
@@ -26,8 +26,37 @@ void dd_drive(dd *rob){
 	rob->M2.veloDesired = rightMotorV;
 	
 }
- void dd_update(dd *rob) {
+
+void dd_goto_loc(dd *rob){
+	//Simple go to location that needs to be made more intelligent
+	double deltaX  = rob->desLoc.x  - rob->global.x;
+	double deltaY  = rob->desLoc.y  - rob->global.y;
+	//double deltaTh = rob->desLoc.th - rob->global.th;
+
+	if (dd_is_loc(rob)){
+		rob->veloDesired  = 0;
+		rob->omegaDesired = 0; //deltaTh/(2*PI)
+	}
+
+	// else{
+	// 	rob->veloDesired = 
+	// }
+	
+}
+
+bool dd_is_loc(dd*rob){
+	double deltaX  = rob->desLoc.x  - rob->global.x;
+	double deltaY  = rob->desLoc.y  - rob->global.y;
+	if (deltaX < POS_THRESH && deltaY < POS_THRESH){
+		return TRUE;
+	}
+	return FALSE;
+
+}
+
+void dd_update(dd *rob) {
  	// Update the state of the diff drive robot
+ 	dd_drive(rob);
  	motor_update( &(rob->M1) );
  	motor_update( &(rob->M2) );
  }
