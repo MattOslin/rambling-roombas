@@ -6,7 +6,7 @@
  */ 
 #include "init.h"
 
-//dd robot;
+dd robot;
 
 // Global flags for interrupts
 volatile bool CTRLreadyFlag = FALSE;	// Frequency control flag for control loop
@@ -20,35 +20,13 @@ float speed;
 uint16_t ping;
 
 int main(void) {
-	m_clockdivide(0);
-	// Initialize ADC and Timers
-	//adc_init();    // Initializes first ADC read for photosensors
 
-	timer0_init(); // Timer0 is our control loop clock
-	//timer1_init(); // Timer1 PWM Used for Motor PWM
- //    timer3_init(); // Timer3 Used for ping sensor triggering pulse
- //    timer4_init(); // Timer4 Used for millis clock
-	// Initalize all necessary MAEVARM utilities
-	m_bus_init();
-	//m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH); // For RF comms 
-	m_usb_init(); // USB COMs for debug
-	m_red(ON);
-    while(!m_usb_isconnected()); // wait for a connection
-	
-	//m_disableJTAG(); //Allows use of some of the portF
-
-	// m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH);
-	// Enable global interrupts
-	sei();
-	m_red(OFF);
-	m_green(ON); // Ready LED
-	/*******************************************/
 	// Initialize GPIO, ADC, m_bus, interrupts, diffDrive
-	// m2_init();
+	m2_init();
 
 	// Initialize diffDrive (motors, encoders, localization)
-	//dd_init(&robot);
-
+	dd_init(&robot);
+	dd_enable(&robot);
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t countUSB = 0; //Used to not bog down processer or terminal with USB Transmissions
@@ -57,13 +35,13 @@ int main(void) {
 	//set(DDRD,4);
 
 	//Main process loop
-  while (1) //Stay in this loop forever
-  {
-		//dd_enable(&robot);
+    while (1) //Stay in this loop forever
+    {
+		
 		//Control Loop at CTRL_FREQ frequency//
-		speed = 200; // RPM
-		//robot.veloDesired = (speed * 19 * 34 / 60.0) / CTRL_FREQ;
-		m_usb_tx_int(speed);
+		//speed = 200; // RPM
+		//robot.veloDesired = -.5;//(speed * 19 * 34 / 60.0) / CTRL_FREQ;
+		//robot.omegaDesired = .2;
 		
 		if (CTRLreadyFlag)
 		{
@@ -71,7 +49,7 @@ int main(void) {
 			//DEBUG CTRL FREQUENCY TEST//
 			//toggle(PORTD,4);
 			
-			CTRLreadyFlag = FALSE; //Reset flag for interupt
+			CTRLreadyFlag = FALSE; //Reset flag for interrupt
 
 			//LOW PASS FILTER FOR ADC//
 // 			int i;
@@ -80,21 +58,37 @@ int main(void) {
 // 				filtADCCounts[i] = alpha*filtADCCounts[i] + (1-alpha)*rawADCCounts[i];
 // 			}
 			
-			//dd_update(&robot);
-
+			dd_update(&robot);
+			// command_update(&(robot.M2),-1000);
+			// motor_update(&(robot.M2));
 			// USB DEBUG//
 			// Send USB information for DEBUG every 100 control loop cycles
 			
 			//toggle(PORTD,4);
 		  	//m_red(TOGGLE);
 //        		m_usb_tx_int(ping);
-//		  		m_usb_tx_string("  ");
-			//m_usb_tx_int(10);
+			m_usb_tx_int(100 * robot.veloDesired);
+			m_usb_tx_string(" ");
+	  		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M1.veloDesired / CTRL_FREQ);
+	  		m_usb_tx_string(" ");//m_usb_tx_int(10);
+			m_usb_tx_int(robot.M1.veloEncoder);
+			m_usb_tx_string(" ");
+			m_usb_tx_int(robot.M1.command);
+
+	  		m_usb_tx_string(" ");
+	  		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M2.veloDesired / CTRL_FREQ);
+	  		m_usb_tx_string(" ");//m_usb_tx_int(10);
 		 //  	m_usb_tx_int(robot.M1.veloDesired);
 		 //  	m_usb_tx_string(" ");
-			// m_usb_tx_int(robot.M1.veloEncoder);
-			// m_usb_tx_string(" ");
-			// m_usb_tx_int(robot.M1.command);
+			m_usb_tx_int(robot.M2.veloEncoder);
+			m_usb_tx_string(" ");
+			m_usb_tx_int(robot.M2.command);
+			m_usb_tx_string(" ");
+			m_usb_tx_hex(buffer[0]);
+			m_usb_tx_string(" ");
+			m_usb_tx_int(buffer[2]);
+			m_usb_tx_string(" ");
+			m_usb_tx_int(buffer[1]);
 			// m_usb_tx_string(" ");
 			// m_usb_tx_int( robot.M1.prevError);
 			//m_usb_tx_string(" ");
@@ -104,7 +98,7 @@ int main(void) {
 			// m_usb_tx_int(rawADCCounts[3]);
 			// // m_usb_tx_string(" ");
 			// m_usb_tx_int(*(robot.M1.dutyCycleRegister));
-			//m_usb_tx_string("\n");
+			m_usb_tx_string("\n");
  			//m_usb_tx_push();
 			//robot.M1.command = /*(M1.command+25)%*/MOTOR_COMMAND_MAX;
 			//motor_update(&(robot.M1));
@@ -115,11 +109,12 @@ int main(void) {
 
 		}
 		//RF Command inputs
-		// if (isCommandReady)
-		// {	
-		// 	isCommandReady = FALSE;
-		// 	rf_parse(buffer, &robot);
-		// }
+		if (isCommandReady)
+		{	
+			m_green(TOGGLE);
+			isCommandReady = FALSE;
+			rf_parse(buffer, &robot);
+		}
 	}
 }
 
@@ -127,38 +122,41 @@ int main(void) {
 //INTERRUPT HANDLER ADC
 // Interrupt to inform main loop that ADC is ready to read
 // In theory 9.6 kHz (VALIDATED without load)
-// ISR(ADC_vect)
-// {
-// 	toggle(PORTD,4);
-// 	adc_read(rawADCCounts);
+ISR(ADC_vect)
+{
+	toggle(PORTD,4);
+	adc_read(rawADCCounts);
 
-// }
+}
 
 //RF Command Interupt Handler.
-// ISR(INT2_vect){
-// 	isCommandReady = TRUE;
-
-// 	m_rf_read(buffer,PACKET_LENGTH);// pull the packet
+ISR(INT2_vect){
+	isCommandReady = TRUE;
+	m_rf_read(buffer,PACKET_LENGTH);// pull the packet
 	
-// }
+}
 
 //Interrupt for CTRL_FREQ frequency control loop
 ISR(TIMER0_COMPA_vect) {
 	CTRLreadyFlag = TRUE;
 }
 
-// // Interrupt for millisecond timer update
-// ISR(TIMER4_OVF_vect) {
-// 	milliseconds++;
-// }
+// Interrupt for millisecond timer update
+ISR(TIMER4_OVF_vect) {
+	milliseconds++;
+}
 
-// interrupt for encoders
-// ISR(INT3_vect){
-// 	encoder_update(&(robot.M1));
-// 	m_red(TOGGLE);	
-// }
+//interrupt for encoders
+ISR(INT3_vect){
+	encoder_update(&(robot.M1));
+}
+
+//interrupt for encoders
+ISR(INT6_vect){
+	encoder_update(&(robot.M2));
+}
 
 // interrupt for input capture on ping sensor
-// ISR(TIMER3_CAPT_vect) {
-//   ping = ICR3;
-// }
+ISR(TIMER3_CAPT_vect) {
+	ping = ICR3;
+}

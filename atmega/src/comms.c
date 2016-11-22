@@ -43,8 +43,8 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 
 		case CONTROLLER:
 			dd_enable(robot);
-			robot->veloDesired  = (buffer[1]-128) / 128.0;
-			robot->omegaDesired = (buffer[2]-128) / 128.0;
+			robot->veloDesired  = (buffer[2]-131) / 128.0;
+			robot->omegaDesired = (buffer[1]-124) / 128.0;
 			break;
 
 		case CALIBRATE:
@@ -52,7 +52,7 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 
 			dd_enable(robot);
 			robot->veloDesired = 0;
-			robot->omegaDesired = .1;
+			robot->omegaDesired = .2;
 			break;
 
 		default:

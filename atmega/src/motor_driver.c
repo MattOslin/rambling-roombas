@@ -15,7 +15,7 @@ void motor_update(motor *m){
 		set( *(m->direct2.reg), m->direct2.bit );
 	}
 	
-	*(m->dutyCycleRegister) = PWM_MAX * MIN( ABS( m->command ) , MOTOR_COMMAND_MAX ) / MOTOR_COMMAND_MAX;
+	*(m->dutyCycleRegister) = (long) PWM_MAX * MIN( ABS( m->command ) , MOTOR_COMMAND_MAX ) / MOTOR_COMMAND_MAX;
 	
 }
 /*
@@ -80,7 +80,7 @@ void drive_CL(motor *m){
 	d_output = m->kd * d_error;
 
 	// Sum the three components of the PID output.
-	output = m->command + p_output + i_output + d_output;
+	output = m->command - p_output + i_output + d_output;
 
 	// Update the previous error and the integral error.
 	m->prevError   = p_error;

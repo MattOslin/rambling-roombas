@@ -7,8 +7,8 @@ void dd_drive(dd *rob){
 	//	unicycle commands of velocity and omega
 	float leftMotorV, rightMotorV;
 
-	leftMotorV = rob->veloDesired - rob->omegaDesired * WHEEL_RADIAL_LOC;
-	rightMotorV = rob->veloDesired + rob->omegaDesired * WHEEL_RADIAL_LOC;
+	leftMotorV = rob->veloDesired - rob->omegaDesired ;//* WHEEL_RADIAL_LOC;
+	rightMotorV = rob->veloDesired + rob->omegaDesired ;//* WHEEL_RADIAL_LOC;
 
 	// Normalize the velocities to the highest velocities if greater than 1
 
@@ -22,7 +22,7 @@ void dd_drive(dd *rob){
 	}
 
 	//Set desired velocity for motors
-	rob->M1.veloDesired = leftMotorV;
+	rob->M1.veloDesired = -leftMotorV;
 	rob->M2.veloDesired = rightMotorV;
 	
 }

@@ -6,25 +6,25 @@ void m2_init() {
 	// SET CLOCK TO 16MHz
 	m_clockdivide(0);
 	// Initialize ADC and Timers
-	//adc_init();    // Initializes first ADC read for photosensors
+	adc_init();    // Initializes first ADC read for photosensors
 
 	timer0_init(); // Timer0 is our control loop clock
 	timer1_init(); // Timer1 PWM Used for Motor PWM
     timer3_init(); // Timer3 Used for ping sensor triggering pulse
     timer4_init(); // Timer4 Used for millis clock
+
 	// Initalize all necessary MAEVARM utilities
 	m_bus_init();
-	//m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH); // For RF comms 
 	m_usb_init(); // USB COMs for debug
-	m_red(ON);
-    while(!m_usb_isconnected()); // wait for a connection
+
+    //while(!m_usb_isconnected()); // wait for a connection
 	
 	m_disableJTAG(); //Allows use of some of the portF
 
-	// m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH);
+	m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH);// For RF comms 
+
 	// Enable global interrupts
-	// sei();
-	m_red(OFF);
+	sei();
 	m_green(ON); // Ready LED
 
 }
@@ -105,17 +105,17 @@ void motor_GPIO_setup() {
 	clr(DDRD, 5); // M1 Enc B Input Pin
 	set(PORTD,5); // M1 Enc B Enable Pull Up
 
-	set(EIMSK,  INT3); // M1 Enc A enable interupt
 	clr(EICRA, ISC31); // Set interrupt to trigger on pin change
 	set(EICRA, ISC30);
+	set(EIMSK,  INT3); // M1 Enc A enable interupt
 
 	clr(DDRE, 6); // M2 Enc A Input Interrupt Pin
 	set(PORTE,6); // M2 Enc A Enable Pull Up
 	clr(DDRF, 0); // M2 Enc B Input Pin
 	set(PORTF,0); // M2 Enc B Enable Pull Up
 
-	clr(EICRA, ISC61); // M2 Enc A enable interupt
-	set(EICRA, ISC60); // Set interrupt to trigger on pin change
+	clr(EICRB, ISC61); // M2 Enc A enable interupt
+	set(EICRB, ISC60); // Set interrupt to trigger on pin change
 	set(EIMSK,  INT6);
 }
 
