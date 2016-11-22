@@ -3,8 +3,6 @@
 
 #include "init.h"
 #include "m_wii.h"
-// #include <stdbool.h>
-// #include <stdint.h>
 
 void localize_init(void);
 bool localize_wii(pos* posStruct);
