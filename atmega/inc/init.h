@@ -7,6 +7,7 @@
 #include "ADC_driver.h"
 #include "diff_drive.h"
 #include "comms.h"
+#include "localize.h"
 
 
 #define	F_CPU 16000000	    // CPU Clock Freq [Hz]
