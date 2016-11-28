@@ -56,13 +56,6 @@ bool localize_wii(pos* posStruct) {
 	static uint8_t lastBadIdx = 4;
 
 	for (i = 0; i < 4; i++) {
-		m_usb_tx_string(" ");
-		m_usb_tx_int(wiiBuffer[3*i]);
-		m_usb_tx_string(" ");
-		m_usb_tx_int(wiiBuffer[3*i+1]);
-		m_usb_tx_string(" ");
-		m_usb_tx_int(wiiBuffer[3*i+2]);
-
 		if (wiiBuffer[3*i+1] == 1023) {
 			badBlobN++;
 			badIdx = i;
