@@ -19,6 +19,8 @@ void m2_init() {
 
     //while(!m_usb_isconnected()); // wait for a connection
 	
+	localize_init();
+
 	m_disableJTAG(); //Allows use of some of the portF
 
 	m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH);// For RF comms 

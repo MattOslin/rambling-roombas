@@ -27,7 +27,40 @@ void dd_drive(dd *rob){
 	
 }
 
-void dd_goto_loc(dd *rob, double veloDes){
+bool dd_goto_rot_trans(dd *rob, double veloDes){
+
+	double deltaX  = rob->desLoc.x  - rob->global.x;
+	double deltaY  = rob->desLoc.y  - rob->global.y;
+	double deltaTh = rob->desLoc.th - rob->global.th;
+	double distFromGoal = sqrt(deltaX * deltaX + deltaY * deltaY);
+
+	float posThresh = 10.0;
+	float thThresh = PI/120;
+	if ( distFromGoal < posThresh ) {
+		if ( ABS(deltaTh) < thThresh ) {
+			rob->veloDesired  = 0;
+			rob->omegaDesired = 0;
+			return TRUE;
+		}
+		rob->veloDesired  = 0;
+		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? -veloDes * deltaTh/ABS(deltaTh) : -veloDes * deltaTh/(PI/2);
+		return FALSE;
+	}
+	else {
+		float thTemp = atan2(deltaY,deltaX);
+		float deltaTh = thTemp - rob->global.th;
+		if ( ABS(deltaTh) < thThresh ){
+			rob->veloDesired  = veloDes;
+			rob->omegaDesired = 0;
+			return FALSE;
+		}
+		rob->veloDesired  = 0;
+		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? -veloDes * deltaTh/ABS(deltaTh) : -veloDes * deltaTh/(PI/2);
+		return FALSE;
+	}
+}
+
+void dd_goto_spiral(dd *rob, double veloDes){
 	//Using J.J. Park and B Kuipers paper for smooth diff drive control
 	//Unclear whether smooth is good or to slow or what
 	//Simple go to location that needs to be made more intelligent

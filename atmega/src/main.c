@@ -59,6 +59,22 @@ int main(void) {
 // 			}
 			
 			dd_update(&robot);
+			if(countUSB%5 == 0){
+
+				m_usb_tx_string("Wii Data:  ");
+				localize_wii(&(robot.global));
+
+
+				// m_usb_tx_string("   Pos Est:  ");
+				// m_usb_tx_int(robot.global.x);
+
+				// m_usb_tx_string(" ");
+				// m_usb_tx_int(robot.global.y);
+
+				// m_usb_tx_string(" ");
+				// m_usb_tx_int(1000*robot.global.th);
+				m_usb_tx_string("\n");
+			}
 			// command_update(&(robot.M2),-1000);
 			// motor_update(&(robot.M2));
 			// USB DEBUG//
@@ -67,28 +83,28 @@ int main(void) {
 			//toggle(PORTD,4);
 		  	//m_red(TOGGLE);
 //        		m_usb_tx_int(ping);
-			m_usb_tx_int(100 * robot.veloDesired);
-			m_usb_tx_string(" ");
-	  		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M1.veloDesired / CTRL_FREQ);
-	  		m_usb_tx_string(" ");//m_usb_tx_int(10);
-			m_usb_tx_int(robot.M1.veloEncoder);
-			m_usb_tx_string(" ");
-			m_usb_tx_int(robot.M1.command);
+			// m_usb_tx_int(100 * robot.veloDesired);
+			// m_usb_tx_string(" ");
+	  // 		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M1.veloDesired / CTRL_FREQ);
+	  // 		m_usb_tx_string(" ");//m_usb_tx_int(10);
+			// m_usb_tx_int(robot.M1.veloEncoder);
+			// m_usb_tx_string(" ");
+			// m_usb_tx_int(robot.M1.command);
 
-	  		m_usb_tx_string(" ");
-	  		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M2.veloDesired / CTRL_FREQ);
-	  		m_usb_tx_string(" ");//m_usb_tx_int(10);
-		 //  	m_usb_tx_int(robot.M1.veloDesired);
-		 //  	m_usb_tx_string(" ");
-			m_usb_tx_int(robot.M2.veloEncoder);
-			m_usb_tx_string(" ");
-			m_usb_tx_int(robot.M2.command);
-			m_usb_tx_string(" ");
-			m_usb_tx_hex(buffer[0]);
-			m_usb_tx_string(" ");
-			m_usb_tx_int(buffer[2]);
-			m_usb_tx_string(" ");
-			m_usb_tx_int(buffer[1]);
+	  // 		m_usb_tx_string(" ");
+	  // 		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M2.veloDesired / CTRL_FREQ);
+	  // 		m_usb_tx_string(" ");//m_usb_tx_int(10);
+		 // //  	m_usb_tx_int(robot.M1.veloDesired);
+		 // //  	m_usb_tx_string(" ");
+			// m_usb_tx_int(robot.M2.veloEncoder);
+			// m_usb_tx_string(" ");
+			// m_usb_tx_int(robot.M2.command);
+			// m_usb_tx_string(" ");
+			// m_usb_tx_hex(buffer[0]);
+			// m_usb_tx_string(" ");
+			// m_usb_tx_int(buffer[2]);
+			// m_usb_tx_string(" ");
+			// m_usb_tx_int(buffer[1]);
 			// m_usb_tx_string(" ");
 			// m_usb_tx_int( robot.M1.prevError);
 			//m_usb_tx_string(" ");
@@ -98,14 +114,14 @@ int main(void) {
 			// m_usb_tx_int(rawADCCounts[3]);
 			// // m_usb_tx_string(" ");
 			// m_usb_tx_int(*(robot.M1.dutyCycleRegister));
-			m_usb_tx_string("\n");
+			
  			//m_usb_tx_push();
 			//robot.M1.command = /*(M1.command+25)%*/MOTOR_COMMAND_MAX;
 			//motor_update(&(robot.M1));
 			
 
 			//Iterate countUSB
-			//countUSB++;
+			countUSB++;
 
 		}
 		//RF Command inputs
