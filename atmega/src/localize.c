@@ -16,11 +16,13 @@ const uint16_t distMatM[4][4] = {
 					};
 
 const float angMat[4][4] = {
-						{      0, 1.5708, 0.4589,  2.2919},
-						{-1.5708,      0,-1.1060, -2.1272},
-						{-2.6827, 2.0356,      0,  2.8670},
-						{-0.8497, 1.0144,-0.2746,		0}
+						{     0, -1.5708, -2.6827, -0.8497},
+						{1.5708,       0,  2.0356,  1.0144},
+						{0.4589, -1.1060,       0, -0.2746},
+						{2.2919, -2.1272,  2.8670, 	     0}
 					};
+
+int16_t calX, calY;
 
 bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uint8_t* order);
 bool determine_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order);
@@ -29,6 +31,12 @@ bool check_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order);
 
 void localize_init(void) {
 	while(m_wii_open() == 0);
+	calX = (int16_t) eeprom_read_word((uint16_t *) 1);
+	calY = (int16_t) eeprom_read_word((uint16_t *) 2);
+}
+
+bool localize_cal(void) {
+	return false;
 }
 
 bool localize_wii(pos* posStruct) {
@@ -37,7 +45,7 @@ bool localize_wii(pos* posStruct) {
 	uint16_t wiiBuffer[12];
 	m_wii_read(wiiBuffer);
 
-	int i; // Loop indexing
+	int8_t i; // Loop indexing
 
 	// Figure out number of bad blobs, along with their location
 	// Also check if bad blobs are in same slots as last time, which will
@@ -79,10 +87,12 @@ bool localize_wii(pos* posStruct) {
 bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uint8_t* order) {
 
 	uint8_t missingPoint = 4;
-	uint8_t ptA = 0;
-	uint8_t ptB = 1;
-	uint8_t i;
-	uint8_t pointIdx[4];
+	uint8_t ptA = 0; // the two points to use for determining position
+	uint8_t ptB = 1; // will ideally be points 0 and 1 of the constellation
+	uint8_t pointIdx[4]; // gives location of constellation point in blobs, 
+						 // pointIdx[0] = 2 means constellation point 0 is in 
+						 // chunk 2 of blobs
+	int8_t i;
 	for (i = 0; i < 4; i++) {
 		pointIdx[order[i]] = i;
 	}
@@ -97,32 +107,40 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uin
 		ptB = 2;
 	}
 
-	int16_t diffX = blobs[3*pointIdx[ptB]] - blobs[3*pointIdx[ptA]];
-	int16_t diffY = blobs[3*pointIdx[ptB]+1] - blobs[3*pointIdx[ptA]+1];
-	posStruct->th = -(angMat[ptA][ptB] - atan2(diffY, diffX));
+	int16_t diffX = (int16_t) blobs[3*pointIdx[ptA]] - (int16_t) blobs[3*pointIdx[ptB]];
+	int16_t diffY = (int16_t) blobs[3*pointIdx[ptB]+1] - (int16_t) blobs[3*pointIdx[ptA]+1];
+	posStruct->th = (angMat[ptA][ptB] - atan2(diffY, diffX));
 
-	double cosTH = cos(-posStruct->th);
-	double sinTH = sin(-posStruct->th);
+	double cosTH = cos(posStruct->th);
+	double sinTH = sin(posStruct->th);
 	double vX, vY, yShift;
 
-	if (missingPoint != 0) {
-		vX = blobs[3*pointIdx[0]] - 512;
-		vY = blobs[3*pointIdx[0]+1] - 384;
+	if (missingPoint > 1) {
+		vX =  511 + calX - (double) (blobs[3*pointIdx[0]]+blobs[3*pointIdx[1]])/2.0;
+		vY = -384 + calY + (double) (blobs[3*pointIdx[0]+1]+blobs[3*pointIdx[1]+1])/2.0;
+		yShift = 0;
+	} else if (missingPoint == 1) {
+		vX =  511 + calX - (double) blobs[3*pointIdx[0]];
+		vY = -384 + calY + (double) blobs[3*pointIdx[0]+1];
 		yShift = 50;
 	} else {
-		vX = blobs[3*pointIdx[1]] - 512;
-		vY = blobs[3*pointIdx[1]+1] - 384;
+		vX =  511 + calX - (double) blobs[3*pointIdx[1]];
+		vY = -384 + calY + (double) blobs[3*pointIdx[1]+1];
+		// vX = blobs[3*pointIdx[1]] - 512;
+		// vY = blobs[3*pointIdx[1]+1] - 384; 
 		yShift = -50;
 	}
 
-	posStruct->x = 1024 - ((cosTH*vX - sinTH*vY) + 512);
-	posStruct->y = 768 - ((sinTH*vX + cosTH*vY) + 384 + yShift);
+	posStruct->x = 512 - (cosTH*vX - sinTH*vY); 
+	posStruct->y = 384 - (sinTH*vX + cosTH*vY) + yShift;
+	// posStruct->x = 1024 - ((cosTH*vX - sinTH*vY) + 512);
+	// posStruct->y = 768 - ((sinTH*vX + cosTH*vY) + 384 + yShift);
 	return true;
 }
 
 bool determine_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order) {
 	uint16_t dists[3];
-	uint8_t i,j;
+	int8_t i,j;
 	uint8_t distIdx = 0;
 	uint8_t skipIdx = badIdx > 3 ? 3 : badIdx;
 

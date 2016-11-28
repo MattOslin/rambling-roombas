@@ -6,5 +6,6 @@
 
 void localize_init(void);
 bool localize_wii(pos* posStruct);
+bool localize_cal(void);
 
 #endif /* LOCALIZE_H_ */
