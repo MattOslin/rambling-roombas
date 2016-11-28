@@ -4,10 +4,8 @@
 
 void motor_update(motor *m){
 
-	encoder_velocity(m);
-
 	if (m->command >= 0)
-	{
+	{	
 		set( *(m->direct1.reg), m->direct1.bit );
 		clr( *(m->direct2.reg), m->direct2.bit );
 	}
@@ -17,7 +15,7 @@ void motor_update(motor *m){
 		set( *(m->direct2.reg), m->direct2.bit );
 	}
 	
-	*(m->dutyCycleRegister) = PWM_MAX * MIN( ABS( m->command ) , MOTOR_COMMAND_MAX ) / MOTOR_COMMAND_MAX;
+	*(m->dutyCycleRegister) = (long) PWM_MAX * MIN( ABS( m->command ) , MOTOR_COMMAND_MAX ) / MOTOR_COMMAND_MAX;
 	
 }
 /*
@@ -59,6 +57,8 @@ void encoder_velocity(motor *m)
 }
 void drive_CL(motor *m){
 
+	encoder_velocity(m);
+
 	float p_error;	// The difference between the desired velocity and current velocity.
 	float i_error;	// The sum of errors over time.
 	float d_error;	// The difference between the previous proportional error and the current proportional error.
@@ -80,7 +80,7 @@ void drive_CL(motor *m){
 	d_output = m->kd * d_error;
 
 	// Sum the three components of the PID output.
-	output = m->command + p_output + i_output + d_output;
+	output = m->command - p_output + i_output + d_output;
 
 	// Update the previous error and the integral error.
 	m->prevError   = p_error;
@@ -94,7 +94,7 @@ void command_update(motor *m, int newCommand){
 		m->command = MAX(newCommand,-MOTOR_COMMAND_MAX);
 	}
 	else{
-		m->command = MIN(newCommand,MOTOR_COMMAND_MAX);
+		m->command = MIN(newCommand, MOTOR_COMMAND_MAX);
 	}
 	
 }

@@ -56,6 +56,13 @@ bool localize_wii(pos* posStruct) {
 	static uint8_t lastBadIdx = 4;
 
 	for (i = 0; i < 4; i++) {
+		m_usb_tx_string(" ");
+		m_usb_tx_int(wiiBuffer[3*i]);
+		m_usb_tx_string(" ");
+		m_usb_tx_int(wiiBuffer[3*i+1]);
+		m_usb_tx_string(" ");
+		m_usb_tx_int(wiiBuffer[3*i+2]);
+
 		if (wiiBuffer[3*i+1] == 1023) {
 			badBlobN++;
 			badIdx = i;
@@ -80,6 +87,8 @@ bool localize_wii(pos* posStruct) {
 			localizeSuccessful =  determine_position(posStruct, wiiBuffer, badIdx, blobOrder);
 		}
 	}
+
+	
 
 	return localizeSuccessful;
 }
@@ -141,6 +150,7 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uin
 bool determine_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order) {
 	uint16_t dists[3];
 	int8_t i,j;
+	
 	uint8_t distIdx = 0;
 	uint8_t skipIdx = badIdx > 3 ? 3 : badIdx;
 
@@ -158,7 +168,7 @@ bool determine_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order) {
 				if (j != skipIdx) {
 					int16_t diffX = (int16_t) blobs[3*i]-blobs[3*j];
 					int16_t diffY = (int16_t) blobs[3*i+1]-blobs[3*j+1];
-					uint16_t tempDist = sqrt(diffX*diffX+diffY*diffY);
+					uint16_t tempDist = sqrt(((long)diffX)*diffX+((long)diffY)*diffY);
 					dists[distIdx] = tempDist;
 
 					if (tempDist > maxDist) {
@@ -301,7 +311,7 @@ bool check_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order) {
 		uint8_t blobJ = order[j[k]];
 		int16_t diffX = (int16_t) blobs[3*i[k]]-blobs[3*j[k]];
 		int16_t diffY = (int16_t) blobs[3*i[k]+1]-blobs[3*j[k]+1];
-		uint16_t dist = sqrt(diffX*diffX+diffY*diffY);
+		uint16_t dist = sqrt(((long)diffX)*diffX+((long)diffY)*diffY);
 		orderGood = orderGood && (dist >= distMatM[blobI][blobJ]) && (dist <= distMatP[blobI][blobJ]);
 	}
 

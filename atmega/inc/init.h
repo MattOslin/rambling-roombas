@@ -44,5 +44,5 @@ uint32_t millis(void); // Returns current milliseconds count
 void usb_read_command(void);
 void motor_GPIO_setup(void);
 void dd_init(dd *rob);
-
+float atan2_aprox(float x, float y);
 #endif /* INIT_H_ */
