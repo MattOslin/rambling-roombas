@@ -13,7 +13,7 @@
 #define	F_CPU 16000000	    // CPU Clock Freq [Hz]
 #define PI 3.14159265       // The constant that defines the ratio between diameter and circumference
 #define TIMER_0_PRSCL 1024  // Timer Prescalers 
-#define TIMER_1_PRSCL 1
+#define TIMER_1_PRSCL 8
 
 #define TIMER_3_PRSCL 1024
 #define TIMER_4_PRSCL 128
@@ -30,6 +30,7 @@
 #define MIN(X,Y)			(X < Y ? X : Y)
 #define MAX(X,Y)			(X > Y ? X : Y)
 #define clr(reg,bit)		reg &= ~(1<<(bit))
+#define ANG_REMAP(TH)		(TH > PI ? TH - 2 * PI : (TH < -PI ? TH + 2 * PI : TH))
 
 
 

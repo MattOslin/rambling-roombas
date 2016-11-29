@@ -111,7 +111,7 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uin
 
 	int16_t diffX = (int16_t) blobs[3*pointIdx[ptA]] - (int16_t) blobs[3*pointIdx[ptB]];
 	int16_t diffY = (int16_t) blobs[3*pointIdx[ptB]+1] - (int16_t) blobs[3*pointIdx[ptA]+1];
-	posStruct->th = (angMat[ptA][ptB] - atan2(diffY, diffX));
+	posStruct->th = ANG_REMAP((angMat[ptA][ptB] - atan2(diffY, diffX)));
 
 	double cosTH = cos(posStruct->th);
 	double sinTH = sin(posStruct->th);
@@ -133,8 +133,8 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uin
 		yShift = -50;
 	}
 
-	posStruct->x = 512 - (cosTH*vX - sinTH*vY); 
-	posStruct->y = 384 - (sinTH*vX + cosTH*vY) + yShift;
+	posStruct->y = /*512 -*/ (cosTH*vX - sinTH*vY); //Was x
+	posStruct->x = /*384*/ - (sinTH*vX + cosTH*vY) + yShift; //was y
 	// posStruct->x = 1024 - ((cosTH*vX - sinTH*vY) + 512);
 	// posStruct->y = 768 - ((sinTH*vX + cosTH*vY) + 384 + yShift);
 	return true;

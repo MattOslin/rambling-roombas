@@ -30,6 +30,8 @@ int main(void) {
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t countUSB = 0; //Used to not bog down processer or terminal with USB Transmissions
+	uint16_t commCount = 0;
+
 	//unsigned int usbIn, charCount;
 
 	//set(DDRD,4);
@@ -45,7 +47,10 @@ int main(void) {
 		
 		if (CTRLreadyFlag)
 		{
-			
+			command_update(&(robot.M2),commCount/5);
+
+			command_update(&(robot.M1),commCount/5);
+
 			//DEBUG CTRL FREQUENCY TEST//
 			//toggle(PORTD,4);
 			
@@ -58,18 +63,24 @@ int main(void) {
 // 				filtADCCounts[i] = alpha*filtADCCounts[i] + (1-alpha)*rawADCCounts[i];
 // 			}
 			
-			dd_update(&robot);
-			if(countUSB%5 == 0){
-
-				m_usb_tx_string("Wii Data:  ");
-				localize_wii(&(robot.global));
+			dd_update(&robot); //UPDATES THE CONTROLS
 
 
-				// m_usb_tx_string("   Pos Est:  ");
+			if(countUSB%50 == 0){
+
+				//m_usb_tx_string("Location Data:  ");
+				// localize_wii(&(robot.global));
+
+
+				m_usb_tx_string("   Current Command:  ");
+				m_usb_tx_int(robot.M1.command);
+
+				//m_usb_tx_string(",");
 				// m_usb_tx_int(robot.global.x);
-
-				// m_usb_tx_string(" ");
+				// m_usb_tx_string(",");
 				// m_usb_tx_int(robot.global.y);
+				// m_usb_tx_string(",");
+				// m_usb_tx_int(100 * robot.global.th);
 
 				// m_usb_tx_string(" ");
 				// m_usb_tx_int(1000*robot.global.th);
@@ -122,6 +133,8 @@ int main(void) {
 
 			//Iterate countUSB
 			countUSB++;
+			commCount++;
+			commCount = 1000*5 < commCount ? 0 : commCount;
 
 		}
 		//RF Command inputs
