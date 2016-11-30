@@ -25,6 +25,12 @@ void m2_init() {
 
 	m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH);// For RF comms 
 
+	set(DDRB,1); // Solenoid fire pin
+	set(DDRB,2); // Puck detection range change
+	set(DDRD,4); // LED Red
+	set(DDRD,6); // LED Blue
+
+
 	// Enable global interrupts
 	sei();
 	m_green(ON); // Ready LED
@@ -32,21 +38,13 @@ void m2_init() {
 }
 void dd_init(dd *rob) {
 	motor_GPIO_setup();
-
-	// rob->SF.reg = (uint8_t *) (&PINB); // Fault Input Pin B0
-	// rob->SF.bit = 0;
-	
-	rob->enable.reg = (uint8_t *) (&PORTB); // GPIO Out to B1
-	rob->enable.bit = 1;
+	rob->enable = FALSE;
 
 	/***********
 	 * MOTOR 1 Specifics
 	***********/
 	rob->M1.direct1.reg = (uint8_t *) (&PORTB);
-	rob->M1.direct1.bit = 3; // GPIO Out to B2
-
-	rob->M1.direct2.reg = (uint8_t *) (&PORTB);
-	rob->M1.direct2.bit = 2; // GPIO Out to B3
+	rob->M1.direct1.bit = 3; // GPIO Out to B3
 
 	rob->M1.dutyCycleRegister = (uint16_t*) (&OCR1C); // Register for changing dutycycle
 	
@@ -66,10 +64,7 @@ void dd_init(dd *rob) {
 	 * MOTOR 2 Specifics
 	***********/
 	rob->M2.direct1.reg = (uint8_t *) (&PORTB);
-	rob->M2.direct1.bit = 4; // GPIO Out to B4
-
-	rob->M2.direct2.reg = (uint8_t *) (&PORTB);
-	rob->M2.direct2.bit = 5; // GPIO Out to B5
+	rob->M2.direct1.bit = 5; // GPIO Out to B5
 
 	rob->M2.dutyCycleRegister = (uint16_t*) (&OCR1B); // Register for changing dutycycle
 	
@@ -78,7 +73,7 @@ void dd_init(dd *rob) {
 	rob->M2.encA.reg = (uint8_t *) (&PINE); // Encoder A Input Pin E6
 	rob->M2.encA.bit = 6;
 	
-	rob->M2.encB.reg = (uint8_t *) (&PINF); // Encoder B Input Pin F0
+	rob->M2.encB.reg = (uint8_t *) (&PINB); // Encoder B Input Pin B0
 	rob->M2.encB.bit = 0;
 
 	rob->M2.kp = CL_VEL_KP; // Motor gain for closed loop velocity control
@@ -90,15 +85,9 @@ void motor_GPIO_setup() {
 
 	//ENABLE GPIO OUTPUT B0-7
 
-	//clr(DDRB, 0); // SF: Active Low Fault Detection
-	//set(PORTB,0); // SF: Enable Pull Up
-
-
-	set(DDRB, 1); // EN: Enable Pin
-	set(DDRB, 2); // M1 DIR1 -> IN1 :  
-	set(DDRB, 3); // M1 DIR2 -> IN2 : 
-	set(DDRB, 4); // M2 DIR1 -> IN1 : 
-	set(DDRB, 5); // M2 DIR2 -> IN2 : 
+	// set(DDRB, 1); // EN: Enable Pin
+	set(DDRB, 3); // M1 DIR1 -> IN1 and !IN2 : 
+	set(DDRB, 5); // M2 DIR1 -> IN1 and !IN2 : 
 	set(DDRB, 6); // M1 PWM  ->  D2 : 
 	set(DDRB, 7); // M2 PWM  ->  D2 :
 
@@ -113,8 +102,8 @@ void motor_GPIO_setup() {
 
 	clr(DDRE, 6); // M2 Enc A Input Interrupt Pin
 	set(PORTE,6); // M2 Enc A Enable Pull Up
-	clr(DDRF, 0); // M2 Enc B Input Pin
-	set(PORTF,0); // M2 Enc B Enable Pull Up
+	clr(DDRB, 0); // M2 Enc B Input Pin
+	set(PORTB,0); // M2 Enc B Enable Pull Up
 
 	clr(EICRB, ISC61); // M2 Enc A enable interupt
 	set(EICRB, ISC60); // Set interrupt to trigger on pin change
@@ -177,8 +166,8 @@ void timer3_init(void) {
   set(TCCR3A, WGM31);
   set(TCCR3A, WGM30);
 
-  clr(DDRC,7);    // set input capture pin to input
   set(DDRC,6);    // set output compare pin to output
+  clr(DDRC,7);    // set input capture pin to input
 
   // output compare: set at rollover, clear at OCR3A
   set(TCCR3A,COM3A1);

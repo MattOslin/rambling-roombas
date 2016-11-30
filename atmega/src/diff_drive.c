@@ -1,29 +1,36 @@
 
 #include "init.h"
 
-
 void dd_drive(dd *rob){
-	// Updates desired motor velocities based on 
-	//	unicycle commands of velocity and omega
-	float leftMotorV, rightMotorV;
+	if(rob->enable){
 
-	leftMotorV = rob->veloDesired - rob->omegaDesired ;//* WHEEL_RADIAL_LOC;
-	rightMotorV = rob->veloDesired + rob->omegaDesired ;//* WHEEL_RADIAL_LOC;
+		// Updates desired motor velocities based on 
+		//	unicycle commands of velocity and omega
+		float leftMotorV, rightMotorV;
 
-	// Normalize the velocities to the highest velocities if greater than 1
+		leftMotorV = rob->veloDesired - rob->omegaDesired ;//* WHEEL_RADIAL_LOC;
+		rightMotorV = rob->veloDesired + rob->omegaDesired ;//* WHEEL_RADIAL_LOC;
 
-	if( (ABS(leftMotorV) > 1.0) && (ABS(leftMotorV) > ABS(rightMotorV)) ) {
-		rightMotorV /= ABS(leftMotorV);
-		leftMotorV /= ABS(leftMotorV);
+		// Normalize the velocities to the highest velocities if greater than 1
+
+		if( (ABS(leftMotorV) > 1.0) && (ABS(leftMotorV) > ABS(rightMotorV)) ) {
+			rightMotorV /= ABS(leftMotorV);
+			leftMotorV /= ABS(leftMotorV);
+		}
+		else if((ABS(rightMotorV) > 1.0) && (ABS(rightMotorV) > ABS(leftMotorV))){
+			leftMotorV /= ABS(rightMotorV);
+			rightMotorV /= ABS(rightMotorV);
+		}
+
+		//Set desired velocity for motors
+		rob->M1.veloDesired = -leftMotorV;
+		rob->M2.veloDesired = rightMotorV;
 	}
-	else if((ABS(rightMotorV) > 1.0) && (ABS(rightMotorV) > ABS(leftMotorV))){
-		leftMotorV /= ABS(rightMotorV);
-		rightMotorV /= ABS(rightMotorV);
-	}
+	else{
 
-	//Set desired velocity for motors
-	rob->M1.veloDesired = -leftMotorV;
-	rob->M2.veloDesired = rightMotorV;
+		rob->M1.veloDesired = 0;
+		rob->M2.veloDesired = 0;
+	}
 	
 }
 
@@ -62,7 +69,7 @@ bool dd_goto_rot_trans(dd *rob, double veloDes){
 
 void dd_goto_spiral(dd *rob, double veloDes){
 	//Using J.J. Park and B Kuipers paper for smooth diff drive control
-	//Unclear whether smooth is good or to slow or what
+	//Unclear whether smooth is good or too slow or what
 	//Simple go to location that needs to be made more intelligent
 	int K1 = 1;
 	int K2 = 10;
@@ -110,20 +117,22 @@ bool dd_is_loc(dd*rob , float posThresh){
 
 void dd_update(dd *rob) {
  	// Update the state of the diff drive robot
- 	dd_drive(rob);
- 	drive_OL(&(rob->M1) );
- 	drive_OL(&(rob->M2) );
+ 	dd_drive( rob );
+	encoder_velocity( &(rob->M1) );
+	encoder_velocity( &(rob->M2) );
+ 	drive_OL( &(rob->M1) );
+ 	drive_OL( &(rob->M2) );
  	motor_update( &(rob->M1) );
  	motor_update( &(rob->M2) );
  }
 
 // ENABLES MOTOR DRIVER OPERATION
 void dd_enable(dd *rob) {
-	set(*(rob->enable.reg),rob->enable.bit);
+	rob->enable = TRUE;
 }
 // STOPS MOTOR DRIVER OPERATION
 void dd_disable(dd *rob) {
-	clr(*(rob->enable.reg),rob->enable.bit);
+	rob->enable = FALSE;
 }
 
 void dd_set(pin *pinToToggle) {

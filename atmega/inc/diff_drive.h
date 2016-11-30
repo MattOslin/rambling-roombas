@@ -15,9 +15,7 @@ typedef struct position {
 typedef struct diffDrive {
 	motor M1;
 	motor M2;
-	pin enable;
-	pin SF;
-	uint8_t fault;
+	bool enable;
 	pos global;
 	pos velocity;
 	pos desLoc;
