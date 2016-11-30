@@ -35,7 +35,7 @@ bool dd_goto_rot_trans(dd *rob, double veloDes){
 	double distFromGoal = sqrt(deltaX * deltaX + deltaY * deltaY);
 
 	float posThresh = 10.0;
-	float thThresh = PI/120;
+	float thThresh = 5 * PI / 180;
 	if ( distFromGoal < posThresh ) {
 		if ( ABS(deltaTh) < thThresh ) {
 			rob->veloDesired  = 0;
@@ -43,7 +43,7 @@ bool dd_goto_rot_trans(dd *rob, double veloDes){
 			return TRUE;
 		}
 		rob->veloDesired  = 0;
-		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? -veloDes * deltaTh/ABS(deltaTh) : -veloDes * deltaTh/(PI/2);
+		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? veloDes * deltaTh/ABS(deltaTh) : veloDes * deltaTh/(PI/2);
 		return FALSE;
 	}
 	else {
@@ -55,7 +55,7 @@ bool dd_goto_rot_trans(dd *rob, double veloDes){
 			return FALSE;
 		}
 		rob->veloDesired  = 0;
-		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? -veloDes * deltaTh/ABS(deltaTh) : -veloDes * deltaTh/(PI/2);
+		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? veloDes * deltaTh/ABS(deltaTh) : veloDes * deltaTh/(PI/2);
 		return FALSE;
 	}
 }
@@ -111,8 +111,8 @@ bool dd_is_loc(dd*rob , float posThresh){
 void dd_update(dd *rob) {
  	// Update the state of the diff drive robot
  	dd_drive(rob);
- 	drive_CL(&(rob->M1) );
- 	drive_CL(&(rob->M2) );
+ 	drive_OL(&(rob->M1) );
+ 	drive_OL(&(rob->M2) );
  	motor_update( &(rob->M1) );
  	motor_update( &(rob->M2) );
  }

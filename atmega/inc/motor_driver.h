@@ -14,10 +14,10 @@
 #define MOTOR_SPEED_MAX 7.0   // Max attempted Rotations per second
 #define ENC_RES 32*19	//Number of edges per rotation of output shaft in the encoders (using one interrupt)
 #define OL_MOTOR_MATCH 0    // Open loop motor matching calibration
-#define CL_VEL_KP 5
+#define CL_VEL_KP 2
 #define CL_VEL_KI 0
 #define CL_VEL_KD 0
-#define ALPHA_EN_LPF .5
+#define ALPHA_EN_LPF .7
 
 // Pin class contains register and bit for set or clearing
 typedef struct pin	 {
@@ -49,7 +49,7 @@ typedef struct motor {
 } motor;
 
 
-void motor_drive(int a, int b);
+void drive_OL(motor *m);
 void motor_update(motor *m);
 void encoder_update(motor *m);
 void encoder_velocity(motor *m);
