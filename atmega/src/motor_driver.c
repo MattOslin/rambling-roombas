@@ -31,22 +31,22 @@ void encoder_update(motor *m){
 		// Rising edge of A.
 		if(check(*(m->encB.reg), m->encB.bit) == 1){
 			//m->dirEncoder = 1;
-			m->countEncoder ++;
+			m->countEncoder --;
 		}
 		else{
 			//m->dirEncoder = -1;
-			m->countEncoder --;
+			m->countEncoder ++;
 		}
 	}
 	else{
 		// Falling edge of A.
 		if(check(*(m->encB.reg), m->encB.bit) == 1){
 			//m->dirEncoder = -1;
-			m->countEncoder --;
+			m->countEncoder ++;
 		}
 		else{
 			//m->dirEncoder = 1;
-			m->countEncoder ++;
+			m->countEncoder --;
 		}
 	}
 }
@@ -87,6 +87,11 @@ void drive_CL(motor *m){
 	m->integError += p_error;
 
 	command_update(m, (int) output);
+}
+
+void drive_OL(motor *m){
+
+	command_update(m, (int) (m->veloDesired * MOTOR_COMMAND_MAX));
 }
 
 void command_update(motor *m, int newCommand){

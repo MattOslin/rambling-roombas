@@ -30,22 +30,30 @@ int main(void) {
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t countUSB = 0; //Used to not bog down processer or terminal with USB Transmissions
+	// robot.desLoc.x = 0;
+	// robot.desLoc.y = -280;
+	// robot.desLoc.th = PI/2;
+	// uint16_t commCount = 0;
+
 	//unsigned int usbIn, charCount;
 
 	//set(DDRD,4);
-
+	// while (!localize_wii(&(robot.global)));
 	//Main process loop
     while (1) //Stay in this loop forever
     {
 		
 		//Control Loop at CTRL_FREQ frequency//
 		//speed = 200; // RPM
-		//robot.veloDesired = -.5;//(speed * 19 * 34 / 60.0) / CTRL_FREQ;
-		//robot.omegaDesired = .2;
+		//robot.veloDesired = .6;//(speed * 19 * 34 / 60.0) / CTRL_FREQ;
+		//robot.omegaDesired = .4;
 		
 		if (CTRLreadyFlag)
 		{
-			
+			// command_update(&(robot.M2),commCount/5);
+
+			// command_update(&(robot.M1),commCount/5);
+
 			//DEBUG CTRL FREQUENCY TEST//
 			//toggle(PORTD,4);
 			
@@ -58,18 +66,31 @@ int main(void) {
 // 				filtADCCounts[i] = alpha*filtADCCounts[i] + (1-alpha)*rawADCCounts[i];
 // 			}
 			
+			 //UPDATES THE CONTROLS
+			// dd_goto_rot_trans(&robot, .2);
 			dd_update(&robot);
-			if(countUSB%5 == 0){
+			if(countUSB%10 == 0){
 
-				m_usb_tx_string("Wii Data:  ");
-				localize_wii(&(robot.global));
+				// m_usb_tx_string("Location Data:  ");
+				// localize_wii(&(robot.global));
 
+				m_usb_tx_string(" vD: ");
+				m_usb_tx_int(100*robot.veloDesired);
+				m_usb_tx_string(" oD: ");
+				m_usb_tx_int(100*robot.omegaDesired);
 
-				// m_usb_tx_string("   Pos Est:  ");
+				// m_usb_tx_string(" vD: ");
+				// m_usb_tx_int(100 * robot.veloDesired);
+				// m_usb_tx_string(" vD_enc:");
+		  // 		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M1.veloDesired / CTRL_FREQ);
+		  // 		m_usb_tx_string(" M1_enc ");//m_usb_tx_int(10);
+				// m_usb_tx_int(robot.M1.veloEncoder);
+				// m_usb_tx_string(",");
 				// m_usb_tx_int(robot.global.x);
-
-				// m_usb_tx_string(" ");
+				// m_usb_tx_string(",");
 				// m_usb_tx_int(robot.global.y);
+				// m_usb_tx_string(",");
+				// m_usb_tx_int(100 * robot.global.th);
 
 				// m_usb_tx_string(" ");
 				// m_usb_tx_int(1000*robot.global.th);
@@ -82,14 +103,7 @@ int main(void) {
 			
 			//toggle(PORTD,4);
 		  	//m_red(TOGGLE);
-//        		m_usb_tx_int(ping);
-			// m_usb_tx_int(100 * robot.veloDesired);
-			// m_usb_tx_string(" ");
-	  // 		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M1.veloDesired / CTRL_FREQ);
-	  // 		m_usb_tx_string(" ");//m_usb_tx_int(10);
-			// m_usb_tx_int(robot.M1.veloEncoder);
-			// m_usb_tx_string(" ");
-			// m_usb_tx_int(robot.M1.command);
+
 
 	  // 		m_usb_tx_string(" ");
 	  // 		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M2.veloDesired / CTRL_FREQ);
@@ -122,6 +136,8 @@ int main(void) {
 
 			//Iterate countUSB
 			countUSB++;
+			// commCount++;
+			// commCount = 1000*5 < commCount ? 0 : commCount;
 
 		}
 		//RF Command inputs

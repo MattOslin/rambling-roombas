@@ -35,7 +35,7 @@ bool dd_goto_rot_trans(dd *rob, double veloDes){
 	double distFromGoal = sqrt(deltaX * deltaX + deltaY * deltaY);
 
 	float posThresh = 10.0;
-	float thThresh = PI/120;
+	float thThresh = 5 * PI / 180;
 	if ( distFromGoal < posThresh ) {
 		if ( ABS(deltaTh) < thThresh ) {
 			rob->veloDesired  = 0;
@@ -43,7 +43,7 @@ bool dd_goto_rot_trans(dd *rob, double veloDes){
 			return TRUE;
 		}
 		rob->veloDesired  = 0;
-		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? -veloDes * deltaTh/ABS(deltaTh) : -veloDes * deltaTh/(PI/2);
+		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? veloDes * deltaTh/ABS(deltaTh) : veloDes * deltaTh/(PI/2);
 		return FALSE;
 	}
 	else {
@@ -55,27 +55,27 @@ bool dd_goto_rot_trans(dd *rob, double veloDes){
 			return FALSE;
 		}
 		rob->veloDesired  = 0;
-		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? -veloDes * deltaTh/ABS(deltaTh) : -veloDes * deltaTh/(PI/2);
+		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? veloDes * deltaTh/ABS(deltaTh) : veloDes * deltaTh/(PI/2);
 		return FALSE;
 	}
 }
 
-void dd_goto_spiral(dd *rob, double veloDes){
+void dd_goto_spiral(dd *rob, float veloDes){
 	//Using J.J. Park and B Kuipers paper for smooth diff drive control
 	//Unclear whether smooth is good or to slow or what
 	//Simple go to location that needs to be made more intelligent
 	int K1 = 1;
 	int K2 = 10;
 
-	double deltaX  = rob->desLoc.x  - rob->global.x;
-	double deltaY  = rob->desLoc.y  - rob->global.y;
-	//double deltaTh = rob->desLoc.th - rob->global.th;
-	double gamma = atan2_aprox( deltaX, deltaY);
-	double del = rob->global.th - gamma;
-	double theta = rob->desLoc.th - gamma;
-	double r = sqrt( deltaX * deltaX + deltaY * deltaY);
+	float deltaX  = rob->desLoc.x  - rob->global.x;
+	float deltaY  = rob->desLoc.y  - rob->global.y;
+	//float deltaTh = rob->desLoc.th - rob->global.th;
+	float gamma = atan2( deltaY, deltaX);
+	float del = rob->global.th - gamma;
+	float theta = rob->desLoc.th - gamma;
+	float r = sqrt( deltaX * deltaX + deltaY * deltaY);
 	
-	float posThresh = 10.0;
+	float posThresh = 5.0;
 	if( r < posThresh){
 		rob->veloDesired  = veloDes * r / posThresh;
 		rob->omegaDesired = - (veloDes / posThresh) * K2 * (del - atan(-K1 * theta))
@@ -84,15 +84,8 @@ void dd_goto_spiral(dd *rob, double veloDes){
 	}
 
 	rob->veloDesired = veloDes;
-	rob->omegaDesired = - (veloDes / posThresh) * K2 * (del - atan(-K1 * theta))
+	rob->omegaDesired = - (veloDes / r) * K2 * (del - atan(-K1 * theta))
 	                    + ( 1 + K1 / (1 + K1 * K1 * theta * theta)) * sin(del);
-
-
-
-
-	// else{
-	// 	rob->veloDesired = 
-	// }
 	
 }
 
@@ -111,8 +104,8 @@ bool dd_is_loc(dd*rob , float posThresh){
 void dd_update(dd *rob) {
  	// Update the state of the diff drive robot
  	dd_drive(rob);
- 	drive_CL(&(rob->M1) );
- 	drive_CL(&(rob->M2) );
+ 	drive_OL(&(rob->M1) );
+ 	drive_OL(&(rob->M2) );
  	motor_update( &(rob->M1) );
  	motor_update( &(rob->M2) );
  }

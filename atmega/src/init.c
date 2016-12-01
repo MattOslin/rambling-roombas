@@ -164,10 +164,10 @@ void timer1_init() {
 	OCR1B = 0;
 	OCR1C = 0;
 		
-	//ENABLE TIMER 1 WITH PRESCALER = 1
+	//ENABLE TIMER 1 WITH PRESCALER = 8
 	clr(TCCR1B, CS12);
-	clr(TCCR1B, CS11);
-	set(TCCR1B, CS10);
+	set(TCCR1B, CS11);
+	clr(TCCR1B, CS10);
 }
 
 void timer3_init(void) {
