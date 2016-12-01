@@ -7,12 +7,12 @@ void motor_update(motor *m){
 	if (m->command >= 0)
 	{	
 		set( *(m->direct1.reg), m->direct1.bit );
-		clr( *(m->direct2.reg), m->direct2.bit );
+		// clr( *(m->direct2.reg), m->direct2.bit );
 	}
 	else
 	{
 		clr( *(m->direct1.reg), m->direct1.bit );
-		set( *(m->direct2.reg), m->direct2.bit );
+		// set( *(m->direct2.reg), m->direct2.bit );
 	}
 	
 	*(m->dutyCycleRegister) = (long) PWM_MAX * MIN( ABS( m->command ) , MOTOR_COMMAND_MAX ) / MOTOR_COMMAND_MAX;
@@ -56,8 +56,6 @@ void encoder_velocity(motor *m)
 	m->countEncoder = 0;
 }
 void drive_CL(motor *m){
-
-	encoder_velocity(m);
 
 	float p_error;	// The difference between the desired velocity and current velocity.
 	float i_error;	// The sum of errors over time.
