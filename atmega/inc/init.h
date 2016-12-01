@@ -8,6 +8,7 @@
 #include "diff_drive.h"
 #include "comms.h"
 #include "localize.h"
+#include "eep_locations.h"
 
 
 #define	F_CPU 16000000	    // CPU Clock Freq [Hz]
