@@ -8,6 +8,7 @@
 #include "diff_drive.h"
 #include "comms.h"
 #include "localize.h"
+#include "eep_locations.h"
 
 #define	F_CPU 16000000	    // CPU Clock Freq [Hz]
 #define PI 3.14159265       // The constant that defines the ratio between diameter and circumference

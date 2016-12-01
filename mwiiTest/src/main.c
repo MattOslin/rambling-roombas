@@ -1,6 +1,7 @@
 #include "m_wii.h"
 #include "m_bus.h"
 #include "m_usb.h"
+#include "eep_test.h"
 
 int main(void) {
 	m_clockdivide(0);
@@ -9,15 +10,26 @@ int main(void) {
 	m_usb_init();
 
 	// m_wii_read(wiiBuffer);
-	uint8_t i;
+	// uint8_t i;
 	// for (i = 0; i < 10; i++) {
 	// 	eeprom_write_byte((uint8_t *)i,i);
 	// }
+
+	// eeprom_write_byte(&slot1, 0x10);
+	// eeprom_write_word(&slot2, 0x3000);
+	// eeprom_write_float(&slot3, 2.4);
+
 	while(true) {
-		for (i = 0; i < 10; i++){
-			m_usb_tx_uint(eeprom_read_byte((uint8_t *) i));
-			m_usb_tx_string(" ");
-		}
+		// for (i = 0; i < 10; i++){
+		// 	m_usb_tx_uint(eeprom_read_byte((uint8_t *) i));
+		// 	m_usb_tx_string(" ");
+		// }
+		m_usb_tx_hexchar(eeprom_read_byte(&slot1));
+		m_usb_tx_string(" ");
+		m_usb_tx_hex(eeprom_read_word(&slot2));
+		m_usb_tx_string(" ");
+		m_usb_tx_uint(eeprom_read_float(&slot3)*100);
+		// print_out();
 		// m_red(TOGGLE);
 		// m_usb_tx_uint(wiiBuffer[0]);
 		// m_usb_tx_string(" ");

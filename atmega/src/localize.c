@@ -22,7 +22,7 @@ const float angMat[4][4] = {
 						{2.2919, -2.1272,  2.8670, 	     0}
 					};
 
-int16_t calX, calY;
+float calX, calY;
 
 bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uint8_t* order);
 bool determine_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order);
@@ -31,8 +31,8 @@ bool check_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order);
 
 void localize_init(void) {
 	while(m_wii_open() == 0);
-	calX = (int16_t) eeprom_read_word((uint16_t *) 1);
-	calY = (int16_t) eeprom_read_word((uint16_t *) 2);
+	calX = eeprom_read_float(&eepCalX);
+	calY = eeprom_read_float(&eepCalY);
 }
 
 bool localize_cal(void) {
