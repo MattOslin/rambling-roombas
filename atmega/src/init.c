@@ -262,4 +262,7 @@ float atan2_aprox(float x, float y){
 }
 
 
-
+//TEMP LOCATION OF PUCK UPDATE
+void puck_update(pk *puck) {
+	// Update the pucks information
+}

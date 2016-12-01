@@ -5,8 +5,10 @@
  * Author : J. Diego Caporale, Matt Oslin, Garrett Wenger, Jake Welde
  */ 
 #include "init.h"
+#include "behavior_FSM.h"
 
 dd robot;
+pk puck;
 
 // Global flags for interrupts
 volatile bool CTRLreadyFlag = FALSE;	// Frequency control flag for control loop
@@ -19,133 +21,55 @@ unsigned char buffer[PACKET_LENGTH] = {0};
 float speed;
 uint16_t ping;
 
+
+
+void usb_debug(void);
+
 int main(void) {
 
 	// Initialize GPIO, ADC, m_bus, interrupts, diffDrive
 	m2_init();
 
 	// Initialize diffDrive (motors, encoders, localization)
-	dd_init(&robot);
+	dd_init(&robot); 
 	dd_enable(&robot);
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
-	uint16_t countUSB = 0; //Used to not bog down processer or terminal with USB Transmissions
+	uint16_t count = 0; //Used to not bog down processer or terminal with USB Transmissions
 	// robot.desLoc.x = 0;
 	// robot.desLoc.y = -280;
 	// robot.desLoc.th = PI/2;
-	// uint16_t commCount = 0;
 
-	//unsigned int usbIn, charCount;
-
-	//set(DDRD,4);
 	// while (!localize_wii(&(robot.global)));
+
 	//Main process loop
     while (1) //Stay in this loop forever
     {
 		
-		//Control Loop at CTRL_FREQ frequency//
-		//speed = 200; // RPM
-		//robot.veloDesired = .6;//(speed * 19 * 34 / 60.0) / CTRL_FREQ;
-		//robot.omegaDesired = .4;
-		
-		if (CTRLreadyFlag)
-		{
-			// command_update(&(robot.M2),commCount/5);
-
-			// command_update(&(robot.M1),commCount/5);
-
-			//DEBUG CTRL FREQUENCY TEST//
-			//toggle(PORTD,4);
+		if (CTRLreadyFlag) {
 			
 			CTRLreadyFlag = FALSE; //Reset flag for interrupt
-
-			//LOW PASS FILTER FOR ADC//
-// 			int i;
-// 			for(i = 0; i < NUMADCS; i++) {
-// 				oldFiltADCCounts[i] = filtADCCounts[i];
-// 				filtADCCounts[i] = alpha*filtADCCounts[i] + (1-alpha)*rawADCCounts[i];
-// 			}
-			
+			puck_update(&puck);
+			find_state(&robot,&puck);
+			dd_update(&robot);
 			 //UPDATES THE CONTROLS
 			// dd_goto_rot_trans(&robot, .2);
-			dd_update(&robot);
-			if(countUSB%10 == 0){
-
-				// m_usb_tx_string("Location Data:  ");
-				// localize_wii(&(robot.global));
-
-				m_usb_tx_string(" vD: ");
-				m_usb_tx_int(100*robot.veloDesired);
-				m_usb_tx_string(" oD: ");
-				m_usb_tx_int(100*robot.omegaDesired);
-
-				// m_usb_tx_string(" vD: ");
-				// m_usb_tx_int(100 * robot.veloDesired);
-				// m_usb_tx_string(" vD_enc:");
-		  // 		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M1.veloDesired / CTRL_FREQ);
-		  // 		m_usb_tx_string(" M1_enc ");//m_usb_tx_int(10);
-				// m_usb_tx_int(robot.M1.veloEncoder);
-				// m_usb_tx_string(",");
-				// m_usb_tx_int(robot.global.x);
-				// m_usb_tx_string(",");
-				// m_usb_tx_int(robot.global.y);
-				// m_usb_tx_string(",");
-				// m_usb_tx_int(100 * robot.global.th);
-
-				// m_usb_tx_string(" ");
-				// m_usb_tx_int(1000*robot.global.th);
-				m_usb_tx_string("\n");
-			}
-			// command_update(&(robot.M2),-1000);
-			// motor_update(&(robot.M2));
-			// USB DEBUG//
-			// Send USB information for DEBUG every 100 control loop cycles
-			
-			//toggle(PORTD,4);
-		  	//m_red(TOGGLE);
-
-
-	  // 		m_usb_tx_string(" ");
-	  // 		m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M2.veloDesired / CTRL_FREQ);
-	  // 		m_usb_tx_string(" ");//m_usb_tx_int(10);
-		 // //  	m_usb_tx_int(robot.M1.veloDesired);
-		 // //  	m_usb_tx_string(" ");
-			// m_usb_tx_int(robot.M2.veloEncoder);
-			// m_usb_tx_string(" ");
-			// m_usb_tx_int(robot.M2.command);
-			// m_usb_tx_string(" ");
-			// m_usb_tx_hex(buffer[0]);
-			// m_usb_tx_string(" ");
-			// m_usb_tx_int(buffer[2]);
-			// m_usb_tx_string(" ");
-			// m_usb_tx_int(buffer[1]);
-			// m_usb_tx_string(" ");
-			// m_usb_tx_int( robot.M1.prevError);
-			//m_usb_tx_string(" ");
-			// m_usb_tx_int(1000 * robot.M1.kp);
-			// m_usb_tx_int(rawADCCounts[2]);
-			// m_usb_tx_string(" ");
-			// m_usb_tx_int(rawADCCounts[3]);
-			// // m_usb_tx_string(" ");
-			// m_usb_tx_int(*(robot.M1.dutyCycleRegister));
-			
- 			//m_usb_tx_push();
-			//robot.M1.command = /*(M1.command+25)%*/MOTOR_COMMAND_MAX;
-			//motor_update(&(robot.M1));
 			
 
-			//Iterate countUSB
-			countUSB++;
-			// commCount++;
-			// commCount = 1000*5 < commCount ? 0 : commCount;
-
+			//Iterate count for slower loop
+			count++;
 		}
+
 		//RF Command inputs
-		if (isCommandReady)
-		{	
+		if (isCommandReady) {	
 			m_green(TOGGLE);
 			isCommandReady = FALSE;
 			rf_parse(buffer, &robot);
+		}
+
+		if(count%10 == 0) {
+			localize_wii(&(robot.global));
+			usb_debug(); // USB Debug function below
 		}
 	}
 }
@@ -158,14 +82,12 @@ ISR(ADC_vect)
 {
 	toggle(PORTD,4);
 	adc_read(rawADCCounts);
-
 }
 
 //RF Command Interupt Handler.
 ISR(INT2_vect){
 	isCommandReady = TRUE;
 	m_rf_read(buffer,PACKET_LENGTH);// pull the packet
-	
 }
 
 //Interrupt for CTRL_FREQ frequency control loop
@@ -190,5 +112,30 @@ ISR(INT6_vect){
 
 // interrupt for input capture on ping sensor
 ISR(TIMER3_CAPT_vect) {
-	ping = ICR3;
+	robot.ping = ICR3;
+}
+
+void usb_debug(){
+	// m_usb_tx_string("Location Data:  ");
+	m_usb_tx_string(" vD: ");
+	m_usb_tx_int(100*robot.veloDesired);
+	m_usb_tx_string(" oD: ");
+	m_usb_tx_int(100*robot.omegaDesired);
+
+	// m_usb_tx_string(" vD: ");
+	// m_usb_tx_int(100 * robot.veloDesired);
+	// m_usb_tx_string(" vD_enc:");
+		// m_usb_tx_int(MOTOR_SPEED_MAX * ENC_RES * robot.M1.veloDesired / CTRL_FREQ);
+		// m_usb_tx_string(" M1_enc ");//m_usb_tx_int(10);
+	// m_usb_tx_int(robot.M1.veloEncoder);
+	// m_usb_tx_string(",");
+	// m_usb_tx_int(robot.global.x);
+	// m_usb_tx_string(",");
+	// m_usb_tx_int(robot.global.y);
+	// m_usb_tx_string(",");
+	// m_usb_tx_int(100 * robot.global.th);
+
+	// m_usb_tx_string(" ");
+	// m_usb_tx_int(1000*robot.global.th);
+	m_usb_tx_string("\n");
 }

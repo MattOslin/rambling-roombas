@@ -1,40 +1,38 @@
 //behavior_FSM.c
 //Controls the state of the system
+#include "behavior_FSM.h"
+//http://stackoverflow.com/questions/1647631/c-state-machine-design/1647679#1647679
 
 
+//ONE OPTION
 
+state_fn puck_search, puck_pursue, puck_to_goal;
 
-//ONEOPTION
-#include <stdio.h>
-
-struct state;
-typedef void state_fn(struct state *);
-
-struct state
+void puck_search(struct state * state)
 {
-    state_fn * next;
-    int i; // data
-};
-
-state_fn foo, bar;
-
-void foo(struct state * state)
-{
-    printf("%s %i\n", __func__, ++state->i);
-    state->next = bar;
+    state->next = puck_pursue;
 }
 
-void bar(struct state * state)
+void puck_pursue(struct state * state)
 {
-    printf("%s %i\n", __func__, ++state->i);
-    state->next = state->i < 10 ? foo : 0;
+    state->next = state->i < 10 ? puck_to_goal : 0;
 }
 
-int main(void)
+void puck_to_goal(struct state * state)
 {
-    struct state state = { foo, 0 };
-    while(state.next) state.next(&state);
+    state->next = state->i < 10 ? puck_search : 0;
 }
+
+
+void find_state(dd *robot,pk *puck)
+{
+	;
+}
+// int main(void)
+// {
+//     struct state state = { puck_search, 0 };
+//     while(state.next) state.next(&state);
+// }
 
 
 

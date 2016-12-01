@@ -23,6 +23,7 @@ typedef struct diffDrive {
 	pos desLoc;
 	float veloDesired;
 	float omegaDesired;
+	int ping;
 } dd;
 
 void dd_toggle(pin *pinToToggle);
@@ -34,7 +35,7 @@ void dd_disable(dd *rob);
 void dd_comm_test(dd *rob);
 
 bool dd_is_loc(dd*rob , float posThresh);
-void dd_goto_spiral(dd *rob, double veloDes);
+void dd_goto_spiral(dd *rob, float veloDes);
 bool dd_goto_rot_trans(dd *rob, double veloDes);
 void dd_drive(dd *rob);
 void get_fault_status(dd *rob);

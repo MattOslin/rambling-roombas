@@ -9,7 +9,6 @@
 #include "comms.h"
 #include "localize.h"
 
-
 #define	F_CPU 16000000	    // CPU Clock Freq [Hz]
 #define PI 3.14159265       // The constant that defines the ratio between diameter and circumference
 #define TIMER_0_PRSCL 1024  // Timer Prescalers 
@@ -32,7 +31,13 @@
 #define clr(reg,bit)		reg &= ~(1<<(bit))
 #define ANG_REMAP(TH)		(TH > PI ? TH - 2 * PI : (TH < -PI ? TH + 2 * PI : TH))
 
-
+typedef struct puckInfo {
+	float r;		//
+	float th;
+	bool isFound;
+	bool isBehind;
+	bool isHave;
+} pk;
 
 // Initialize helper functions
 
@@ -45,5 +50,6 @@ uint32_t millis(void); // Returns current milliseconds count
 void usb_read_command(void);
 void motor_GPIO_setup(void);
 void dd_init(dd *rob);
+void puck_update(pk *puck);
 float atan2_aprox(float x, float y);
 #endif /* INIT_H_ */
