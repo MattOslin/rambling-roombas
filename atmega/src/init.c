@@ -19,15 +19,15 @@ void m2_init() {
 
     //while(!m_usb_isconnected()); // wait for a connection
 	
-	localize_init();
+	//localize_init();
 
 	m_disableJTAG(); //Allows use of some of the portF
 
 	m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH);// For RF comms 
 
 	set(DDRB,1); // Solenoid fire pin
-	set(DDRB,2); // Puck detection range change
-	set(DDRD,4); // LED Red
+	set(DDRB,4); // Puck detection range change
+	set(DDRD,5); // LED Red
 	set(DDRD,6); // LED Blue
 
 
@@ -53,8 +53,8 @@ void dd_init(dd *rob) {
 	rob->M1.encA.reg = (uint8_t *) (&PIND); // Encoder A Input Pin D3
 	rob->M1.encA.bit = 3;
 	
-	rob->M1.encB.reg = (uint8_t *) (&PIND); // Encoder B Input Pin D5
-	rob->M1.encB.bit = 5;
+	rob->M1.encB.reg = (uint8_t *) (&PIND); // Encoder B Input Pin D4
+	rob->M1.encB.bit = 4;
 	
 	rob->M1.kp = CL_VEL_KP; // Motor gain for closed loop velocity control
 	rob->M1.ki = CL_VEL_KI; //     These parameters are here 
@@ -64,7 +64,7 @@ void dd_init(dd *rob) {
 	 * MOTOR 2 Specifics
 	***********/
 	rob->M2.direct1.reg = (uint8_t *) (&PORTB);
-	rob->M2.direct1.bit = 5; // GPIO Out to B5
+	rob->M2.direct1.bit = 2; // GPIO Out to B2
 
 	rob->M2.dutyCycleRegister = (uint16_t*) (&OCR1B); // Register for changing dutycycle
 	
@@ -87,14 +87,14 @@ void motor_GPIO_setup() {
 
 	// set(DDRB, 1); // EN: Enable Pin
 	set(DDRB, 3); // M1 DIR1 -> IN1 and !IN2 : 
-	set(DDRB, 5); // M2 DIR1 -> IN1 and !IN2 : 
-	set(DDRB, 6); // M1 PWM  ->  D2 : 
-	set(DDRB, 7); // M2 PWM  ->  D2 :
+	set(DDRB, 2); // M2 DIR1 -> IN1 and !IN2 : 
+	set(DDRB, 7); // M1 PWM  ->  D2 : 
+	set(DDRB, 6); // M2 PWM  ->  D2 :
 
 	clr(DDRD, 3); // M1 Enc A Input Interrupt Pin
 	set(PORTD,3); // M1 Enc A Enable Pull Up
-	clr(DDRD, 5); // M1 Enc B Input Pin
-	set(PORTD,5); // M1 Enc B Enable Pull Up
+	clr(DDRD, 4); // M1 Enc B Input Pin
+	set(PORTD,4); // M1 Enc B Enable Pull Up
 
 	clr(EICRA, ISC31); // Set interrupt to trigger on pin change
 	set(EICRA, ISC30);
