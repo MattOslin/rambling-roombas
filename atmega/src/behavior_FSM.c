@@ -30,11 +30,11 @@ void bar(struct state * state)
     state->next = state->i < 10 ? foo : 0;
 }
 
-int main(void)
-{
-    struct state state = { foo, 0 };
-    while(state.next) state.next(&state);
-}
+// int main(void)
+// {
+//     struct state state = { foo, 0 };
+//     while(state.next) state.next(&state);
+// }
 
 
 
