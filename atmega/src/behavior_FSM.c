@@ -1,39 +1,101 @@
 //behavior_FSM.c
 //Controls the state of the system
-
-
-
-
-//ONEOPTION
+#include "behavior_FSM.h"
 #include <stdio.h>
+//http://stackoverflow.com/questions/1647631/c-state-machine-design/1647679#1647679
 
-struct state;
-typedef void state_fn(struct state *);
+//ONE OPTION
 
-struct state
-{
-    state_fn * next;
-    int i; // data
-};
 
-state_fn foo, bar;
 
-void foo(struct state * state)
-{
-    printf("%s %i\n", __func__, ++state->i);
-    state->next = bar;
+typedef enum {ST_ERROR = -1, ST_PK_SEARCH, ST_PK_PURSUE, ST_PK_TO_GOAL, ST_GOAL_MADE, NUM_ST} state;
+
+typedef enum {EV_ERROR = -1, EV_PK_FOUND, EV_PK_OBSCURED, EV_PK_OBTAINED, EV_PK_LOST, EV_GOAL_MADE, NUM_EV} event;
+
+typedef state state_fn(void);
+
+state_fn fsm_error, puck_search, puck_pursue, puck_to_goal, goal_made;
+
+static state_fn *transArr[NUM_ST][NUM_EV];
+
+void init_fsm(){
+
+	int i,j;
+	for (i = 0; i < NUM_ST; i++) {
+		for (j = 0; j < NUM_EV; j++) {
+	    	transArr[i][j] = &fsm_error;
+		}
+	}
+	transArr[ST_PK_SEARCH]	[EV_PK_OBSCURED]	= &puck_search;
+	transArr[ST_PK_SEARCH]	[EV_PK_FOUND]		= &puck_pursue;
+	transArr[ST_PK_PURSUE]	[EV_PK_FOUND]		= &puck_pursue;
+	transArr[ST_PK_PURSUE]	[EV_PK_OBSCURED]	= &puck_search;
+	transArr[ST_PK_PURSUE]	[EV_PK_OBTAINED]	= &puck_to_goal;
+	transArr[ST_PK_TO_GOAL]	[EV_PK_OBTAINED]	= &puck_to_goal;
+	transArr[ST_PK_TO_GOAL]	[EV_PK_LOST]		= &puck_pursue;
+	transArr[ST_PK_TO_GOAL]	[EV_GOAL_MADE]		= &goal_made;
+	transArr[ST_GOAL_MADE]	[EV_PK_OBSCURED]	= &puck_search;
 }
 
-void bar(struct state * state)
-{
-    printf("%s %i\n", __func__, ++state->i);
-    state->next = state->i < 10 ? foo : 0;
+event event_handler_fsm(dd *robot,pk *puck){
+	static int i = -1;
+	i++;
+	return i%NUM_EV;
 }
 
-// int main(void)
+void find_state(dd *robot,pk *puck)
+{
+	static state st = ST_PK_SEARCH;
+	event ev = event_handler_fsm(robot,puck);
+	printf("%i\t",ev);
+	st = transArr[st][ev]();
+
+}
+
+
+
+state puck_search(void)
+{
+    printf("puck_search\t");
+    return ST_PK_SEARCH;
+}
+
+state puck_pursue(void)
+{
+    printf("puck_pursue\t");
+    return ST_PK_PURSUE;
+}
+
+state puck_to_goal(void)
+{
+    printf("puck_to_goal\t");
+    return ST_PK_TO_GOAL;
+}
+
+state goal_made(void)
+{
+    printf("goal_made\t");
+    return ST_GOAL_MADE;
+}
+
+state fsm_error(void)
+{
+    printf("fsm_error\t");
+    return ST_PK_SEARCH;
+}
+
+
+// void main(void)
 // {
-//     struct state state = { foo, 0 };
-//     while(state.next) state.next(&state);
+// 	int i,j;
+// 	state st;
+// 	init_fsm();
+// 	for(i=0;i<NUM_ST;i++){
+// 		for(j=0;j<NUM_EV;j++){
+// 			st = transArr[i][j]();
+// 		}
+// 		printf("\n");
+// 	}
 // }
 
 

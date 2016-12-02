@@ -10,7 +10,6 @@
 #include "localize.h"
 #include "eep_locations.h"
 
-
 #define	F_CPU 16000000	    // CPU Clock Freq [Hz]
 #define PI 3.14159265       // The constant that defines the ratio between diameter and circumference
 #define TIMER_0_PRSCL 1024  // Timer Prescalers 
@@ -37,6 +36,14 @@
 #define NEG_Y 0
 #define POS_Y 1
 
+typedef struct puckInfo {
+	float r;		//
+	float th;
+	bool isFound;
+	bool isBehind;
+	bool isHave;
+} pk;
+
 // Initialize helper functions
 
 void m2_init(void);
@@ -48,5 +55,6 @@ uint32_t millis(void); // Returns current milliseconds count
 void usb_read_command(void);
 void motor_GPIO_setup(void);
 void dd_init(dd *rob);
+void puck_update(pk *puck);
 float atan2_aprox(float x, float y);
 #endif /* INIT_H_ */
