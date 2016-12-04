@@ -4,18 +4,20 @@
  * Created: 10/25/2016 6:31:06 PM
  * Author : J. Diego Caporale, Matt Oslin, Garrett Wenger, Jake Welde
  */ 
-#include "m_general.h"
 #include "ADC_driver.h"
 
 /*   WHICH ADCS DO YOU WANT TO USE
 *    COMMENT OUT THE ADCS YOU DON'T WANT
 *	 DON'T FORGET TO ADJUST #define NUMADCS 
+*    NUMADCS SHOULD BE THE NUMBER OF ADCs USED DOESN'T INCLUDE THE ONES WE ADJUST 
 *	 DON'T FORGET TO COMMENT OUT THE FINAL SEMICOLON
 ***********************************************************************************
 ***********************************************************************************/
 
 #define NUMADCS 8
-const int ADCsToRead[] = {ADC0,ADC1,ADC4,ADC5,ADC6,ADC7/*,ADC8,ADC9*/,ADC10/*,ADC11*/,ADC12,/*ADC13*/};
+#define NUMADCS_HI_RES 2
+const int ADCsToRead[] = 
+	{ADC0,ADC1,ADC4,ADC5,ADC6,ADC7/*,ADC8,ADC9*/,ADC10/*,ADC11*/,ADC12/*,ADC13*/ ,ADC4, ADC5};
 //Disable Digital Inputs
 void adc_dis_digi()
 {
@@ -82,10 +84,18 @@ void adc_read(uint16_t rawADCCounts[])
 {
 	static uint8_t ADCIndex = 0;
 	rawADCCounts[ADCIndex] = ADC;
-	//toggle(PORTC,6);
+
 	//Choose which ADC to run next and set ADMUX register
-	ADCIndex = (ADCIndex + 1) % NUMADCS;
-  clr(ADCSRA,ADEN); // turn off ADC while changing registers to avoid spurious behavior
+	ADCIndex = (ADCIndex + 1) % (NUMADCS+NUMADCS_HI_RES);
+  	clr(ADCSRA,ADEN); // turn off ADC while changing registers to avoid spurious behavior
+
+  	//Setting high mosfet gate for hi_res reading
+  	if (ADCIndex < NUMADCS) {
+  		clr(PORTB,4);
+  	}
+  	else {
+  		set(PORTB,4);
+  	}
 
 	if (ADCsToRead[ADCIndex] < 8)
 	{
@@ -97,7 +107,7 @@ void adc_read(uint16_t rawADCCounts[])
 	}
 	ADMUX = (ADMUX & 0b11111000) + ADCsToRead[ADCIndex] % 8;
 
-  set(ADCSRA,ADEN); // re enable ADC
+	set(ADCSRA,ADEN); // re enable ADC
 
 	//Start next ADC read
 	set(ADCSRA, ADSC);

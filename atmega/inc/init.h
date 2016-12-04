@@ -35,6 +35,7 @@
 typedef struct puckInfo {
 	float r;		//
 	float th;
+	float thPrev;
 	bool isFound;
 	bool isBehind;
 	bool isHave;
@@ -53,4 +54,5 @@ void motor_GPIO_setup(void);
 void dd_init(dd *rob);
 void puck_update(pk *puck);
 float atan2_aprox(float x, float y);
+bool system_check(dd*rob);
 #endif /* INIT_H_ */

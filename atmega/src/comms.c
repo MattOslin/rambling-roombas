@@ -1,5 +1,4 @@
-#include "init.h"
-
+#include "comms.h"
 //extern unsigned char buffer[PACKET_LENGTH];
 
 void rf_parse(unsigned char *buffer, dd *robot) {
@@ -61,6 +60,11 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			break;
 	}
 }
+
+void rf_diagnostics(dd *robot) {
+	;
+}
+
 void usb_read_command() {	
 	char buff[8];
 	unsigned int indx = 0;

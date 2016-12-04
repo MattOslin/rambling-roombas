@@ -14,8 +14,13 @@ void motor_update(motor *m){
 		clr( *(m->direct1.reg), m->direct1.bit );
 		// set( *(m->direct2.reg), m->direct2.bit );
 	}
-	
-	*(m->dutyCycleRegister) = (long) PWM_MAX * MIN( ABS( m->command ) , MOTOR_COMMAND_MAX ) / MOTOR_COMMAND_MAX;
+	// m_usb_tx_string("\n");
+ 	// m_usb_tx_string("timerpin bef: ");
+	m_usb_tx_int(*(m->dutyCycleRegister));
+
+	*(m->dutyCycleRegister) = (uint16_t)((unsigned long) PWM_MAX * MIN( ABS( m->command ) , MOTOR_COMMAND_MAX )) / MOTOR_COMMAND_MAX;
+	// m_usb_tx_string("   timerpin aft: ");
+	// m_usb_tx_int(*(m->dutyCycleRegister));
 	
 }
 /*

@@ -1,5 +1,5 @@
 #include "init.h"
-
+#include "behavior_FSM.h"
 extern uint32_t milliseconds;
 
 void m2_init() {
@@ -19,7 +19,7 @@ void m2_init() {
 
     //while(!m_usb_isconnected()); // wait for a connection
 	
-	//localize_init();
+	localize_init();
 
 	m_disableJTAG(); //Allows use of some of the portF
 
@@ -39,6 +39,8 @@ void m2_init() {
 void dd_init(dd *rob) {
 	motor_GPIO_setup();
 	rob->enable = FALSE;
+	rob->nxtSt = 0;
+	rob->ev = 0;
 
 	/***********
 	 * MOTOR 1 Specifics
@@ -255,3 +257,55 @@ float atan2_aprox(float x, float y){
 void puck_update(pk *puck) {
 	// Update the pucks information
 }
+
+bool system_check(dd *rob){
+
+	set(PORTD,5); // LED Red
+	m_wait(500);
+	set(PORTD,6); // LED Blue
+	m_wait(500);
+	clr(PORTD,5); // LED Red
+	m_wait(500);
+	clr(PORTD,6); // LED Red
+	m_wait(500);
+	set(PORTB,1); // Solenoid fire pin
+	
+	m_wait(150);
+	clr(PORTB,1); // Solenoid fire pin
+
+	m_wait(500);
+	rob->veloDesired = .2;
+	rob->omegaDesired = 0;
+	dd_update(rob);
+	
+	m_wait(500);
+	rob->veloDesired = -.2;
+	rob->omegaDesired = 0;
+	dd_update(rob);
+
+	m_wait(500);
+	rob->veloDesired = 0;
+	rob->omegaDesired = .2;
+	dd_update(rob);
+
+	m_wait(500);
+	rob->veloDesired = 0;
+	rob->omegaDesired = -.2;
+	dd_update(rob);
+
+	m_wait(500);
+	rob->veloDesired = 0;
+	rob->omegaDesired = 0;
+	dd_update(rob);
+
+	int i;
+	for(i=0;i<3;i++){
+		set(PORTD,5); // LED Red
+		m_wait(100);
+		clr(PORTD,5);
+		m_wait(100);
+	}
+	return TRUE;
+}
+
+
