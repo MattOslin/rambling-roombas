@@ -60,6 +60,16 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			robot->omegaDesired = .2;
 			break;
 
+		case COACH:
+			eeprom_write_byte(&eepDirection, buffer[2]);
+			eeprom_write_byte(&eepTeam, buffer[3]);
+			buffer[4] = eeprom_read_byte(&eepAddress);
+			buffer[5] = eeprom_read_byte(&eepDirection);
+			buffer[6] = eeprom_read_byte(&eepTeam);
+			m_rf_send(buffer[1], buffer, PACKET_LENGTH);
+
+			break;
+
 		default:
 			//TEAM COMMANDS GO IN THERE OWN CASES
 			dd_disable(robot);
