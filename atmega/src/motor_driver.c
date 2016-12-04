@@ -1,22 +1,19 @@
+#include "motor_driver.h"
 
-#include "init.h"
-
+void command_update(motor *m, int newCommand);
 
 void motor_update(motor *m){
 
-	if (m->command >= 0)
-	{	
+	if (m->command >= 0) {	
 		set( *(m->direct1.reg), m->direct1.bit );
 		// clr( *(m->direct2.reg), m->direct2.bit );
-	}
-	else
-	{
+	} else {
 		clr( *(m->direct1.reg), m->direct1.bit );
 		// set( *(m->direct2.reg), m->direct2.bit );
 	}
 	// m_usb_tx_string("\n");
  	// m_usb_tx_string("timerpin bef: ");
-	m_usb_tx_int(*(m->dutyCycleRegister));
+	// m_usb_tx_int(*(m->dutyCycleRegister));
 
 	*(m->dutyCycleRegister) = (uint16_t)((unsigned long) PWM_MAX * MIN( ABS( m->command ) , MOTOR_COMMAND_MAX )) / MOTOR_COMMAND_MAX;
 	// m_usb_tx_string("   timerpin aft: ");

@@ -1,7 +1,7 @@
 #ifndef EEP_LOCATIONS_H_
 #define EEP_LOCATIONS_H_
 
-#include "init.h"
+#include "m_general.h"
 
 extern uint8_t EEMEM eepAddress;
 extern uint8_t EEMEM eepTeam;

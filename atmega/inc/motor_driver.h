@@ -8,6 +8,10 @@
 
 #ifndef MOTOR_DRIVER_H_
 #define MOTOR_DRIVER_H_
+
+#include "m_general.h"
+#include "macros.h"
+
 #define MOTOR_COMMAND_MAX 1000
 #define PWM_FREQ 100		// PWM Frequency (only set freq or max not both)
 #define PWM_MAX (F_CPU/(TIMER_1_PRSCL*PWM_FREQ))	// PWM Duty Cycle max (inversely proportional with frequency)
@@ -47,15 +51,10 @@ typedef struct motor {
 
 } motor;
 
-
 void drive_OL(motor *m);
 void motor_update(motor *m);
 void encoder_update(motor *m);
 void encoder_velocity(motor *m);
 void drive_CL(motor *m);
-void command_update(motor *m, int newCommand);
-
-
-
 
 #endif /* MOTOR_DRIVER_H_ */

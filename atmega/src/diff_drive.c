@@ -1,5 +1,11 @@
 
-#include "init.h"
+#include "diff_drive.h"
+
+void dd_drive(dd *rob);
+void dd_toggle(pin *pinToToggle);
+void dd_clear(pin *pinToToggle);
+void dd_set(pin *pinToToggle);
+bool dd_check(pin *pinToToggle);
 
 void dd_drive(dd *rob){
 	if(rob->enable){
@@ -134,9 +140,11 @@ void dd_set(pin *pinToToggle) {
 void dd_clear(pin *pinToToggle) {
 	clr(*(pinToToggle->reg),pinToToggle->bit);
 }
+
 void dd_toggle(pin *pinToToggle) {
 	toggle(*(pinToToggle->reg),pinToToggle->bit);
 }
+
 bool dd_check(pin *pinToToggle) {
 	return check(*(pinToToggle->reg),pinToToggle->bit);
 }

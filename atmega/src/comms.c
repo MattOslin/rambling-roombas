@@ -62,9 +62,11 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 		case COACH:
 			eeprom_write_byte(&eepDirection, buffer[2]);
 			eeprom_write_byte(&eepTeam, buffer[3]);
+			robot->direction = eeprom_read_byte(&eepDirection);
+			robot->team = eeprom_read_byte(&eepTeam);
 			buffer[4] = eeprom_read_byte(&eepAddress);
-			buffer[5] = eeprom_read_byte(&eepDirection);
-			buffer[6] = eeprom_read_byte(&eepTeam);
+			buffer[5] = robot->direction;
+			buffer[6] = robot->team;
 			m_rf_send(buffer[1], buffer, PACKET_LENGTH);
 
 			break;
