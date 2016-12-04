@@ -24,6 +24,7 @@ void m2_init(void);
 uint32_t millis(void); // Returns current milliseconds count
 void dd_init(dd *rob);
 void puck_update(pk *puck, uint16_t* ADCs);
+void solenoid_update(dd *rob);
 float atan2_aprox(float x, float y);
 bool system_check(dd*rob);
 

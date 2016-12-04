@@ -274,17 +274,37 @@ void puck_update(pk *puck, uint16_t *ADCs) {
 
 	if (ADCs[3]>30 || ADCs[1]>30 || ADCs[5]>30 || ADCs[0]>30 || ADCs[6]>30 || ADCs[7]>30  ){
 		puck->isFound = TRUE;
+		puck->isBehind = FALSE;
+
 		puck->th = (PI/15)*((int)ADCs[3]-(int)ADCs[1]+3*(int)ADCs[5]-3*(int)ADCs[0]+5*(int)ADCs[6]-5*(int)ADCs[7])
 		/(float)(ADCs[3]+ADCs[1]+ADCs[5]+ADCs[0]+ADCs[6]+ADCs[7]);
 	}
-	else{
+	else if(ADCs[2]>30){
+	puck->isBehind = TRUE;
+	puck->isFound = TRUE;
+	}
+	else {
 		puck->isFound = FALSE;
+		puck->isBehind = FALSE;
 		puck->th = 0;
 	}
 	puck->r = 0;
 	puck->isHave = ADCs[4]<900;
-	puck->isBehind = FALSE;
 
+}
+void solenoid_update(dd *rob){
+	static uint32_t time;
+	static bool isFiring;
+	if (rob->solenoid){
+		rob->solenoid = 0;
+		time = millis();
+		SOLENOID(ON);
+		isFiring = TRUE;
+	}
+	else if (isFiring && (millis() - time > SOL_ON_TIME)) {
+		SOLENOID(OFF);
+		isFiring = FALSE;
+	}
 }
 
 bool system_check(dd *rob){

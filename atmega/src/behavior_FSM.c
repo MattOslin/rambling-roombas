@@ -8,12 +8,12 @@
 
 //ONE OPTION
 //Default state must be ZERO
-typedef enum {ST_ERROR = -1, ST_PK_SEARCH, ST_PK_BEHIND, ST_PK_PURSUE, ST_PK_TO_GOAL, ST_GOAL_MADE, NUM_ST} state;
-typedef enum {EV_ERROR = -1, EV_PK_OBSCURED, EV_PK_FOUND, EV_PK_BEHIND, EV_PK_OBTAINED, EV_GOAL_MADE, NUM_EV} event;
+typedef enum {ST_ERROR = -1, ST_STANDBY, ST_PK_SEARCH, ST_PK_BEHIND, ST_PK_PURSUE, ST_PK_TO_GOAL, ST_GOAL_MADE, NUM_ST} state;
+typedef enum {EV_ERROR = -1, EV_STANDBY, EV_PLAY, EV_PK_OBSCURED, EV_PK_FOUND, EV_PK_BEHIND, EV_PK_OBTAINED, EV_GOAL_MADE, NUM_EV} event;
 
 typedef state state_fn(dd *robot, pk *puck);
 
-state_fn fsm_error, puck_search, puck_pursue, puck_to_goal, goal_made, puck_behind,puck_behind_persist;
+state_fn fsm_error, standby, puck_search, puck_pursue, puck_to_goal, goal_made, puck_behind,puck_behind_persist;
 
 static state_fn *transArr[NUM_ST][NUM_EV];
 
@@ -40,41 +40,68 @@ void init_fsm(){
 
 	transArr[ST_PK_TO_GOAL]	[EV_PK_OBTAINED]	= &puck_to_goal;
 	transArr[ST_PK_TO_GOAL]	[EV_PK_FOUND]		= &puck_pursue;
-	transArr[ST_PK_TO_GOAL]	[EV_PK_FOUND]		= &puck_pursue;
-	transArr[ST_PK_TO_GOAL]	[EV_PK_FOUND]		= &puck_pursue;
+	transArr[ST_PK_TO_GOAL]	[EV_PK_OBSCURED]	= &puck_search;
+	transArr[ST_PK_TO_GOAL]	[EV_PK_BEHIND]		= &puck_search;
 	transArr[ST_PK_TO_GOAL]	[EV_GOAL_MADE]		= &goal_made;
 
+	transArr[ST_GOAL_MADE]	[EV_GOAL_MADE]		= &goal_made;
 	transArr[ST_GOAL_MADE]	[EV_PK_OBSCURED]	= &puck_search;
+	transArr[ST_GOAL_MADE]	[EV_PK_FOUND]		= &puck_pursue;
+	transArr[ST_GOAL_MADE]	[EV_PK_BEHIND]		= &puck_behind;
+	transArr[ST_GOAL_MADE]	[EV_PK_OBTAINED]	= &puck_to_goal;
 
+	for (i = 0; i < NUM_ST; i++) {
+	    	transArr[i][EV_STANDBY] = &standby;
+	}
 }
 
 //BREAD AND BUTTER OF STATE MACHINE
 
 void event_handler_fsm( dd *robot, pk *puck ){
-	event ev;
-	if(puck->isFound){
-		if(puck->isBehind){
-			ev = EV_PK_BEHIND;
+	event ev = robot->ev;
+	if(robot->enable){
+		if (robot->goalMade){
+			robot->goalMade = 0;
+			robot->ev = EV_GOAL_MADE;
+			return;
 		}
-		else if(puck->isHave){
-			ev = EV_PK_OBTAINED;
-		}
-		else{
-			ev = EV_PK_FOUND;
-		}
-	}
-	else {
-		if (robot->ev == EV_PK_BEHIND && !dd_is_loc(robot,5)){
-			ev = EV_PK_BEHIND;
-		}
-		else{
-			ev = EV_PK_OBSCURED;
+		if (robot->ev == EV_GOAL_MADE){
+			if(dd_is_loc(robot,5)){
+				robot->ev = EV_STANDBY;
+				dd_disable(robot);
+			}
+			return;
 		}
 
+		if(puck->isFound){
+			if(puck->isBehind){
+				ev = EV_PK_BEHIND;
+			}
+			else if(puck->isHave){
+				ev = EV_PK_OBTAINED;
+			}
+			else{
+				ev = EV_PK_FOUND;
+			}
+		}
+		else {
+			if (robot->ev == EV_PK_BEHIND && !dd_is_loc(robot,5)){
+				return;
+			}
+			else{
+				ev = EV_PK_OBSCURED;
+			}
+
+		}
+		robot->ev = ev;
 	}
-	robot->ev = ev;
+	else
+	{
+		robot->ev = EV_STANDBY;
+	}
 	
 }
+
 
 void find_state( dd *robot, pk *puck)
 {
@@ -85,7 +112,16 @@ void find_state( dd *robot, pk *puck)
 
 }
 
+
+
 // STATE FUNCTIONS
+state standby(dd *robot, pk *puck){
+	dd_disable(robot);
+    // printf("standby\t");
+
+    return ST_STANDBY;
+}
+
 state puck_search(dd *robot, pk *puck)
 {
     //robot->veloDesired  = .1;
@@ -129,13 +165,14 @@ state puck_pursue(dd *robot, pk *puck)
 
 // state puck_pursue(dd *robot, pk *puck)
 // {
-// 	int kp = 10;
-// 	int kd = 0;
-// 	int k1 = 25;
-// 	int k2 = 5;
+// 	float kp = 2;
+// 	float kd = 6;
+// 	float k1 = .4;
+// 	float k2 = 2;
+//	float k3 = 1;
 // 	alpha = - robot->global.th - puck->th + pi/2;
-// 	robot->omegaDesired = - kp * puck->th  - kd * (puck->th - puck->thPrev)+ k1 * alpha;
-// 	robot->veloDesired = k2/((abs(robot->omegaDesired) + 1));
+// 	robot->omegaDesired = kp * puck->th  + kd * (puck->th - puck->thPrev)+ k3 * alpha;
+// 	robot->veloDesired = k1 / (k2 * ABS(robot->omegaDesired) + 1);
 //     printf("puck_pursue\t");
 //     return ST_PK_PURSUE;
 // }
@@ -143,14 +180,22 @@ state puck_pursue(dd *robot, pk *puck)
 state puck_to_goal(dd *robot, pk *puck)
 {
     // printf("puck_to_goal\t");
+	robot->desLoc.x = 0;
+	robot->desLoc.y = 280;
+	robot->desLoc.th = PI/2;
+	
+	dd_goto_spiral(robot,.5);
 
-	robot->omegaDesired = 0;
-	robot->veloDesired = .2;
     return ST_PK_TO_GOAL;
 }
 
 state goal_made(dd *robot, pk *puck)
 {
+	robot->desLoc.x = 0;
+	robot->desLoc.y = 0;
+	robot->desLoc.th = 0;
+	
+	dd_goto_rot_trans(robot,.5);
     // printf("goal_made\t");
     return ST_GOAL_MADE;
 }
@@ -175,44 +220,3 @@ state fsm_error(dd *robot, pk *puck)
 // 	}
 // }
 
-
-
-// //ANOTHER OPTION
-// int (* state[])(void) = { entry_state, foo_state, bar_state, exit_state};
-// enum state_codes { entry, foo, bar, end};
-
-// enum ret_codes { ok, fail, repeat};
-// struct transition {
-//     enum state_codes src_state;
-//     enum ret_codes   ret_code;
-//     enum state_codes dst_state;
-// };
-// /* transitions from end state aren't needed */
-// struct transition state_transitions[] = {
-//     {entry, ok,     foo},
-//     {entry, fail,   end},
-//     {foo,   ok,     bar},
-//     {foo,   fail,   end},
-//     {foo,   repeat, foo},
-//     {bar,   ok,     end},
-//     {bar,   fail,   end},
-//     {bar,   repeat, foo}};
-
-// #define EXIT_STATE end
-// #define ENTRY_STATE entry
-
-// int main(int argc, char *argv[]) {
-//     enum state_codes cur_state = ENTRY_STATE;
-//     enum ret_codes rc;
-//     int (* state_fun)(void);
-
-//     for (;;) {
-//         state_fun = state[cur_state];
-//         rc = state_fun();
-//         if (EXIT_STATE == cur_state)
-//             break;
-//         cur_state = lookup_transitions(cur_state, rc);
-//     }
-
-//     return EXIT_SUCCESS;
-// }

@@ -30,7 +30,7 @@ int main(void) {
 	m2_init();
 
 	// Initialize diffDrive (motors, encoders, localization)
-	dd_init(&robot); 
+	// dd_init(&robot); 
 	dd_enable(&robot);
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
@@ -43,8 +43,6 @@ int main(void) {
 	// while(1){
 	// 	system_check(&robot);
 	// }
-	//while (!localize_wii(&(robot.global)));
-
 	//Main process loop
     while (1) //Stay in this loop forever
     {
@@ -64,6 +62,7 @@ int main(void) {
 			}
 
 			dd_update(&robot);
+			solenoid_update(&robot);
 			 //UPDATES THE CONTROLS
 			// dd_goto_rot_trans(&robot, .2);
 			
@@ -80,7 +79,7 @@ int main(void) {
 		}
 
 		if(count%10 == 0) {
-			//localize_wii(&(robot.global));
+			localize_wii(&(robot.global));
 			usb_debug(&robot, &puck); // USB Debug function below
 		}
 	}
@@ -150,11 +149,11 @@ void usb_debug(dd *rob, pk *puck){
 		// m_usb_tx_string(" M1_enc ");//m_usb_tx_int(10);
 	// m_usb_tx_int(robot.M1.veloEncoder);
 	// m_usb_tx_string(",");
-	// m_usb_tx_int(robot.global.x);
-	// m_usb_tx_string(",");
-	// m_usb_tx_int(robot.global.y);
-	// m_usb_tx_string(",");
-	// m_usb_tx_int(100 * robot.global.th);
+	m_usb_tx_int(robot.global.x);
+	m_usb_tx_string(",");
+	m_usb_tx_int(robot.global.y);
+	m_usb_tx_string(",");
+	m_usb_tx_int(100 * robot.global.th);
 
 	// m_usb_tx_string(" ");
 	// m_usb_tx_int(1000*robot.global.th);
@@ -172,24 +171,24 @@ void usb_debug(dd *rob, pk *puck){
 	// m_usb_tx_string(" ");
 	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepTeam));
 
-	m_usb_tx_string(" ADC L: ");
- 	m_usb_tx_int(rawADCCounts[3]);
-	m_usb_tx_string(" ADC R: ");
- 	m_usb_tx_int(rawADCCounts[1]);
- 	m_usb_tx_string(" Puck TH: ");
- 	m_usb_tx_int((int)100*puck->th);
- 	m_usb_tx_string(" isFound: ");
- 	m_usb_tx_int(puck->isFound);
-	m_usb_tx_string(" puckHave ADC: ");
- 	m_usb_tx_int(rawADCCounts[4]);
- 	m_usb_tx_string(" isHave: ");
- 	m_usb_tx_int(puck->isHave);
-	m_usb_tx_string(" commVelo: ");
- 	m_usb_tx_int(100*rob->veloDesired);
-	m_usb_tx_string(" commOm: ");
- 	m_usb_tx_int(100*rob->omegaDesired);
- 	m_usb_tx_string(" state: ");
- 	m_usb_tx_int(rob->nxtSt);
+	// m_usb_tx_string(" ADC L: ");
+ // 	m_usb_tx_int(rawADCCounts[3]);
+	// m_usb_tx_string(" ADC R: ");
+ // 	m_usb_tx_int(rawADCCounts[1]);
+ // 	m_usb_tx_string(" Puck TH: ");
+ // 	m_usb_tx_int((int)100*puck->th);
+ // 	m_usb_tx_string(" isFound: ");
+ // 	m_usb_tx_int(puck->isFound);
+	// m_usb_tx_string(" puckHave ADC: ");
+ // 	m_usb_tx_int(rawADCCounts[4]);
+ // 	m_usb_tx_string(" isHave: ");
+ // 	m_usb_tx_int(puck->isHave);
+	// m_usb_tx_string(" commVelo: ");
+ // 	m_usb_tx_int(100*rob->veloDesired);
+	// m_usb_tx_string(" commOm: ");
+ // 	m_usb_tx_int(100*rob->omegaDesired);
+ // 	m_usb_tx_string(" state: ");
+ // 	m_usb_tx_int(rob->nxtSt);
  	
 	m_usb_tx_string("\n");
 }

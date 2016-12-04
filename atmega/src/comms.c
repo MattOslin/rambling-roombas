@@ -5,6 +5,7 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 	switch(buffer[0]) {
 		case COMM_TEST:
 			//FLASH LEDS
+			dd_disable(robot);
 			dd_comm_test(robot);
 			break;
 		
@@ -16,13 +17,24 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 		case GOAL_R:
 			// PAUSE
 			// GET SCORE A AND SCORE B FROM BUFFER
-			dd_disable(robot);
+			if(robot->team == RED) {
+				robot->goalMade = 1;
+			}
+			else {
+				dd_disable(robot);
+			}
+
 			break;
 
 		case GOAL_B:
 			// PAUSE
 			// GET SCORE A AND SCORE B FROM BUFFER
-			dd_disable(robot);
+			if(robot->team == BLUE) {
+				robot->goalMade = 1;
+			}
+			else {
+				dd_disable(robot);
+			}
 			break;
 		
 		case PAUSE:

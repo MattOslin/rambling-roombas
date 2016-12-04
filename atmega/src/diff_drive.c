@@ -156,7 +156,7 @@ float get_radius_curv(dd *rob){
 	if (rob->omegaDesired <.001){
 		return 1000.0;
 	}
-	return rob->veloDesired/rob->omegaDesired;// actual equation Vdes/omDes = -R/(Rr)
+	return rob->veloDesired/rob->omegaDesired;// actual equation Vdes/omDes = -R/(2*Rr)
 }
 void dd_comm_test(dd *rob) {
 	//

@@ -23,6 +23,8 @@
 #define RED 0
 #define BLUE 1
 
+#define SOL_ON_TIME 200  //in milliseconds
+
 //Helper Macros
 #define ABS(X)				(X < 0 ?-X : X)
 #define MIN(X,Y)			(X < Y ? X : Y)
@@ -30,4 +32,5 @@
 #define clr(reg,bit)		reg &= ~(1<<(bit))
 #define ANG_REMAP(TH)		(TH > PI ? TH - 2 * PI : (TH < -PI ? TH + 2 * PI : TH))
 
+#define SOLENOID(val)		set(DDRB,1); if(val==OFF){set(PORTB,1); }else if(val==ON){clr(PORTB,1);}else if(val==TOGGLE){toggle(PORTB,1);}
 #endif

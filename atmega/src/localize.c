@@ -1,4 +1,5 @@
 #include "localize.h"
+#include "m_usb.h"
 
 #define eB 0.1
 const uint16_t distMatP[4][4] = {
@@ -15,19 +16,19 @@ const uint16_t distMatM[4][4] = {
 						{ (1-eB)*55, (1-eB)*70,(1-eB)*80, (1-eB)*0}
 					};
 
-const float angMat[4][4] = {
-						{	   0,  3.1416, 2.0297, -2.4205},
-						{	   0,       0, 0.4648, -0.5564},
-						{-1.1119, -2.6768,      0, -1.8453},
-						{ 0.7211,  2.5852, 1.2962,       0}
-					};
-
 // const float angMat[4][4] = {
-// 						{     0, -1.5708, -2.6827, -0.8497},
-// 						{1.5708,       0,  2.0356,  1.0144},
-// 						{0.4589, -1.1060,       0, -0.2746},
-// 						{2.2919, -2.1272,  2.8670, 	     0}
+// 						{	   0,  3.1416, 2.0297, -2.4205},
+// 						{	   0,       0, 0.4648, -0.5564},
+// 						{-1.1119, -2.6768,      0, -1.8453},
+// 						{ 0.7211,  2.5852, 1.2962,       0}
 // 					};
+
+const float angMat[4][4] = {
+						{     0, -1.5708, -2.6827, -0.8497},
+						{1.5708,       0,  2.0356,  1.0144},
+						{0.4589, -1.1060,       0, -0.2746},
+						{2.2919, -2.1272,  2.8670, 	     0}
+					};
 
 float calX, calY;
 
@@ -38,8 +39,8 @@ bool check_order(unsigned int* blobs, uint8_t* badIdx, uint8_t* order);
 
 void localize_init(void) {
 	while(m_wii_open() == 0);
-	calX = eeprom_read_float(&eepCalX);
-	calY = eeprom_read_float(&eepCalY);
+	calX = 0; //eeprom_read_float(&eepCalX);
+	calY = 0; //eeprom_read_float(&eepCalY);
 }
 
 bool localize_cal(void) {
@@ -71,6 +72,12 @@ bool localize_wii(pos* posStruct) {
 	static uint8_t lastBadIdx = 4;
 
 	for (i = 0; i < 4; i++) {
+		// m_usb_tx_uint(wiiBuffer[3*i]);
+		// m_usb_tx_string(", ");
+		// m_usb_tx_uint(wiiBuffer[3*i+1]);
+		// m_usb_tx_string(", ");
+		// m_usb_tx_uint(wiiBuffer[3*i+2]);
+		// m_usb_tx_string(", ");
 		if (wiiBuffer[3*i+1] > 768) {
 			badBlobN++;
 			badIdx = i;
@@ -128,7 +135,7 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t* badIdx, ui
 	int16_t diffY = (int16_t) blobs[3*pointIdx[ptB]+1] - (int16_t) blobs[3*pointIdx[ptA]+1];
 
 	posStruct->th = angMat[ptA][ptB] - atan2(diffY, diffX);
-	posStruct->th = ANG_REMAP(posStruct->th);
+	// posStruct->th = ANG_REMAP(posStruct->th);
 
 	double cosTH = cos(posStruct->th);
 	double sinTH = sin(posStruct->th);
@@ -152,6 +159,7 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t* badIdx, ui
 
 	posStruct->y = /*512 -*/ (cosTH*vX - sinTH*vY); //Was x
 	posStruct->x = /*384*/ - (sinTH*vX + cosTH*vY) + yShift; //was y
+	posStruct->th = ANG_REMAP(posStruct->th+PI/2.0);
 	// posStruct->x = 1024 - ((cosTH*vX - sinTH*vY) + 512);
 	// posStruct->y = 768 - ((sinTH*vX + cosTH*vY) + 384 + yShift);
 	return true;
