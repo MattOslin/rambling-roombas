@@ -33,6 +33,11 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 		case HALFTIME:
 			//PAUSE
 			dd_disable(robot);
+			if (eeprom_read_byte(&eepDirection) == POS_Y) {
+				eeprom_write_byte(&eepDirection, NEG_Y);
+			} else {
+				eeprom_write_byte(&eepDirection, POS_Y);
+			}
 			break;
 
 		case GAME_OVER:

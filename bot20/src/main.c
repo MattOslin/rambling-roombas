@@ -13,8 +13,15 @@ int main(void) {
 	eeprom_write_byte(&eepAddress, BOT_ADDRESS);
 
 	while(true) {
-		m_usb_tx_hexchar(eeprom_read_byte(&eepAddress));
+		m_usb_tx_uint(eeprom_read_byte(&eepAddress));
 		m_usb_tx_string(" ");
+		m_usb_tx_uint(eeprom_read_byte(&eepTeam));
+		m_usb_tx_string(" ");
+		m_usb_tx_uint(eeprom_read_byte(&eepDirection));
+		m_usb_tx_string(" ");
+		m_usb_tx_int(eeprom_read_float(&eepCalX)*100);
+		m_usb_tx_string(" ");
+		m_usb_tx_int(eeprom_read_float(&eepCalY)*100);
 		m_usb_tx_string("\n");
 		m_wait(1000);
 	}

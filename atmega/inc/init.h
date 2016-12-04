@@ -24,6 +24,7 @@
 #define CHANNEL 1
 #define MY_ADDRESS 20 /*21*/ /*22*/
 #define PACKET_LENGTH 10
+// #define USE_EEP_ADDRESS
 
 //Helper Macros
 #define ABS(X)				(X < 0 ?-X : X)
@@ -31,6 +32,9 @@
 #define MAX(X,Y)			(X > Y ? X : Y)
 #define clr(reg,bit)		reg &= ~(1<<(bit))
 #define ANG_REMAP(TH)		(TH > PI ? TH - 2 * PI : (TH < -PI ? TH + 2 * PI : TH))
+
+#define NEG_Y 0
+#define POS_Y 1
 
 typedef struct puckInfo {
 	float r;		//
