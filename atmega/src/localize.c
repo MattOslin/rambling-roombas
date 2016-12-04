@@ -24,9 +24,9 @@ const float angMat[4][4] = {
 
 float calX, calY;
 
-bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uint8_t* order);
-bool determine_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order);
-bool check_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order);
+bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t* badIdx, uint8_t* order);
+bool determine_order(unsigned int* blobs, uint8_t* badIdx, uint8_t* order);
+bool check_order(unsigned int* blobs, uint8_t* badIdx, uint8_t* order);
 
 
 void localize_init(void) {
@@ -37,6 +37,14 @@ void localize_init(void) {
 
 bool localize_cal(void) {
 	return false;
+}
+
+void localize_enc(pos* posStruct, double encCountsL, double encCountsR) {
+	double mean = (encCountsR + encCountsL)/2;
+	double diff = (encCountsR - encCountsL)/(2*WHEEL_RADIAL_LOC);
+	posStruct->th = posStruct->th + diff;
+	posStruct->x = posStruct->x + mean*cos(posStruct->th);
+	posStruct->y = posStruct->y + mean*sin(posStruct->th);
 }
 
 bool localize_wii(pos* posStruct) {
@@ -56,7 +64,7 @@ bool localize_wii(pos* posStruct) {
 	static uint8_t lastBadIdx = 4;
 
 	for (i = 0; i < 4; i++) {
-		if (wiiBuffer[3*i+1] == 1023) {
+		if (wiiBuffer[3*i+1] > 768) {
 			badBlobN++;
 			badIdx = i;
 		} 
@@ -67,17 +75,17 @@ bool localize_wii(pos* posStruct) {
 	if (badBlobN > 1) {
 		// Panic
 		localizeSuccessful = false;
-	} else if (knownBlobOrder && check_order(wiiBuffer, badIdx, blobOrder)) {
+	} else if (knownBlobOrder && check_order(wiiBuffer, &badIdx, blobOrder)) {
 		// Blob order is known and correct
-		localizeSuccessful = determine_position(posStruct, wiiBuffer, badIdx, blobOrder);
+		localizeSuccessful = determine_position(posStruct, wiiBuffer, &badIdx, blobOrder);
 
 	} else {
 		// Blob order unknown or incorrect, redetermine
-		knownBlobOrder = determine_order(wiiBuffer, badIdx, blobOrder);
+		knownBlobOrder = determine_order(wiiBuffer, &badIdx, blobOrder);
 		if(!knownBlobOrder) {
 			localizeSuccessful = false;
 		} else {
-			localizeSuccessful =  determine_position(posStruct, wiiBuffer, badIdx, blobOrder);
+			localizeSuccessful =  determine_position(posStruct, wiiBuffer, &badIdx, blobOrder);
 		}
 	}
 
@@ -86,7 +94,7 @@ bool localize_wii(pos* posStruct) {
 	return localizeSuccessful;
 }
 
-bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uint8_t* order) {
+bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t* badIdx, uint8_t* order) {
 
 	uint8_t missingPoint = 4;
 	uint8_t ptA = 0; // the two points to use for determining position
@@ -99,8 +107,8 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uin
 		pointIdx[order[i]] = i;
 	}
 
-	if (badIdx < 4) {
-		missingPoint = order[badIdx];
+	if (*badIdx < 4) {
+		missingPoint = order[*badIdx];
 	}
 
 	if (missingPoint == 0) {
@@ -111,7 +119,9 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uin
 
 	int16_t diffX = (int16_t) blobs[3*pointIdx[ptA]] - (int16_t) blobs[3*pointIdx[ptB]];
 	int16_t diffY = (int16_t) blobs[3*pointIdx[ptB]+1] - (int16_t) blobs[3*pointIdx[ptA]+1];
-	posStruct->th = ANG_REMAP((angMat[ptA][ptB] - atan2(diffY, diffX)));
+
+	posStruct->th = angMat[ptA][ptB] - atan2(diffY, diffX);
+	posStruct->th = ANG_REMAP(posStruct->th);
 
 	double cosTH = cos(posStruct->th);
 	double sinTH = sin(posStruct->th);
@@ -140,12 +150,12 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t badIdx, uin
 	return true;
 }
 
-bool determine_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order) {
+bool determine_order(unsigned int* blobs, uint8_t* badIdx, uint8_t* order) {
 	uint16_t dists[3];
 	int8_t i,j;
 	
 	uint8_t distIdx = 0;
-	uint8_t skipIdx = badIdx > 3 ? 3 : badIdx;
+	uint8_t skipIdx = *badIdx > 3 ? 3 : *badIdx;
 
 	uint8_t minIdx = 0;
 	uint8_t maxIdx = 0;
@@ -178,6 +188,8 @@ bool determine_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order) {
 			}
 		}
 	}
+
+	// If minDist too small or maxDist too large, do something here because there's a bad point
 
 	// Calculate the ratio of the two shorter sides to the long side
 	// These ratios can uniquely identify the triangles, and should hopefully
@@ -272,11 +284,11 @@ bool determine_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order) {
 	}
 }
 
-bool check_order(unsigned int* blobs, uint8_t badIdx, uint8_t* order) {
+bool check_order(unsigned int* blobs, uint8_t* badIdx, uint8_t* order) {
 	bool orderGood = true;
 	uint8_t i[3] = {0,0,0};
 	uint8_t j[3] = {1,2,3};
-	switch (badIdx) {
+	switch (*badIdx) {
 		case 0:
 			i[0] = 1; i[1] = 1; i[2] = 2;
 			j[0] = 2; j[2] = 3; j[3] = 3;
