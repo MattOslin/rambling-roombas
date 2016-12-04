@@ -23,8 +23,8 @@ void dd_drive(dd *rob){
 		}
 
 		//Set desired velocity for motors
-		rob->M1.veloDesired = -leftMotorV;
-		rob->M2.veloDesired = rightMotorV;
+		rob->M1.veloDesired = -rightMotorV;
+		rob->M2.veloDesired = leftMotorV;
 	}
 	else{
 
@@ -34,12 +34,12 @@ void dd_drive(dd *rob){
 	
 }
 
-bool dd_goto_rot_trans(dd *rob, double veloDes){
+bool dd_goto_rot_trans(dd *rob, float veloDes){
 
-	double deltaX  = rob->desLoc.x  - rob->global.x;
-	double deltaY  = rob->desLoc.y  - rob->global.y;
-	double deltaTh = rob->desLoc.th - rob->global.th;
-	double distFromGoal = sqrt(deltaX * deltaX + deltaY * deltaY);
+	float deltaX  = rob->desLoc.x  - rob->global.x;
+	float deltaY  = rob->desLoc.y  - rob->global.y;
+	float deltaTh = rob->desLoc.th - rob->global.th;
+	float distFromGoal = sqrt(deltaX * deltaX + deltaY * deltaY);
 
 	float posThresh = 10.0;
 	float thThresh = 5 * PI / 180;
@@ -97,8 +97,8 @@ void dd_goto_spiral(dd *rob, float veloDes){
 }
 
 bool dd_is_loc(dd*rob , float posThresh){
-	double deltaX  = rob->desLoc.x  - rob->global.x;
-	double deltaY  = rob->desLoc.y  - rob->global.y;
+	float deltaX  = rob->desLoc.x  - rob->global.x;
+	float deltaY  = rob->desLoc.y  - rob->global.y;
 
 
 	if (deltaX < posThresh && deltaY < posThresh){

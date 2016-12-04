@@ -5,7 +5,8 @@
  * Author : J. Diego Caporale, Matt Oslin, Garrett Wenger, Jake Welde
  */ 
 #include "init.h"
-#include "behavior_FSM.h"
+//#include "behavior_FSM.h"
+void usb_debug(dd *rob);
 
 dd robot;
 pk puck;
@@ -23,8 +24,6 @@ uint16_t ping;
 
 
 
-void usb_debug(void);
-
 int main(void) {
 
 	// Initialize GPIO, ADC, m_bus, interrupts, diffDrive
@@ -36,10 +35,12 @@ int main(void) {
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t count = 0; //Used to not bog down processer or terminal with USB Transmissions
-	// robot.desLoc.x = 0;
-	// robot.desLoc.y = -280;
-	// robot.desLoc.th = PI/2;
-
+	robot.desLoc.x = 0;
+	robot.desLoc.y = 0;
+	robot.desLoc.th = 0;
+	while(1){
+		system_check(&robot);
+	}
 	// while (!localize_wii(&(robot.global)));
 
 	//Main process loop
@@ -49,8 +50,9 @@ int main(void) {
 		if (CTRLreadyFlag) {
 			
 			CTRLreadyFlag = FALSE; //Reset flag for interrupt
-			puck_update(&puck);
-			find_state(&robot,&puck);
+			// puck_update(&puck);
+			// find_state(&robot,&puck);
+			//dd_goto_spiral(&robot,.1);
 			dd_update(&robot);
 			 //UPDATES THE CONTROLS
 			// dd_goto_rot_trans(&robot, .2);
@@ -68,8 +70,8 @@ int main(void) {
 		}
 
 		if(count%10 == 0) {
-			localize_wii(&(robot.global));
-			usb_debug(); // USB Debug function below
+			//localize_wii(&(robot.global));
+			usb_debug(&robot); // USB Debug function below
 		}
 	}
 }
@@ -114,14 +116,21 @@ ISR(INT6_vect){
 ISR(TIMER3_CAPT_vect) {
 	robot.ping = ICR3;
 }
-
-void usb_debug(){
+void usb_debug(dd *rob){
 	// m_usb_tx_string("Location Data:  ");
+	m_usb_tx_string("\n");
 	m_usb_tx_string(" vD: ");
-	m_usb_tx_int(100*robot.veloDesired);
+	m_usb_tx_int(100*rob->veloDesired);
 	m_usb_tx_string(" oD: ");
-	m_usb_tx_int(100*robot.omegaDesired);
-
+	m_usb_tx_int(100*rob->omegaDesired);
+	m_usb_tx_string(" m1 timerpin: ");
+	m_usb_tx_int(*(rob->M1.dutyCycleRegister));
+	m_usb_tx_string(" m2 timerpin: ");
+	m_usb_tx_int(*(rob->M2.dutyCycleRegister));
+	m_usb_tx_string(" m1 command: ");
+	m_usb_tx_int(rob->M1.command);
+	m_usb_tx_string(" m2 command: ");
+	m_usb_tx_int(rob->M2.command);
 	// m_usb_tx_string(" vD: ");
 	// m_usb_tx_int(100 * robot.veloDesired);
 	// m_usb_tx_string(" vD_enc:");

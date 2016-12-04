@@ -1,20 +1,19 @@
 //behavior_FSM.c
 //Controls the state of the system
-#include "behavior_FSM.h"
+
 #include <stdio.h>
+#include "behavior_FSM.h"
+
 //http://stackoverflow.com/questions/1647631/c-state-machine-design/1647679#1647679
 
 //ONE OPTION
+//Default state must be ZERO
+typedef enum {ST_ERROR = -1, ST_PK_SEARCH, ST_PK_BEHIND, ST_PK_PURSUE, ST_PK_TO_GOAL, ST_GOAL_MADE, NUM_ST} state;
+typedef enum {EV_ERROR = -1, EV_PK_OBSCURED, EV_PK_FOUND, EV_PK_BEHIND, EV_PK_OBTAINED, EV_GOAL_MADE, NUM_EV} event;
 
+typedef state state_fn(dd *robot, pk *puck);
 
-
-typedef enum {ST_ERROR = -1, ST_PK_SEARCH, ST_PK_PURSUE, ST_PK_TO_GOAL, ST_GOAL_MADE, NUM_ST} state;
-
-typedef enum {EV_ERROR = -1, EV_PK_FOUND, EV_PK_OBSCURED, EV_PK_OBTAINED, EV_PK_LOST, EV_GOAL_MADE, NUM_EV} event;
-
-typedef state state_fn(void);
-
-state_fn fsm_error, puck_search, puck_pursue, puck_to_goal, goal_made;
+state_fn fsm_error, puck_search, puck_pursue, puck_to_goal, goal_made, puck_behind,puck_behind_persist;
 
 static state_fn *transArr[NUM_ST][NUM_EV];
 
@@ -28,57 +27,131 @@ void init_fsm(){
 	}
 	transArr[ST_PK_SEARCH]	[EV_PK_OBSCURED]	= &puck_search;
 	transArr[ST_PK_SEARCH]	[EV_PK_FOUND]		= &puck_pursue;
+	transArr[ST_PK_SEARCH]	[EV_PK_BEHIND]		= &puck_behind;
+
+	transArr[ST_PK_BEHIND]	[EV_PK_FOUND]		= &puck_pursue;
+	transArr[ST_PK_BEHIND]	[EV_PK_BEHIND]		= &puck_behind_persist;
+	transArr[ST_PK_BEHIND]	[EV_PK_OBSCURED]	= &puck_search;
+
 	transArr[ST_PK_PURSUE]	[EV_PK_FOUND]		= &puck_pursue;
 	transArr[ST_PK_PURSUE]	[EV_PK_OBSCURED]	= &puck_search;
+	transArr[ST_PK_PURSUE]	[EV_PK_BEHIND]		= &puck_behind;
 	transArr[ST_PK_PURSUE]	[EV_PK_OBTAINED]	= &puck_to_goal;
+
 	transArr[ST_PK_TO_GOAL]	[EV_PK_OBTAINED]	= &puck_to_goal;
-	transArr[ST_PK_TO_GOAL]	[EV_PK_LOST]		= &puck_pursue;
+	transArr[ST_PK_TO_GOAL]	[EV_PK_FOUND]		= &puck_pursue;
+	transArr[ST_PK_TO_GOAL]	[EV_PK_FOUND]		= &puck_pursue;
+	transArr[ST_PK_TO_GOAL]	[EV_PK_FOUND]		= &puck_pursue;
 	transArr[ST_PK_TO_GOAL]	[EV_GOAL_MADE]		= &goal_made;
+
 	transArr[ST_GOAL_MADE]	[EV_PK_OBSCURED]	= &puck_search;
+
 }
 
-event event_handler_fsm(dd *robot,pk *puck){
-	static int i = -1;
-	i++;
-	return i%NUM_EV;
+//BREAD AND BUTTER OF STATE MACHINE
+
+void event_handler_fsm( dd *robot, pk *puck ){
+	event ev;
+	if(puck->isFound){
+		if(puck->isBehind){
+			ev = EV_PK_BEHIND;
+		}
+		else if(puck->isHave){
+			ev = EV_PK_OBTAINED;
+		}
+		else{
+			ev = EV_PK_FOUND;
+		}
+	}
+	else {
+		if (robot->ev == EV_PK_BEHIND && !dd_is_loc(robot,5)){
+			ev = EV_PK_BEHIND;
+		}
+		else{
+			ev = EV_PK_OBSCURED;
+		}
+
+	}
+	robot->ev = ev;
+	
 }
 
-void find_state(dd *robot,pk *puck)
+void find_state( dd *robot, pk *puck)
 {
-	static state st = ST_PK_SEARCH;
-	event ev = event_handler_fsm(robot,puck);
-	printf("%i\t",ev);
-	st = transArr[st][ev]();
+	event_handler_fsm(robot,puck);
+	printf("%i\t",robot->ev);
+	robot->nxtSt = transArr[robot->nxtSt][robot->ev](robot, puck);
+	printf("%i\n",robot->nxtSt);
 
 }
 
-
-
-state puck_search(void)
+// STATE FUNCTIONS
+state puck_search(dd *robot, pk *puck)
 {
+    robot->veloDesired  = .1;
+    robot->omegaDesired = .5; 
     printf("puck_search\t");
     return ST_PK_SEARCH;
 }
 
-state puck_pursue(void)
+
+state puck_behind_persist(dd *robot, pk *puck)
 {
+
+    dd_goto_rot_trans(robot,.5);
+
+    printf("puck_behind\t");
+    return ST_PK_BEHIND;
+}
+state puck_behind(dd *robot, pk *puck)
+{
+    robot->desLoc.x = robot->global.x;
+	robot->desLoc.y = robot->global.y;
+	robot->desLoc.th = ANG_REMAP(robot->global.th + PI);
+
+    dd_goto_rot_trans(robot,.5);
+    printf("puck_behind\t");
+    return ST_PK_BEHIND;
+}
+
+
+state puck_pursue(dd *robot, pk *puck)
+{
+	int kp = 10;
+	int kd = 0;
+	int k = 1;
+	robot->omegaDesired = - kp * puck->th - kd * (puck->th - puck->thPrev);
+	robot->veloDesired = k/((abs(robot->omegaDesired) + 1));
     printf("puck_pursue\t");
     return ST_PK_PURSUE;
 }
 
-state puck_to_goal(void)
+// state puck_pursue(dd *robot, pk *puck)
+// {
+// 	int kp = 10;
+// 	int kd = 0;
+// 	int k1 = 25;
+// 	int k2 = 5;
+// 	alpha = - robot->global.th - puck->th + pi/2;
+// 	robot->omegaDesired = - kp * puck->th  - kd * (puck->th - puck->thPrev)+ k1 * alpha;
+// 	robot->veloDesired = k2/((abs(robot->omegaDesired) + 1));
+//     printf("puck_pursue\t");
+//     return ST_PK_PURSUE;
+// }
+
+state puck_to_goal(dd *robot, pk *puck)
 {
     printf("puck_to_goal\t");
     return ST_PK_TO_GOAL;
 }
 
-state goal_made(void)
+state goal_made(dd *robot, pk *puck)
 {
     printf("goal_made\t");
     return ST_GOAL_MADE;
 }
 
-state fsm_error(void)
+state fsm_error(dd *robot, pk *puck)
 {
     printf("fsm_error\t");
     return ST_PK_SEARCH;
