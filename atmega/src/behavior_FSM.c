@@ -79,18 +79,18 @@ void event_handler_fsm( dd *robot, pk *puck ){
 void find_state( dd *robot, pk *puck)
 {
 	event_handler_fsm(robot,puck);
-	printf("%i\t",robot->ev);
+	// printf("%i\t",robot->ev);
 	robot->nxtSt = transArr[robot->nxtSt][robot->ev](robot, puck);
-	printf("%i\n",robot->nxtSt);
+	// printf("%i\n",robot->nxtSt);
 
 }
 
 // STATE FUNCTIONS
 state puck_search(dd *robot, pk *puck)
 {
-    robot->veloDesired  = .1;
-    robot->omegaDesired = .5; 
-    printf("puck_search\t");
+    //robot->veloDesired  = .1;
+    robot->omegaDesired = .15; 
+    // printf("puck_search\t");
     return ST_PK_SEARCH;
 }
 
@@ -100,7 +100,7 @@ state puck_behind_persist(dd *robot, pk *puck)
 
     dd_goto_rot_trans(robot,.5);
 
-    printf("puck_behind\t");
+    // printf("puck_behind\t");
     return ST_PK_BEHIND;
 }
 state puck_behind(dd *robot, pk *puck)
@@ -110,19 +110,20 @@ state puck_behind(dd *robot, pk *puck)
 	robot->desLoc.th = ANG_REMAP(robot->global.th + PI);
 
     dd_goto_rot_trans(robot,.5);
-    printf("puck_behind\t");
+    // printf("puck_behind\t");
     return ST_PK_BEHIND;
 }
 
 
 state puck_pursue(dd *robot, pk *puck)
 {
-	int kp = 10;
-	int kd = 0;
-	int k = 1;
-	robot->omegaDesired = - kp * puck->th - kd * (puck->th - puck->thPrev);
-	robot->veloDesired = k/((abs(robot->omegaDesired) + 1));
-    printf("puck_pursue\t");
+	float kp = 2;
+	float kd = 6;
+	float k1 = .4;
+	float k2 = 2;
+	robot->omegaDesired = kp * puck->th + kd * (puck->th - puck->thPrev);
+	robot->veloDesired = k1 / (k2 * ABS(robot->omegaDesired) + 1);
+    // printf("puck_pursue\t");
     return ST_PK_PURSUE;
 }
 
@@ -141,19 +142,22 @@ state puck_pursue(dd *robot, pk *puck)
 
 state puck_to_goal(dd *robot, pk *puck)
 {
-    printf("puck_to_goal\t");
+    // printf("puck_to_goal\t");
+
+	robot->omegaDesired = 0;
+	robot->veloDesired = .2;
     return ST_PK_TO_GOAL;
 }
 
 state goal_made(dd *robot, pk *puck)
 {
-    printf("goal_made\t");
+    // printf("goal_made\t");
     return ST_GOAL_MADE;
 }
 
 state fsm_error(dd *robot, pk *puck)
 {
-    printf("fsm_error\t");
+    // printf("fsm_error\t");
     return ST_PK_SEARCH;
 }
 

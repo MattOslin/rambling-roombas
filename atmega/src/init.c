@@ -38,7 +38,7 @@ void m2_init() {
 
 	// Enable global interrupts
 	sei();
-	m_green(ON); // Ready LED
+	// m_green(ON); // Ready LED
 
 }
 void dd_init(dd *rob) {
@@ -263,16 +263,17 @@ void puck_update(pk *puck, uint16_t *ADCs) {
 	// Update the pucks information
 	puck->thPrev = puck->th;
 
-	if (ADCs[3]>30 || ADCs[1]>30 ){
+	if (ADCs[3]>30 || ADCs[1]>30 || ADCs[5]>30 || ADCs[0]>30 || ADCs[6]>30 || ADCs[7]>30  ){
 		puck->isFound = TRUE;
-		puck->th = (PI/15)*((int)ADCs[3]-(int)ADCs[1])/(float)(ADCs[3]+ADCs[1]);
+		puck->th = (PI/15)*((int)ADCs[3]-(int)ADCs[1]+3*(int)ADCs[5]-3*(int)ADCs[0]+5*(int)ADCs[6]-5*(int)ADCs[7])
+		/(float)(ADCs[3]+ADCs[1]+ADCs[5]+ADCs[0]+ADCs[6]+ADCs[7]);
 	}
 	else{
 		puck->isFound = FALSE;
 		puck->th = 0;
 	}
 	puck->r = 0;
-	puck->isHave = FALSE;
+	puck->isHave = ADCs[4]<900;
 	puck->isBehind = FALSE;
 
 }

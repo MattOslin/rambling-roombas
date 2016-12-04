@@ -5,7 +5,7 @@
  * Author : J. Diego Caporale, Matt Oslin, Garrett Wenger, Jake Welde
  */ 
 #include "init.h"
-//#include "behavior_FSM.h"
+#include "behavior_FSM.h"
 void usb_debug(dd *rob, pk *puck);
 
 dd robot;
@@ -38,6 +38,8 @@ int main(void) {
 	robot.desLoc.x = 0;
 	robot.desLoc.y = 0;
 	robot.desLoc.th = 0;
+	init_fsm();
+	m_green(ON); // Ready LED
 	// while(1){
 	// 	system_check(&robot);
 	// }
@@ -51,8 +53,16 @@ int main(void) {
 			
 			CTRLreadyFlag = FALSE; //Reset flag for interrupt
 			puck_update(&puck, rawADCCounts);
-			// find_state(&robot,&puck);
+			find_state(&robot,&puck);
 			//dd_goto_spiral(&robot,.1);
+
+			if(puck.isHave){
+				set(DDRD,6); // LED Blue
+			}
+			else{
+				clr(DDRD,6);
+			}
+
 			dd_update(&robot);
 			 //UPDATES THE CONTROLS
 			// dd_goto_rot_trans(&robot, .2);
@@ -156,15 +166,30 @@ void usb_debug(dd *rob, pk *puck){
 	//  	m_usb_tx_int(rawADCCounts[i]);
 	// }
 
+	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepAddress));
+	// m_usb_tx_string(" ");
+	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepDirection));
+	// m_usb_tx_string(" ");
+	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepTeam));
 
-		m_usb_tx_string(" ADC L: ");
-	 	m_usb_tx_int(rawADCCounts[3]);
-		m_usb_tx_string(" ADC R: ");
-	 	m_usb_tx_int(rawADCCounts[1]);
-	 	m_usb_tx_string(" Puck TH: ");
-	 	m_usb_tx_int((int)100*puck->th);
-	 	m_usb_tx_string(" isFound: ");
-	 	m_usb_tx_int(puck->isFound);
-	 	
+	m_usb_tx_string(" ADC L: ");
+ 	m_usb_tx_int(rawADCCounts[3]);
+	m_usb_tx_string(" ADC R: ");
+ 	m_usb_tx_int(rawADCCounts[1]);
+ 	m_usb_tx_string(" Puck TH: ");
+ 	m_usb_tx_int((int)100*puck->th);
+ 	m_usb_tx_string(" isFound: ");
+ 	m_usb_tx_int(puck->isFound);
+	m_usb_tx_string(" puckHave ADC: ");
+ 	m_usb_tx_int(rawADCCounts[4]);
+ 	m_usb_tx_string(" isHave: ");
+ 	m_usb_tx_int(puck->isHave);
+	m_usb_tx_string(" commVelo: ");
+ 	m_usb_tx_int(100*rob->veloDesired);
+	m_usb_tx_string(" commOm: ");
+ 	m_usb_tx_int(100*rob->omegaDesired);
+ 	m_usb_tx_string(" state: ");
+ 	m_usb_tx_int(rob->nxtSt);
+ 	
 	m_usb_tx_string("\n");
 }
