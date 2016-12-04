@@ -1,7 +1,9 @@
 #ifndef LOCALIZE_H_
 #define LOCALIZE_H_
 
-#include "init.h"
+#include "m_general.h"
+#include "diff_drive.h"
+#include "eep_locations.h"
 #include "m_wii.h"
 
 void localize_init(void);

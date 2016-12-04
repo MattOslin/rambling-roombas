@@ -1,6 +1,12 @@
 #include "init.h"
-#include "behavior_FSM.h"
+
 extern uint32_t milliseconds;
+
+void timer0_init(void);
+void timer1_init(void);
+void timer3_init(void); // Ping sensor timer
+void timer4_init(void); // Millisecond timer
+void motor_GPIO_setup(void);
 
 void m2_init() {
 	// SET CLOCK TO 16MHz
@@ -41,11 +47,14 @@ void m2_init() {
 	// m_green(ON); // Ready LED
 
 }
+
 void dd_init(dd *rob) {
 	motor_GPIO_setup();
 	rob->enable = FALSE;
 	rob->nxtSt = 0;
 	rob->ev = 0;
+	rob->direction = eeprom_read_byte(&eepDirection);
+	rob->team = eeprom_read_byte(&eepTeam);
 
 	/***********
 	 * MOTOR 1 Specifics
@@ -213,7 +222,7 @@ uint32_t millis(void) {
 	return milliseconds;
 }
 
-float atan2_aprox(float x, float y){
+float atan2_aprox(float x, float y) {
 
 	const float k = .28125;
 

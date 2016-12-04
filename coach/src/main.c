@@ -38,9 +38,9 @@
 #define BOT22LED 6
 
 volatile bool packetReceived = FALSE; // RF command flag
-bool configed20 = false;
-bool configed21 = false;
-bool configed22 = false;
+bool configed20 = FALSE;
+bool configed21 = FALSE;
+bool configed22 = FALSE;
 
 //Global Variable
 volatile uint32_t milliseconds = 0;
@@ -103,14 +103,11 @@ int main(void) {
 
 	// while (!localize_wii(&(robot.global)));
 
-	bool configed20 = false;
-	bool configed21 = false;
-	bool configed22 = false;
 	uint8_t lastTeam = 0xFF;
 	uint8_t lastDir = 0xFF;
 	//Main process loop
     while (1) {
-    	if(check(PINB,DIR_PIN) == POS_Y) {
+    	if(check(PINB,DIR_PIN) != POS_Y) {
     		if (lastDir != POS_Y) {
     			reset_configs();
     		}
@@ -168,9 +165,9 @@ int main(void) {
 }
 
 void reset_configs() {
-	configed20 = false;
-	configed21 = false;
-	configed22 = false;
+	configed20 = FALSE;
+	configed21 = FALSE;
+	configed22 = FALSE;
 
 	clr(PORTF,BOT20LED);
 	clr(PORTF,BOT21LED);
@@ -178,7 +175,7 @@ void reset_configs() {
 }
 
 bool send_config(uint8_t botAddr, uint8_t botPin, uint8_t ledPin) {
-	bool configured = false;
+	bool configured = FALSE;
 	uint8_t direction;
 	uint8_t team;
 
@@ -220,7 +217,7 @@ bool send_config(uint8_t botAddr, uint8_t botPin, uint8_t ledPin) {
 		if (packetReceived) {
 			configured = (botAddr == buffer[4]) && (direction == buffer[5]) && (team == buffer[6]);
 		}
-		packetReceived = false;
+		packetReceived = FALSE;
 	}
 
 	if(configured) {

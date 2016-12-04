@@ -8,6 +8,7 @@
 
 #ifndef COMMS_H_
 #define COMMS_H_
+
 #include "m_bus.h"
 #include "m_usb.h"
 #include "m_rf.h"
@@ -22,6 +23,8 @@ enum rf_command {
 
 void rf_parse(unsigned char *buffer, dd *robot);
 void rf_diagnostics(dd *robot);
+void usb_read_command(void);
+
  
 
 

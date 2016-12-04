@@ -1,6 +1,7 @@
 #ifndef DIFF_DRIVE_H_
 #define DIFF_DRIVE_H_
 
+#include "m_general.h"
 #include "motor_driver.h"
 // Position,
 // contains x, y, and theta values 
@@ -26,22 +27,17 @@ typedef struct diffDrive {
 	int ping;
 	int ev;
 	int nxtSt;
+	uint8_t direction;
+	uint8_t team;
 } dd;
 
-void dd_toggle(pin *pinToToggle);
-void dd_clear(pin *pinToToggle);
-void dd_set(pin *pinToToggle);
-bool dd_check(pin *pinToToggle);
 void dd_enable(dd *rob);
 void dd_disable(dd *rob);
-void dd_comm_test(dd *rob);
+void dd_update(dd *rob);
 
+void dd_comm_test(dd *rob);
 bool dd_is_loc(dd *rob, float posThresh);
 void dd_goto_spiral(dd *rob, float veloDes);
 bool dd_goto_rot_trans(dd *rob, float veloDes);
-void dd_drive(dd *rob);
-void get_fault_status(dd *rob);
-void dd_update(dd *rob);
-float get_radius_curv(dd *rob);
 
 #endif /* DIFF_DRIVE_H_ */
