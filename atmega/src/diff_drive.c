@@ -23,7 +23,7 @@ void dd_drive(dd *rob){
 		}
 
 		//Set desired velocity for motors
-		rob->M1.veloDesired = -rightMotorV;
+		rob->M1.veloDesired = rightMotorV;
 		rob->M2.veloDesired = leftMotorV;
 	}
 	else{
@@ -144,7 +144,12 @@ bool dd_check(pin *pinToToggle) {
 // void get_fault_status(dd *rob) {
 // 	rob->fault = check(*(rob->SF.reg),rob->SF.bit);
 // }
-
+float get_radius_curv(dd *rob){
+	if (rob->omegaDesired <.001){
+		return 1000.0;
+	}
+	return rob->veloDesired/rob->omegaDesired;// actual equation Vdes/omDes = -R/(Rr)
+}
 void dd_comm_test(dd *rob) {
 	//
 }

@@ -12,7 +12,10 @@
 #include "m_usb.h"
 #include "m_rf.h"
 #include "diff_drive.h"
+#include "eep_locations.h"
 
+#define NEG_Y 0
+#define POS_Y 1
 enum rf_command {
 	COMM_TEST = 0xA0, PLAY, GOAL_R, GOAL_B, PAUSE, HALFTIME, GAME_OVER, CONTROLLER, CALIBRATE
 };

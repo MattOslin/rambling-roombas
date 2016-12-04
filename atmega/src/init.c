@@ -259,8 +259,22 @@ float atan2_aprox(float x, float y){
 
 
 //TEMP LOCATION OF PUCK UPDATE
-void puck_update(pk *puck) {
+void puck_update(pk *puck, uint16_t *ADCs) {
 	// Update the pucks information
+	puck->thPrev = puck->th;
+
+	if (ADCs[3]>30 || ADCs[1]>30 ){
+		puck->isFound = TRUE;
+		puck->th = (PI/15)*((int)ADCs[3]-(int)ADCs[1])/(float)(ADCs[3]+ADCs[1]);
+	}
+	else{
+		puck->isFound = FALSE;
+		puck->th = 0;
+	}
+	puck->r = 0;
+	puck->isHave = FALSE;
+	puck->isBehind = FALSE;
+
 }
 
 bool system_check(dd *rob){

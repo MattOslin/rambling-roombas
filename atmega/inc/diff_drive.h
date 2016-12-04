@@ -42,5 +42,6 @@ bool dd_goto_rot_trans(dd *rob, float veloDes);
 void dd_drive(dd *rob);
 void get_fault_status(dd *rob);
 void dd_update(dd *rob);
+float get_radius_curv(dd *rob);
 
 #endif /* DIFF_DRIVE_H_ */

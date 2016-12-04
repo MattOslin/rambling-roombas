@@ -6,7 +6,7 @@
  */ 
 #include "init.h"
 //#include "behavior_FSM.h"
-void usb_debug(dd *rob);
+void usb_debug(dd *rob, pk *puck);
 
 dd robot;
 pk puck;
@@ -38,10 +38,10 @@ int main(void) {
 	robot.desLoc.x = 0;
 	robot.desLoc.y = 0;
 	robot.desLoc.th = 0;
-	while(1){
-		system_check(&robot);
-	}
-	// while (!localize_wii(&(robot.global)));
+	// while(1){
+	// 	system_check(&robot);
+	// }
+	//while (!localize_wii(&(robot.global)));
 
 	//Main process loop
     while (1) //Stay in this loop forever
@@ -50,7 +50,7 @@ int main(void) {
 		if (CTRLreadyFlag) {
 			
 			CTRLreadyFlag = FALSE; //Reset flag for interrupt
-			// puck_update(&puck);
+			puck_update(&puck, rawADCCounts);
 			// find_state(&robot,&puck);
 			//dd_goto_spiral(&robot,.1);
 			dd_update(&robot);
@@ -71,7 +71,7 @@ int main(void) {
 
 		if(count%10 == 0) {
 			//localize_wii(&(robot.global));
-			usb_debug(&robot); // USB Debug function below
+			usb_debug(&robot, &puck); // USB Debug function below
 		}
 	}
 }
@@ -116,21 +116,23 @@ ISR(INT6_vect){
 ISR(TIMER3_CAPT_vect) {
 	robot.ping = ICR3;
 }
-void usb_debug(dd *rob){
+
+
+void usb_debug(dd *rob, pk *puck){
 	// m_usb_tx_string("Location Data:  ");
-	m_usb_tx_string("\n");
-	m_usb_tx_string(" vD: ");
-	m_usb_tx_int(100*rob->veloDesired);
-	m_usb_tx_string(" oD: ");
-	m_usb_tx_int(100*rob->omegaDesired);
-	m_usb_tx_string(" m1 timerpin: ");
-	m_usb_tx_int(*(rob->M1.dutyCycleRegister));
-	m_usb_tx_string(" m2 timerpin: ");
-	m_usb_tx_int(*(rob->M2.dutyCycleRegister));
-	m_usb_tx_string(" m1 command: ");
-	m_usb_tx_int(rob->M1.command);
-	m_usb_tx_string(" m2 command: ");
-	m_usb_tx_int(rob->M2.command);
+	// m_usb_tx_string("\n");
+	// m_usb_tx_string(" vD: ");
+	// m_usb_tx_int(100*rob->veloDesired);
+	// m_usb_tx_string(" oD: ");
+	// m_usb_tx_int(100*rob->omegaDesired);
+	// m_usb_tx_string(" m1 timerpin: ");
+	// m_usb_tx_int(*(rob->M1.dutyCycleRegister));
+	// m_usb_tx_string(" m2 timerpin: ");
+	// m_usb_tx_int(*(rob->M2.dutyCycleRegister));
+	// m_usb_tx_string(" m1 command: ");
+	// m_usb_tx_int(rob->M1.command);
+	// m_usb_tx_string(" m2 command: ");
+	// m_usb_tx_int(rob->M2.command);
 	// m_usb_tx_string(" vD: ");
 	// m_usb_tx_int(100 * robot.veloDesired);
 	// m_usb_tx_string(" vD_enc:");
@@ -146,5 +148,23 @@ void usb_debug(dd *rob){
 
 	// m_usb_tx_string(" ");
 	// m_usb_tx_int(1000*robot.global.th);
+	// int i;
+	// for(i=0;i<12;i++){
+	// 	m_usb_tx_string(" ADC");
+	// 	m_usb_tx_int(i);
+	// 	m_usb_tx_string(": ");
+	//  	m_usb_tx_int(rawADCCounts[i]);
+	// }
+
+
+		m_usb_tx_string(" ADC L: ");
+	 	m_usb_tx_int(rawADCCounts[3]);
+		m_usb_tx_string(" ADC R: ");
+	 	m_usb_tx_int(rawADCCounts[1]);
+	 	m_usb_tx_string(" Puck TH: ");
+	 	m_usb_tx_int((int)100*puck->th);
+	 	m_usb_tx_string(" isFound: ");
+	 	m_usb_tx_int(puck->isFound);
+	 	
 	m_usb_tx_string("\n");
 }
