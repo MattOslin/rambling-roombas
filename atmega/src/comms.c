@@ -1,12 +1,15 @@
 #include "comms.h"
 //extern unsigned char buffer[PACKET_LENGTH];
 
+void update_led(dd *robot);
+
 void rf_parse(unsigned char *buffer, dd *robot) {
 	switch(buffer[0]) {
 		case COMM_TEST:
 			//FLASH LEDS
 			dd_disable(robot);
 			dd_comm_test(robot);
+			update_led(robot);
 			break;
 		
 		case PLAY:
@@ -45,10 +48,13 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 		case HALFTIME:
 			//PAUSE
 			dd_disable(robot);
-			if (eeprom_read_byte(&eepDirection) == POS_Y) {
+			if (robot->direction == POS_Y) {
+			// if (eeprom_read_byte(&eepDirection) == POS_Y) {
 				eeprom_write_byte(&eepDirection, NEG_Y);
+				robot->direction = NEG_Y;
 			} else {
 				eeprom_write_byte(&eepDirection, POS_Y);
+				robot->direction = POS_Y;
 			}
 			break;
 
@@ -80,11 +86,12 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			buffer[5] = robot->direction;
 			buffer[6] = robot->team;
 			m_rf_send(buffer[1], buffer, PACKET_LENGTH);
+			update_led(robot);
 
 			break;
 
 		default:
-			//TEAM COMMANDS GO IN THERE OWN CASES
+			//TEAM COMMANDS GO IN THEIR OWN CASES
 			dd_disable(robot);
 			break;
 	}
@@ -134,5 +141,57 @@ void usb_read_command() {
 			break;
 		default :
 			m_usb_tx_string("NO DATA");
+	}
+}
+
+void update_led(dd *robot) {
+	uint8_t redPin = 5;
+	uint8_t bluePin = 6;
+	uint8_t blinkPin;
+
+	if (robot->team == RED) {
+		set(PORTD, redPin);
+		clr(PORTD, bluePin);
+		blinkPin = redPin;
+	} else {
+		clr(PORTD, redPin);
+		set(PORTD, bluePin);
+		blinkPin = bluePin;
+	}
+
+	if (robot->direction == POS_Y) {
+		m_wait(250);
+		clr(PORTD, blinkPin);
+		m_wait(250);
+		set(PORTD, blinkPin);
+		m_wait(250);
+		clr(PORTD, blinkPin);
+		m_wait(250);
+		set(PORTD, blinkPin);
+		m_wait(250);
+		clr(PORTD, blinkPin);
+	} else {
+		m_wait(75);
+		clr(PORTD, blinkPin);
+		m_wait(75);
+		set(PORTD, blinkPin);
+		m_wait(75);
+		clr(PORTD, blinkPin);
+		m_wait(75);
+		set(PORTD, blinkPin);
+		m_wait(75);
+		clr(PORTD, blinkPin);
+		m_wait(75);
+		set(PORTD, blinkPin);
+		m_wait(75);
+		clr(PORTD, blinkPin);
+		m_wait(75);
+		set(PORTD, blinkPin);
+		m_wait(75);
+		clr(PORTD, blinkPin);
+		m_wait(75);
+		set(PORTD, blinkPin);
+		m_wait(75);
+		clr(PORTD, blinkPin);
 	}
 }

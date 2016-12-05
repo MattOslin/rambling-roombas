@@ -107,7 +107,7 @@ int main(void) {
 	uint8_t lastDir = 0xFF;
 	//Main process loop
     while (1) {
-    	if(check(PINB,DIR_PIN) != POS_Y) {
+    	if(!check(PINB,DIR_PIN) == POS_Y) {
     		if (lastDir != POS_Y) {
     			reset_configs();
     		}
@@ -179,7 +179,7 @@ bool send_config(uint8_t botAddr, uint8_t botPin, uint8_t ledPin) {
 	uint8_t direction;
 	uint8_t team;
 
-	if (check(PINB,DIR_PIN) == POS_Y) {
+	if (!check(PINB,DIR_PIN) == POS_Y) {
 		direction = POS_Y;
 	} else {
 		direction = NEG_Y;
