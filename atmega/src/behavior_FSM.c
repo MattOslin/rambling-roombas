@@ -53,6 +53,13 @@ void init_fsm(){
 	for (i = 0; i < NUM_ST; i++) {
 	    	transArr[i][EV_STANDBY] = &standby;
 	}
+
+	transArr[ST_STANDBY]    [EV_GOAL_MADE]        = &goal_made;
+    transArr[ST_STANDBY]    [EV_PLAY]            = &puck_search;
+    transArr[ST_STANDBY]    [EV_PK_OBSCURED]    = &puck_search;
+    transArr[ST_STANDBY]    [EV_PK_FOUND]        = &puck_pursue;
+    transArr[ST_STANDBY]    [EV_PK_BEHIND]        = &puck_behind;
+    transArr[ST_STANDBY]    [EV_PK_OBTAINED]    = &puck_to_goal;
 }
 
 //BREAD AND BUTTER OF STATE MACHINE
@@ -183,11 +190,11 @@ state puck_pursue(dd *robot, pk *puck)
 state puck_to_goal(dd *robot, pk *puck)
 {
     // printf("puck_to_goal\t");
-	robot->desLoc.x = 0;
-	robot->desLoc.y = 280;
-	robot->desLoc.th = PI/2;
+	robot->desLoc.x = -62;
+	robot->desLoc.y = -280;
+	robot->desLoc.th = -PI/2;
 	
-	dd_goto_spiral(robot,.5);
+	dd_goto_spiral(robot,.2);
 
     return ST_PK_TO_GOAL;
 }

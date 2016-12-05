@@ -77,8 +77,8 @@ void dd_goto_spiral(dd *rob, float veloDes){
 	//Using J.J. Park and B Kuipers paper for smooth diff drive control
 	//Unclear whether smooth is good or too slow or what
 	//Simple go to location that needs to be made more intelligent
-	int K1 = 1;
-	int K2 = 10;
+	float K1 = 0.5;
+	float K2 = 5;
 
 	float deltaX  = rob->desLoc.x  - rob->global.x;
 	float deltaY  = rob->desLoc.y  - rob->global.y;
@@ -88,17 +88,18 @@ void dd_goto_spiral(dd *rob, float veloDes){
 	float theta = ANG_REMAP(rob->desLoc.th - gamma);
 	float r = sqrt( deltaX * deltaX + deltaY * deltaY);
 	
-	float posThresh = 5.0;
+	float posThresh = 20.0;
 	if( r < posThresh){
-		rob->veloDesired  = veloDes * r / posThresh;
-		rob->omegaDesired = - (veloDes / posThresh) * K2 * (del - atan(-K1 * theta))
-	                    + ( 1 + K1 / (1 + K1 * K1 * theta * theta)) * sin(del);
+		// rob->veloDesired  = veloDes * r / posThresh;
+		// rob->omegaDesired = - (veloDes / posThresh) * (K2 * (del - atan(-K1 * theta))
+	 //                    + ( 1 + K1 / (1 + K1 * K1 * theta * theta)) * sin(del));
+		rob->veloDesired = 0;
 	    return;
 	}
 
 	rob->veloDesired = veloDes;
-	rob->omegaDesired = - (veloDes / r) * K2 * (del - atan(-K1 * theta))
-	                    + ( 1 + K1 / (1 + K1 * K1 * theta * theta)) * sin(del);
+	rob->omegaDesired = - (veloDes / r) *(K2 * (del - atan(-K1 * theta))
+	                    + ( 1 + K1 / (1 + K1 * K1 * theta * theta)) * sin(del));
 	
 }
 

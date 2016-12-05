@@ -290,7 +290,6 @@ void puck_update(pk *puck, uint16_t *ADCs) {
 	}
 	puck->r = 0;
 	puck->isHave = ADCs[4]<900;
-
 }
 void solenoid_update(dd *rob){
 	static uint32_t time;

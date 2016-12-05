@@ -46,7 +46,6 @@ int main(void) {
 	//Main process loop
     while (1) //Stay in this loop forever
     {
-		
 		if (CTRLreadyFlag) {
 			
 			CTRLreadyFlag = FALSE; //Reset flag for interrupt
