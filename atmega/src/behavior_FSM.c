@@ -66,7 +66,7 @@ void event_handler_fsm( dd *robot, pk *puck ){
 			return;
 		}
 		if (robot->ev == EV_GOAL_MADE){
-			if(dd_is_loc(robot,5)){
+			if(dd_is_loc(robot,5,.1)){
 				robot->ev = EV_STANDBY;
 				dd_disable(robot);
 			}
@@ -85,7 +85,7 @@ void event_handler_fsm( dd *robot, pk *puck ){
 			}
 		}
 		else {
-			if (robot->ev == EV_PK_BEHIND && !dd_is_loc(robot,5)){
+			if (robot->ev == EV_PK_BEHIND && !dd_is_loc(robot,5,.1)){
 				return;
 			}
 			else{
@@ -151,31 +151,34 @@ state puck_behind(dd *robot, pk *puck)
 }
 
 
-state puck_pursue(dd *robot, pk *puck)
-{
-	float kp = 2;
-	float kd = 6;
-	float k1 = .4;
-	float k2 = 2;
-	robot->omegaDesired = kp * puck->th + kd * (puck->th - puck->thPrev);
-	robot->veloDesired = k1 / (k2 * ABS(robot->omegaDesired) + 1);
-    // printf("puck_pursue\t");
-    return ST_PK_PURSUE;
-}
-
 // state puck_pursue(dd *robot, pk *puck)
 // {
 // 	float kp = 2;
 // 	float kd = 6;
 // 	float k1 = .4;
 // 	float k2 = 2;
-//	float k3 = 1;
-// 	alpha = - robot->global.th - puck->th + pi/2;
-// 	robot->omegaDesired = kp * puck->th  + kd * (puck->th - puck->thPrev)+ k3 * alpha;
+// 	robot->omegaDesired = kp * puck->th + kd * (puck->th - puck->thPrev);
 // 	robot->veloDesired = k1 / (k2 * ABS(robot->omegaDesired) + 1);
-//     printf("puck_pursue\t");
+//     // printf("puck_pursue\t");
 //     return ST_PK_PURSUE;
 // }
+
+state puck_pursue(dd *robot, pk *puck)
+{
+	float kp = 2;
+	float kd = 6;
+	float k1 = .4;
+	float k2 = 2;
+	float kap = 1.5;
+	float kad = .1;
+	static float prevAlpha = 0;
+	float alpha = ANG_REMAP(robot->global.th + puck->th - PI/2);
+	robot->omegaDesired = kp * puck->th  + kd * (puck->th - puck->thPrev)+ kap * alpha - kad * prevAlpha;
+	robot->veloDesired = k1 / (k2 * ABS(robot->omegaDesired) + 1);
+	prevAlpha = alpha;
+    //printf("puck_pursue\t");
+    return ST_PK_PURSUE;
+}
 
 state puck_to_goal(dd *robot, pk *puck)
 {

@@ -30,8 +30,8 @@ int main(void) {
 	m2_init();
 
 	// Initialize diffDrive (motors, encoders, localization)
-	// dd_init(&robot); 
-	dd_enable(&robot);
+	dd_init(&robot); 
+	// dd_enable(&robot);
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t count = 0; //Used to not bog down processer or terminal with USB Transmissions
@@ -149,14 +149,19 @@ void usb_debug(dd *rob, pk *puck){
 		// m_usb_tx_string(" M1_enc ");//m_usb_tx_int(10);
 	// m_usb_tx_int(robot.M1.veloEncoder);
 	// m_usb_tx_string(",");
-	m_usb_tx_int(robot.global.x);
+	m_usb_tx_int(rob->global.x);
 	m_usb_tx_string(",");
-	m_usb_tx_int(robot.global.y);
+	m_usb_tx_int(rob->global.y);
 	m_usb_tx_string(",");
-	m_usb_tx_int(100 * robot.global.th);
+	m_usb_tx_int(100 * rob->global.th);
 
-	// m_usb_tx_string(" ");
-	// m_usb_tx_int(1000*robot.global.th);
+	m_usb_tx_string(" STATE: ");
+	m_usb_tx_int(rob->nxtSt);
+	m_usb_tx_string(" EVENT: ");
+	m_usb_tx_int(rob->ev);
+	m_usb_tx_string(" enable: ");
+	m_usb_tx_int(rob->enable);
+	
 	// int i;
 	// for(i=0;i<12;i++){
 	// 	m_usb_tx_string(" ADC");

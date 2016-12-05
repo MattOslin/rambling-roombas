@@ -279,10 +279,10 @@ void puck_update(pk *puck, uint16_t *ADCs) {
 		puck->th = (PI/15)*((int)ADCs[3]-(int)ADCs[1]+3*(int)ADCs[5]-3*(int)ADCs[0]+5*(int)ADCs[6]-5*(int)ADCs[7])
 		/(float)(ADCs[3]+ADCs[1]+ADCs[5]+ADCs[0]+ADCs[6]+ADCs[7]);
 	}
-	else if(ADCs[2]>30){
-	puck->isBehind = TRUE;
-	puck->isFound = TRUE;
-	}
+	// else if(ADCs[2]>30){
+	// puck->isBehind = TRUE;
+	// puck->isFound = TRUE;
+	// }
 	else {
 		puck->isFound = FALSE;
 		puck->isBehind = FALSE;

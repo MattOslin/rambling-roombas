@@ -44,7 +44,7 @@ bool dd_goto_rot_trans(dd *rob, float veloDes){
 
 	float deltaX  = rob->desLoc.x  - rob->global.x;
 	float deltaY  = rob->desLoc.y  - rob->global.y;
-	float deltaTh = rob->desLoc.th - rob->global.th;
+	float deltaTh = ANG_REMAP(rob->desLoc.th - rob->global.th);
 	float distFromGoal = sqrt(deltaX * deltaX + deltaY * deltaY);
 
 	float posThresh = 10.0;
@@ -84,8 +84,8 @@ void dd_goto_spiral(dd *rob, float veloDes){
 	float deltaY  = rob->desLoc.y  - rob->global.y;
 	//float deltaTh = rob->desLoc.th - rob->global.th;
 	float gamma = atan2( deltaY, deltaX);
-	float del = rob->global.th - gamma;
-	float theta = rob->desLoc.th - gamma;
+	float del = ANG_REMAP(rob->global.th - gamma);
+	float theta = ANG_REMAP(rob->desLoc.th - gamma);
 	float r = sqrt( deltaX * deltaX + deltaY * deltaY);
 	
 	float posThresh = 5.0;
@@ -102,12 +102,13 @@ void dd_goto_spiral(dd *rob, float veloDes){
 	
 }
 
-bool dd_is_loc(dd*rob , float posThresh){
+bool dd_is_loc(dd*rob , float posThresh, float thThresh){
 	float deltaX  = rob->desLoc.x  - rob->global.x;
 	float deltaY  = rob->desLoc.y  - rob->global.y;
+	float deltaTh  =rob->desLoc.th  - rob->global.th;
 
 
-	if (deltaX < posThresh && deltaY < posThresh){
+	if (deltaX < posThresh && deltaY < posThresh && ANG_REMAP(deltaTh) < ANG_REMAP(thThresh)){
 		return TRUE;
 	}
 	return FALSE;
