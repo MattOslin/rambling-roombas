@@ -53,7 +53,7 @@ void dd_init(dd *rob) {
 	rob->enable = FALSE;
 	rob->nxtSt = 0;
 	rob->ev = 0;
-	rob->direction = eeprom_read_byte(&eepDirection);
+	rob->direction = (int8_t) eeprom_read_byte(&eepDirection);
 	rob->team = eeprom_read_byte(&eepTeam);
 
 	/***********

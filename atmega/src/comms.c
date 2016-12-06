@@ -50,10 +50,10 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			dd_disable(robot);
 			if (robot->direction == POS_Y) {
 			// if (eeprom_read_byte(&eepDirection) == POS_Y) {
-				eeprom_write_byte(&eepDirection, NEG_Y);
+				eeprom_write_byte(&eepDirection, (uint8_t) NEG_Y);
 				robot->direction = NEG_Y;
 			} else {
-				eeprom_write_byte(&eepDirection, POS_Y);
+				eeprom_write_byte(&eepDirection, (uint8_t) POS_Y);
 				robot->direction = POS_Y;
 			}
 			break;
@@ -78,12 +78,12 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			break;
 
 		case COACH:
-			eeprom_write_byte(&eepDirection, buffer[2]);
+			eeprom_write_byte(&eepDirection, (uint8_t) buffer[2]);
 			eeprom_write_byte(&eepTeam, buffer[3]);
-			robot->direction = eeprom_read_byte(&eepDirection);
+			robot->direction = (int8_t) eeprom_read_byte(&eepDirection);
 			robot->team = eeprom_read_byte(&eepTeam);
 			buffer[4] = eeprom_read_byte(&eepAddress);
-			buffer[5] = robot->direction;
+			buffer[5] = (uint8_t) robot->direction;
 			buffer[6] = robot->team;
 			m_rf_send(buffer[1], buffer, PACKET_LENGTH);
 			update_led(robot);

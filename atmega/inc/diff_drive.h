@@ -27,7 +27,7 @@ typedef struct diffDrive {
 	int ping;
 	int ev;
 	int nxtSt;
-	uint8_t direction;
+	int8_t direction;
 	uint8_t team;
 	uint8_t solenoid;
 	uint8_t goalMade;
