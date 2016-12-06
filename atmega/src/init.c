@@ -25,7 +25,7 @@ void m2_init() {
 
     //while(!m_usb_isconnected()); // wait for a connection
 	
-	localize_init();
+//	localize_init();
 
 	m_disableJTAG(); //Allows use of some of the portF
 
@@ -265,32 +265,6 @@ uint32_t millis(void) {
 // 		}
 // 	}
 // }
-
-
-//TEMP LOCATION OF PUCK UPDATE
-void puck_update(pk *puck, uint16_t *ADCs) {
-	// Update the pucks information
-	puck->thPrev = puck->th;
-
-	if (ADCs[3]>30 || ADCs[1]>30 || ADCs[5]>30 || ADCs[0]>30 || ADCs[6]>30 || ADCs[7]>30  ){
-		puck->isFound = TRUE;
-		puck->isBehind = FALSE;
-
-		puck->th = (PI/15)*((int)ADCs[3]-(int)ADCs[1]+3*(int)ADCs[5]-3*(int)ADCs[0]+5*(int)ADCs[6]-5*(int)ADCs[7])
-		/(float)(ADCs[3]+ADCs[1]+ADCs[5]+ADCs[0]+ADCs[6]+ADCs[7]);
-	}
-	// else if(ADCs[2]>30){
-	// puck->isBehind = TRUE;
-	// puck->isFound = TRUE;
-	// }
-	else {
-		puck->isFound = FALSE;
-		puck->isBehind = FALSE;
-		puck->th = 0;
-	}
-	puck->r = 0;
-	puck->isHave = ADCs[4]<900;
-}
 
 
 void shoot_puck(dd *rob, pk *puck){
