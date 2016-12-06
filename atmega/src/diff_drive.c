@@ -1,5 +1,6 @@
 
 #include "diff_drive.h"
+#include "m_usb.h"
 
 void dd_drive(dd *rob);
 void dd_toggle(pin *pinToToggle);
@@ -40,7 +41,10 @@ void dd_drive(dd *rob){
 	
 }
 
+
 bool dd_goto_rot_trans(dd *rob, float veloDes){
+	static float thPrev = 0;
+	static float thInt = 0;
 
 	float deltaX  = rob->desLoc.x  - rob->global.x;
 	float deltaY  = rob->desLoc.y  - rob->global.y;
@@ -55,29 +59,43 @@ bool dd_goto_rot_trans(dd *rob, float veloDes){
 			rob->omegaDesired = 0;
 			return TRUE;
 		}
-		rob->veloDesired  = 0;
-		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? veloDes * deltaTh/ABS(deltaTh) : veloDes * deltaTh/(PI/2);
-		return FALSE;
+	}
+	
+	float thTemp = atan2(deltaY,deltaX);
+	deltaTh = ANG_REMAP(thTemp - rob->global.th);
+	rob->veloDesired  = 0;
+	float kp = 1;
+	float ki = 0;
+	float kd = 1;
+
+	// float k1 = .4;
+	// float k2 = 2;
+	rob->omegaDesired = kp * deltaTh + ki * thInt + kd * 100 * (deltaTh - thPrev);
+	thPrev = deltaTh;
+	thInt = MIN(.1/ki,thInt + deltaTh);
+	return FALSE;
+}
+
+
+void dd_norm(dd *rob, float maxV){
+	if( (ABS(rob->veloDesired) > ABS(rob->omegaDesired)) ) {
+		rob->omegaDesired /= ABS(rob->veloDesired);
+		rob->veloDesired /= ABS(rob->veloDesired);
 	}
 	else {
-		float thTemp = atan2(deltaY,deltaX);
-		float deltaTh = thTemp - rob->global.th;
-		if ( ABS(deltaTh) < thThresh ){
-			rob->veloDesired  = veloDes;
-			rob->omegaDesired = 0;
-			return FALSE;
-		}
-		rob->veloDesired  = 0;
-		rob->omegaDesired = ABS(deltaTh/(PI/2)) > 1 ? veloDes * deltaTh/ABS(deltaTh) : veloDes * deltaTh/(PI/2);
-		return FALSE;
+		rob->omegaDesired /= ABS(rob->omegaDesired);
+		rob->veloDesired /= ABS(rob->omegaDesired);
 	}
+	rob->veloDesired = maxV*rob->veloDesired;
+	rob->omegaDesired = maxV*rob->omegaDesired;
 }
 
 void dd_goto_spiral(dd *rob, float veloDes){
+	//DOESNT WORK
 	//Using J.J. Park and B Kuipers paper for smooth diff drive control
 	//Unclear whether smooth is good or too slow or what
 	//Simple go to location that needs to be made more intelligent
-	float K1 = 0.5;
+	float K1 = 2;
 	float K2 = 5;
 
 	float deltaX  = rob->desLoc.x  - rob->global.x;
@@ -88,12 +106,13 @@ void dd_goto_spiral(dd *rob, float veloDes){
 	float theta = ANG_REMAP(rob->desLoc.th - gamma);
 	float r = sqrt( deltaX * deltaX + deltaY * deltaY);
 	
-	float posThresh = 20.0;
+	float posThresh = 50.0;
 	if( r < posThresh){
 		// rob->veloDesired  = veloDes * r / posThresh;
 		// rob->omegaDesired = - (veloDes / posThresh) * (K2 * (del - atan(-K1 * theta))
 	 //                    + ( 1 + K1 / (1 + K1 * K1 * theta * theta)) * sin(del));
 		rob->veloDesired = 0;
+		rob->omegaDesired = 0;
 	    return;
 	}
 
@@ -102,6 +121,85 @@ void dd_goto_spiral(dd *rob, float veloDes){
 	                    + ( 1 + K1 / (1 + K1 * K1 * theta * theta)) * sin(del));
 	
 }
+
+void dd_goto_spiral2(dd *robot, float veloDes){
+	//DOESNT WORK
+   // printf("puck_to_goal\t");
+
+    float goalTh = PI/2;
+
+    static float prevAlpha = 0;
+    static float prevPhi = 0;
+    float kp = 2;
+    float kd = 6;
+    float k1 = .4;
+    float k2 = 2;
+    float kap = 0;//1.5;
+    float kad = 0;//;.1;
+    float gamma = atan2(robot->desLoc.y - robot->global.y, robot->desLoc.x - robot->global.x);
+    float phi = ANG_REMAP(gamma - robot->global.th);
+    float alpha = ANG_REMAP(gamma - goalTh);
+    robot->omegaDesired = kp * phi  + kd * (phi - prevPhi)+ kap * alpha - kad * prevAlpha;
+    robot->veloDesired = k1 / (k2 * ABS(robot->omegaDesired) + 1);
+    robot->veloDesired = MAX(robot->veloDesired, 2 * MIN_PUCK_TURN_RAD * robot->omegaDesired / WHEEL_RADIAL_LOC);
+    dd_norm(robot,.3);
+    prevAlpha = alpha;
+    prevPhi = phi;
+}
+// 	//Using J.J. Park and B Kuipers paper for smooth diff drive control
+// 	//Unclear whether smooth is good or too slow or what
+// 	//Simple go to location that needs to be made more intelligent
+// 	float Krho = .01;
+// 	float Kalpha = .5;
+// 	float Kbeta = 1;
+
+// 	float deltaX  = rob->desLoc.x  - rob->global.x;
+// 	float deltaY  = rob->desLoc.y  - rob->global.y;
+// 	//float deltaTh = rob->desLoc.th - rob->global.th;
+// 	float gamma = atan2( deltaY, deltaX);
+// 	float alpha = ANG_REMAP(gamma - rob->global.th);
+// 	float beta = ANG_REMAP(-alpha - rob->global.th + rob->desLoc.th);
+// 	float rho = sqrt( deltaX * deltaX + deltaY * deltaY);
+	
+// 	// m_usb_tx_string(" alpha: ");
+// 	// m_usb_tx_int(100*alpha);
+
+// 	// m_usb_tx_string(" beta: ");
+// 	// m_usb_tx_int(100*beta);	
+
+// 	// m_usb_tx_string(" gamma: ");
+// 	// m_usb_tx_int(100*gamma);
+
+// 	// m_usb_tx_string(" rho: ");
+// 	// m_usb_tx_int(rho);
+
+// 	// m_usb_tx_string("\n");
+
+// 	float posThresh = 50.0;
+// 	if( rho < posThresh){
+// 		// rob->veloDesired  = veloDes * r / posThresh;
+// 		// rob->omegaDesired = - (veloDes / posThresh) * (K2 * (del - atan(-K1 * theta))
+// 	 //                    + ( 1 + K1 / (1 + K1 * K1 * theta * theta)) * sin(del));
+// 		rob->veloDesired = 0;
+// 		rob->omegaDesired = 0;
+// 	    return;
+// 	}
+
+// 	rob->veloDesired = Krho * rho;
+// 	rob->omegaDesired = (Kalpha * alpha - Kbeta * beta);
+
+// 	if( (ABS(rob->veloDesired) > 1.0) && (ABS(rob->veloDesired) > ABS(rob->omegaDesired)) ) {
+// 		rob->omegaDesired /= ABS(rob->veloDesired);
+// 		rob->veloDesired /= ABS(rob->veloDesired);
+// 	}
+// 	else if((ABS(rob->omegaDesired) > 1.0) && (ABS(rob->omegaDesired) > ABS(rob->veloDesired))){
+// 		rob->omegaDesired /= ABS(rob->omegaDesired);
+// 		rob->veloDesired /= ABS(rob->omegaDesired);
+// 	}
+// 	rob->veloDesired = veloDes*rob->veloDesired;
+// 	rob->omegaDesired = veloDes*rob->omegaDesired;
+
+// }
 
 bool dd_is_loc(dd*rob , float posThresh, float thThresh){
 	float deltaX  = rob->desLoc.x  - rob->global.x;

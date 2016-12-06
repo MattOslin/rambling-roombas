@@ -31,7 +31,7 @@ int main(void) {
 
 	// Initialize diffDrive (motors, encoders, localization)
 	dd_init(&robot); 
-	// dd_enable(&robot);
+	dd_enable(&robot);
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t count = 0; //Used to not bog down processer or terminal with USB Transmissions
@@ -51,13 +51,14 @@ int main(void) {
 			CTRLreadyFlag = FALSE; //Reset flag for interrupt
 			puck_update(&puck, rawADCCounts);
 			find_state(&robot,&puck);
-			//dd_goto_spiral(&robot,.1);
 
 			if(puck.isHave){
 				set(DDRD,6); // LED Blue
+				set(DDRD,5);
 			}
 			else{
 				clr(DDRD,6);
+				clr(DDRD,5);
 			}
 
 			dd_update(&robot);
@@ -127,12 +128,12 @@ ISR(TIMER3_CAPT_vect) {
 
 
 void usb_debug(dd *rob, pk *puck){
-	// m_usb_tx_string("Location Data:  ");
+	
 	// m_usb_tx_string("\n");
-	// m_usb_tx_string(" vD: ");
-	// m_usb_tx_int(100*rob->veloDesired);
-	// m_usb_tx_string(" oD: ");
-	// m_usb_tx_int(100*rob->omegaDesired);
+	m_usb_tx_string(" vD: ");
+	m_usb_tx_int(100*rob->veloDesired);
+	m_usb_tx_string(" oD: ");
+	m_usb_tx_int(100*rob->omegaDesired);
 	// m_usb_tx_string(" m1 timerpin: ");
 	// m_usb_tx_int(*(rob->M1.dutyCycleRegister));
 	// m_usb_tx_string(" m2 timerpin: ");
@@ -148,18 +149,19 @@ void usb_debug(dd *rob, pk *puck){
 		// m_usb_tx_string(" M1_enc ");//m_usb_tx_int(10);
 	// m_usb_tx_int(robot.M1.veloEncoder);
 	// m_usb_tx_string(",");
+	m_usb_tx_string("  Location Data:  ");
 	m_usb_tx_int(rob->global.x);
 	m_usb_tx_string(",");
 	m_usb_tx_int(rob->global.y);
 	m_usb_tx_string(",");
 	m_usb_tx_int(100 * rob->global.th);
 
-	m_usb_tx_string(" STATE: ");
-	m_usb_tx_int(rob->nxtSt);
-	m_usb_tx_string(" EVENT: ");
-	m_usb_tx_int(rob->ev);
-	m_usb_tx_string(" enable: ");
-	m_usb_tx_int(rob->enable);
+	// m_usb_tx_string(" STATE: ");
+	// m_usb_tx_int(rob->nxtSt);
+	// m_usb_tx_string(" EVENT: ");
+	// m_usb_tx_int(rob->ev);
+	// m_usb_tx_string(" enable: ");
+	// m_usb_tx_int(rob->enable);
 	
 	// int i;
 	// for(i=0;i<12;i++){
