@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "behavior_FSM.h"
+#include "m_usb.h"
 
 //http://stackoverflow.com/questions/1647631/c-state-machine-design/1647679#1647679
 
@@ -51,14 +52,14 @@ void init_fsm(){
 	transArr[ST_GOAL_MADE]	[EV_PK_OBTAINED]	= &puck_to_goal;
 
 	for (i = 0; i < NUM_ST; i++) {
-	    	transArr[i][EV_STANDBY] = &standby;
+	    transArr[i][EV_STANDBY] = &standby;
 	}
 
-	transArr[ST_STANDBY]    [EV_GOAL_MADE]        = &goal_made;
-    transArr[ST_STANDBY]    [EV_PLAY]            = &puck_search;
+	transArr[ST_STANDBY]    [EV_GOAL_MADE] 		= &goal_made;
+    transArr[ST_STANDBY]    [EV_PLAY]			= &puck_search;
     transArr[ST_STANDBY]    [EV_PK_OBSCURED]    = &puck_search;
-    transArr[ST_STANDBY]    [EV_PK_FOUND]        = &puck_pursue;
-    transArr[ST_STANDBY]    [EV_PK_BEHIND]        = &puck_behind;
+    transArr[ST_STANDBY]    [EV_PK_FOUND]		= &puck_pursue;
+    transArr[ST_STANDBY]    [EV_PK_BEHIND] 		= &puck_behind;
     transArr[ST_STANDBY]    [EV_PK_OBTAINED]    = &puck_to_goal;
 }
 
@@ -206,10 +207,19 @@ state puck_to_goal(dd *robot, pk *puck)
     float alpha = ANG_REMAP(gamma - robot->desLoc.th);
     robot->omegaDesired = kp * phi  + kd * (phi - prevPhi)+ kap * alpha - kad * prevAlpha;
     robot->veloDesired = k1 / (k2 * ABS(robot->omegaDesired) + 1);
-    robot->veloDesired = MAX(robot->veloDesired, 2 * MIN_PUCK_TURN_RAD * robot->omegaDesired / WHEEL_RADIAL_LOC);
+    robot->veloDesired = MAX(robot->veloDesired, 2 * MIN_PUCK_TURN_RAD * ABS(robot->omegaDesired) / WHEEL_RADIAL_LOC);
     dd_norm(robot,.3);
     prevAlpha = alpha;
     prevPhi = phi;   // printf("puck_to_goal\t");
+
+    m_usb_tx_string(" alpha: ");
+	m_usb_tx_int(100*alpha);
+
+	m_usb_tx_string(" phi: ");
+	m_usb_tx_int(100*phi);	
+
+	m_usb_tx_string(" gamma: ");
+	m_usb_tx_int(100*gamma);
     return ST_PK_TO_GOAL;
 
 }

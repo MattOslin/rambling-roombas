@@ -33,4 +33,5 @@
 #define ANG_REMAP(TH)		(TH > PI ? TH - 2 * PI : (TH < -PI ? TH + 2 * PI : TH))
 
 #define SOLENOID(val)		set(DDRB,1); if(val==OFF){set(PORTB,1); }else if(val==ON){clr(PORTB,1);}else if(val==TOGGLE){toggle(PORTB,1);}
+
 #endif

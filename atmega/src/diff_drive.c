@@ -228,6 +228,7 @@ void dd_update(dd *rob) {
 // ENABLES MOTOR DRIVER OPERATION
 void dd_enable(dd *rob) {
 	rob->enable = TRUE;
+	
 }
 // STOPS MOTOR DRIVER OPERATION
 void dd_disable(dd *rob) {

@@ -31,7 +31,7 @@ int main(void) {
 
 	// Initialize diffDrive (motors, encoders, localization)
 	dd_init(&robot); 
-	dd_enable(&robot);
+	// dd_enable(&robot);
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t count = 0; //Used to not bog down processer or terminal with USB Transmissions
@@ -40,9 +40,9 @@ int main(void) {
 	robot.desLoc.th = 0;
 	init_fsm();
 	m_green(ON); // Ready LED
-	// while(1){
-	// 	system_check(&robot);
-	// }
+	while(1){
+		system_check(&robot);
+	}
 	//Main process loop
     while (1) //Stay in this loop forever
     {
@@ -52,14 +52,14 @@ int main(void) {
 			puck_update(&puck, rawADCCounts);
 			find_state(&robot,&puck);
 
-			if(puck.isHave){
-				set(DDRD,6); // LED Blue
-				set(DDRD,5);
-			}
-			else{
-				clr(DDRD,6);
-				clr(DDRD,5);
-			}
+			// if(puck.isHave){
+			// 	set(PORTD,6); // LED Blue
+			// 	set(PORTD,5);
+			// }
+			// else{
+			// 	clr(PORTD,6);
+			// 	clr(PORTD,5);
+			// }
 
 			dd_update(&robot);
 			solenoid_update(&robot);
