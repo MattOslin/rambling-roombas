@@ -17,7 +17,7 @@
 #define PACKET_LENGTH 10
 // #define USE_EEP_ADDRESS
 
-#define NEG_Y 0
+#define NEG_Y -1
 #define POS_Y 1
 
 #define RED 0

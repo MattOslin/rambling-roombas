@@ -9,7 +9,7 @@
 #include "m_bus.h"
 #include "m_rf.h"
 
-#define NEG_Y 0
+#define NEG_Y -1
 #define POS_Y 1
 
 #define DIR_PIN 0
@@ -104,10 +104,10 @@ int main(void) {
 	// while (!localize_wii(&(robot.global)));
 
 	uint8_t lastTeam = 0xFF;
-	uint8_t lastDir = 0xFF;
+	int8_t lastDir = 0;
 	//Main process loop
     while (1) {
-    	if(check(PINB,DIR_PIN) != POS_Y) {
+    	if(!check(PINB,DIR_PIN) == POS_Y) {
     		if (lastDir != POS_Y) {
     			reset_configs();
     		}
@@ -179,10 +179,10 @@ bool send_config(uint8_t botAddr, uint8_t botPin, uint8_t ledPin) {
 	uint8_t direction;
 	uint8_t team;
 
-	if (check(PINB,DIR_PIN) == POS_Y) {
-		direction = POS_Y;
+	if (!check(PINB,DIR_PIN) == POS_Y) {
+		direction = (uint8_t) POS_Y;
 	} else {
-		direction = NEG_Y;
+		direction = (uint8_t) NEG_Y;
 	}
 
 	if (check(PINB,TEAM_PIN) == RED) {

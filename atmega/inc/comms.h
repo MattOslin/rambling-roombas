@@ -14,9 +14,8 @@
 #include "m_rf.h"
 #include "diff_drive.h"
 #include "eep_locations.h"
+#include "macros.h"
 
-#define NEG_Y 0
-#define POS_Y 1
 enum rf_command {
 	COMM_TEST = 0xA0, PLAY, GOAL_R, GOAL_B, PAUSE, HALFTIME, GAME_OVER, CONTROLLER, CALIBRATE, COACH
 };
@@ -24,8 +23,5 @@ enum rf_command {
 void rf_parse(unsigned char *buffer, dd *robot);
 void rf_diagnostics(dd *robot);
 void usb_read_command(void);
-
- 
-
 
 #endif /* COMMS_H_ */
