@@ -8,6 +8,7 @@
 #include "diff_drive.h"
 #include "comms.h"
 #include "eep_locations.h"
+#include "puck_sense.h"
 
 // typedef struct puckInfo {
 // 	float r;		//
