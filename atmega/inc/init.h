@@ -8,6 +8,7 @@
 #include "diff_drive.h"
 #include "comms.h"
 #include "eep_locations.h"
+#include "puck_sense.h"
 
 // typedef struct puckInfo {
 // 	float r;		//
@@ -28,7 +29,7 @@ void puck_update(pk *puck, uint16_t* ADCs);
 void shoot_puck(dd *rob, pk *puck);
 
 void solenoid_update(dd *rob);
-float atan2_aprox(float x, float y);
+// float atan2_aprox(float x, float y);
 bool system_check(dd*rob);
 
 #endif /* INIT_H_ */

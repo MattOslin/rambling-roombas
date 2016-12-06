@@ -140,10 +140,10 @@ ISR(TIMER3_CAPT_vect) {
 void usb_debug(dd *rob, pk *puck){
 	
 	// m_usb_tx_string("\n");
-	m_usb_tx_string(" vD: ");
-	m_usb_tx_int(100*rob->veloDesired);
-	m_usb_tx_string(" oD: ");
-	m_usb_tx_int(100*rob->omegaDesired);
+//	m_usb_tx_string(" vD: ");
+//	m_usb_tx_int(100*rob->veloDesired);
+//	m_usb_tx_string(" oD: ");
+//	m_usb_tx_int(100*rob->omegaDesired);
 	// m_usb_tx_string(" m1 timerpin: ");
 	// m_usb_tx_int(*(rob->M1.dutyCycleRegister));
 	// m_usb_tx_string(" m2 timerpin: ");
@@ -159,16 +159,16 @@ void usb_debug(dd *rob, pk *puck){
 		// m_usb_tx_string(" M1_enc ");//m_usb_tx_int(10);
 	// m_usb_tx_int(robot.M1.veloEncoder);
 	// m_usb_tx_string(",");
-	m_usb_tx_string("  Location Data:  ");
-	m_usb_tx_int(rob->global.x);
-	m_usb_tx_string(",");
-	m_usb_tx_int(rob->global.y);
-	m_usb_tx_string(",");
-	m_usb_tx_int(100 * rob->global.th);
-	m_usb_tx_string(" Team:");
-	m_usb_tx_int(rob->team);
-	m_usb_tx_string(" Direction:");
-	m_usb_tx_int(rob->direction);
+//	m_usb_tx_string("  Location Data:  ");
+//	m_usb_tx_int(rob->global.x);
+//	m_usb_tx_string(",");
+//	m_usb_tx_int(rob->global.y);
+//	m_usb_tx_string(",");
+//	m_usb_tx_int(100 * rob->global.th);
+//	m_usb_tx_string(" Team:");
+//	m_usb_tx_int(rob->team);
+//	m_usb_tx_string(" Direction:");
+//	m_usb_tx_int(rob->direction);
 
 	// m_usb_tx_string(" STATE: ");
 	// m_usb_tx_int(rob->nxtSt);
@@ -177,13 +177,15 @@ void usb_debug(dd *rob, pk *puck){
 	// m_usb_tx_string(" enable: ");
 	// m_usb_tx_int(rob->enable);
 	
-	// int i;
-	// for(i=0;i<12;i++){
-	// 	m_usb_tx_string(" ADC");
-	// 	m_usb_tx_int(i);
-	// 	m_usb_tx_string(": ");
-	//  	m_usb_tx_int(rawADCCounts[i]);
-	// }
+  int i;
+  for(i=0;i<8;i++){
+//  m_usb_tx_string(" ADC");
+//  m_usb_tx_int(i);
+  m_usb_tx_string(" ");
+    m_usb_tx_int(rawADCCounts[i]);
+  }
+  m_usb_tx_string(" Ping: ");
+  m_usb_tx_int(rob->ping);
 
 	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepAddress));
 	// m_usb_tx_string(" ");
