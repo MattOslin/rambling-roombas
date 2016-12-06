@@ -268,7 +268,20 @@ uint32_t millis(void) {
 
 
 void shoot_puck(dd *rob, pk *puck){
-	
+	float topGoalAng=0;
+	float botGoalAng=0;
+	float distToGoal = GOAL_Y - (rob->global.y)*rob->direction;
+	if( distToGoal < SHT_THRSH_FAR && (distToGoal > SHT_THRSH_NEAR) && (ABS(rob->global.x)<(GOAL_X + SHT_THRSH_NEAR))){
+		topGoalAng = atan2(rob->direction * distToGoal, topGoalAng - rob->global.x );
+		botGoalAng = atan2(rob->direction * distToGoal, botGoalAng - rob->global.x );
+		if (rob->direction == POS_Y && rob->global.th > topGoalAng && rob->global.th < botGoalAng){
+			rob->solenoid = ON;
+		}
+		else if (rob->direction == NEG_Y && rob->global.th < topGoalAng && rob->global.th > botGoalAng){
+			rob->solenoid = ON;
+		}
+	}
+	return;
 }
 
 void solenoid_update(dd *rob){
