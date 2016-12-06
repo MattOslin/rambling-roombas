@@ -1,19 +1,20 @@
 #include "comms.h"
 //extern unsigned char buffer[PACKET_LENGTH];
 
-void update_led(dd *robot);
+void flash_led(dd *robot);
+void set_led(uint8_t team, uint8_t state);
 
 void rf_parse(unsigned char *buffer, dd *robot) {
 	switch(buffer[0]) {
 		case COMM_TEST:
 			//FLASH LEDS
 			dd_disable(robot);
-			dd_comm_test(robot);
-			update_led(robot);
+			flash_led(robot);
 			break;
 		
 		case PLAY:
 			// SET STATE TO PLAY 
+			set_led(robot->team, ON);
 			dd_enable(robot);
 			break;
 			
@@ -42,6 +43,7 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 		
 		case PAUSE:
 			//PAUSE
+			set_led(0, OFF);
 			dd_disable(robot);
 			break;
 		
@@ -56,10 +58,12 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 				eeprom_write_byte(&eepDirection, (uint8_t) POS_Y);
 				robot->direction = POS_Y;
 			}
+			flash_led(robot);
 			break;
 
 		case GAME_OVER:
 			//PAUSE
+			set_led(0, OFF);
 			dd_disable(robot);
 			break;
 
@@ -86,7 +90,7 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			buffer[5] = (uint8_t) robot->direction;
 			buffer[6] = robot->team;
 			m_rf_send(buffer[1], buffer, PACKET_LENGTH);
-			update_led(robot);
+			flash_led(robot);
 
 			break;
 
@@ -144,19 +148,32 @@ void usb_read_command() {
 	}
 }
 
-void update_led(dd *robot) {
-	uint8_t redPin = 5;
-	uint8_t bluePin = 6;
+void set_led(uint8_t team, uint8_t state) {
+	if (state == ON) {
+		if(team == RED) {
+			set(PORTD, PIN_RED);
+			clr(PORTD, PIN_BLUE);
+		} else {
+			clr(PORTD, PIN_RED);
+			set(PORTD, PIN_BLUE);
+		}
+	} else {
+		clr(PORTD, PIN_RED);
+		clr(PORTD, PIN_BLUE);
+	}
+} 
+
+void flash_led(dd *robot) {
 	uint8_t blinkPin;
 
 	if (robot->team == RED) {
-		set(PORTD, redPin);
-		clr(PORTD, bluePin);
-		blinkPin = redPin;
+		set(PORTD, PIN_RED);
+		clr(PORTD, PIN_BLUE);
+		blinkPin = PIN_RED;
 	} else {
-		clr(PORTD, redPin);
-		set(PORTD, bluePin);
-		blinkPin = bluePin;
+		clr(PORTD, PIN_RED);
+		set(PORTD, PIN_BLUE);
+		blinkPin = PIN_BLUE;
 	}
 
 	if (robot->direction == POS_Y) {

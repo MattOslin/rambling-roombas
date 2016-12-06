@@ -160,7 +160,3 @@ float get_radius_curv(dd *rob){
 	}
 	return rob->veloDesired/rob->omegaDesired;// actual equation Vdes/omDes = -R/(2*Rr)
 }
-void dd_comm_test(dd *rob) {
-	//
-}
-
