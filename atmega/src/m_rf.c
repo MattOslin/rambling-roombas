@@ -12,7 +12,7 @@
 #define	MRFREAD			0x02
 #define MRFSEND			0x03
 
-char m_rf_open(char channel, char RXaddress, char packet_length)
+char m_rf_open(unsigned char channel,unsigned char RXaddress,unsigned char packet_length)
 {	
 	// START | MRFTWIADDR | MRFINIT | channel | RXaddress | packet_length | STOP
 	
@@ -55,7 +55,7 @@ char m_rf_open(char channel, char RXaddress, char packet_length)
 	return 1;
 }
 
-char m_rf_read(char* buffer, char packet_length)
+char m_rf_read(unsigned char* buffer, unsigned char packet_length)
 {
 	// START | MRFTWIADDR (in MR mode) | (BYTES) | (DATA_0) | ... | (DATA_N) | STOP
 
@@ -102,7 +102,7 @@ char m_rf_read(char* buffer, char packet_length)
 	return 1;
 }
 
-char m_rf_send(char TXaddress, char* buffer, char packet_length)
+char m_rf_send(unsigned char TXaddress, unsigned char* buffer, unsigned char packet_length)
 {
 	// START | MRFTWIADDR | MRFSEND | TXaddress | DATA_0 | ... | DATA_N | STOP
 	

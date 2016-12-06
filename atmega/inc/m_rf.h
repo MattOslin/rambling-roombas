@@ -15,7 +15,7 @@
 // Public functions:
 // -----------------------------------------------------------------------------
 
-char m_rf_open(char channel, char RXaddress, char packet_length);
+char m_rf_open(unsigned char channel, unsigned char RXaddress, unsigned char packet_length);
 // FUNCTIONALITY:
 // configure the RF communications channel and place in RX mode, 
 // which will take INT2 low when data is available
@@ -30,7 +30,7 @@ char m_rf_open(char channel, char RXaddress, char packet_length);
 // 0 : something went wrong
 
 
-char m_rf_read(char* buffer, char packet_length);
+char m_rf_read(unsigned char* buffer, unsigned char packet_length);
 // FUNCTIONALITY
 // get the message from the module's receive buffer
 //
@@ -43,7 +43,7 @@ char m_rf_read(char* buffer, char packet_length);
 // 0 : not connected, nothing to read, or buffer length mismatch
 
 
-char m_rf_send(char TXaddress, char* buffer, char packet_length);
+char m_rf_send(unsigned char TXaddress, unsigned char* buffer, unsigned char packet_length);
 // FUNCTIONALITY:
 // take the transmitter out of receive mode
 // send a message to a specified receiver

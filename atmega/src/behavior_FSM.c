@@ -176,8 +176,8 @@ state puck_pursue(dd *robot, pk *puck)
 	float kd = 6;
 	float k1 = .4;
 	float k2 = 2;
-	float kap = 1.5;
-	float kad = .1;
+	float kap = 0;//.6;
+	float kad = 0;//.1;
 	static float prevAlpha = 0;
 	float alpha = ANG_REMAP(robot->global.th + puck->th - PI/2);
 	robot->omegaDesired = kp * puck->th  + kd * (puck->th - puck->thPrev)+ kap * alpha - kad * prevAlpha;
@@ -189,15 +189,42 @@ state puck_pursue(dd *robot, pk *puck)
 
 state puck_to_goal(dd *robot, pk *puck)
 {
-    // printf("puck_to_goal\t");
-	robot->desLoc.x = -62;
-	robot->desLoc.y = -280;
-	robot->desLoc.th = -PI/2;
-	
-	dd_goto_spiral(robot,.2);
+	robot->desLoc.x = 0;
+	robot->desLoc.y = 300;
+	robot->desLoc.th = PI/2;
 
+    static float prevAlpha = 0;
+    static float prevPhi = 0;
+    float kp = 2;
+    float kd = 6;
+    float k1 = .4;
+    float k2 = 2;
+    float kap = 0;//1.5;
+    float kad = 0;//;.1;
+    float gamma = atan2(robot->desLoc.y - robot->global.y, robot->desLoc.x - robot->global.x);
+    float phi = ANG_REMAP(gamma - robot->global.th);
+    float alpha = ANG_REMAP(gamma - robot->desLoc.th);
+    robot->omegaDesired = kp * phi  + kd * (phi - prevPhi)+ kap * alpha - kad * prevAlpha;
+    robot->veloDesired = k1 / (k2 * ABS(robot->omegaDesired) + 1);
+    robot->veloDesired = MAX(robot->veloDesired, 2 * MIN_PUCK_TURN_RAD * robot->omegaDesired / WHEEL_RADIAL_LOC);
+    dd_norm(robot,.3);
+    prevAlpha = alpha;
+    prevPhi = phi;   // printf("puck_to_goal\t");
     return ST_PK_TO_GOAL;
+
 }
+
+// state puck_to_goal(dd *robot, pk *puck)
+// {
+//     // printf("puck_to_goal\t");
+// 	robot->desLoc.x = -62;
+// 	robot->desLoc.y = -280;
+// 	robot->desLoc.th = -PI/2;
+	
+// 	dd_goto_spiral(robot,.2);
+
+//     return ST_PK_TO_GOAL;
+// }
 
 state goal_made(dd *robot, pk *puck)
 {
