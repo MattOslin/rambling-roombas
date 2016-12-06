@@ -47,9 +47,9 @@ bool localize_cal(void) {
 	return false;
 }
 
-void localize_enc(pos* posStruct, double encCountsL, double encCountsR) {
-	double mean = (encCountsR + encCountsL)/2;
-	double diff = (encCountsR - encCountsL)/(2*WHEEL_RADIAL_LOC);
+void localize_enc(pos* posStruct, float encCountsL, float encCountsR) {
+	float mean = (encCountsR + encCountsL)/2;
+	float diff = (encCountsR - encCountsL)/(2*WHEEL_RADIAL_LOC);
 	posStruct->th = posStruct->th + diff;
 	posStruct->x = posStruct->x + mean*cos(posStruct->th);
 	posStruct->y = posStruct->y + mean*sin(posStruct->th);
@@ -137,21 +137,21 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t* badIdx, ui
 	posStruct->th = angMat[ptA][ptB] - atan2(diffY, diffX);
 	// posStruct->th = ANG_REMAP(posStruct->th);
 
-	double cosTH = cos(posStruct->th);
-	double sinTH = sin(posStruct->th);
-	double vX, vY, yShift;
+	float cosTH = cos(posStruct->th);
+	float sinTH = sin(posStruct->th);
+	float vX, vY, yShift;
 
 	if (missingPoint > 1) {
-		vX =  511 + calX - (double) (blobs[3*pointIdx[0]]+blobs[3*pointIdx[1]])/2.0;
-		vY = -384 + calY + (double) (blobs[3*pointIdx[0]+1]+blobs[3*pointIdx[1]+1])/2.0;
+		vX =  511 + calX - (float) (blobs[3*pointIdx[0]]+blobs[3*pointIdx[1]])/2.0;
+		vY = -384 + calY + (float) (blobs[3*pointIdx[0]+1]+blobs[3*pointIdx[1]+1])/2.0;
 		yShift = 0;
 	} else if (missingPoint == 1) {
-		vX =  511 + calX - (double) blobs[3*pointIdx[0]];
-		vY = -384 + calY + (double) blobs[3*pointIdx[0]+1];
+		vX =  511 + calX - (float) blobs[3*pointIdx[0]];
+		vY = -384 + calY + (float) blobs[3*pointIdx[0]+1];
 		yShift = 50;
 	} else {
-		vX =  511 + calX - (double) blobs[3*pointIdx[1]];
-		vY = -384 + calY + (double) blobs[3*pointIdx[1]+1];
+		vX =  511 + calX - (float) blobs[3*pointIdx[1]];
+		vY = -384 + calY + (float) blobs[3*pointIdx[1]+1];
 		// vX = blobs[3*pointIdx[1]] - 512;
 		// vY = blobs[3*pointIdx[1]+1] - 384; 
 		yShift = -50;

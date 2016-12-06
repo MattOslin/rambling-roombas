@@ -22,6 +22,6 @@ enum rf_command {
 
 void rf_parse(unsigned char *buffer, dd *robot);
 void rf_diagnostics(dd *robot);
-void usb_read_command(void);
+// void usb_read_command(void);
 
 #endif /* COMMS_H_ */

@@ -15,27 +15,27 @@
 ***********************************************************************************/
 
 #define NUMADCS 8
-#define NUMADCS_HI_RES 0
+
 const uint8_t ADCsToRead[] = 
 	{ADC0,ADC1,ADC4,ADC5,ADC6,ADC7/*,ADC8,ADC9*/,ADC10/*,ADC11*/,ADC12/*,ADC13,ADC4, ADC5*/};
 //Disable Digital Inputs
-void adc_dis_digi()
-{
-// set(DIDR0, ADC0D);	//F0
-// set(DIDR0, ADC1D);	//F1
-// set(DIDR0, ADC4D);	//F4
-// set(DIDR0, ADC5D);	//F5
-// set(DIDR0, ADC6D);	//F6
-// set(DIDR0, ADC7D);	//F7
-	DIDR0 = 0xF3;
-// // set(DIDR2, ADC8D);	//D4
-// // set(DIDR2, ADC9D);	//D6
-// set(DIDR2, ADC10D);	//D7
-// // set(DIDR2, ADC11D);	//B4 Used in motor controller
-// set(DIDR2, ADC12D);	//B5
-// // set(DIDR2, ADC13D);	//B6
-	DIDR2 = 0x14;
-}
+// void adc_dis_digi()
+// {
+// // set(DIDR0, ADC0D);	//F0
+// // set(DIDR0, ADC1D);	//F1
+// // set(DIDR0, ADC4D);	//F4
+// // set(DIDR0, ADC5D);	//F5
+// // set(DIDR0, ADC6D);	//F6
+// // set(DIDR0, ADC7D);	//F7
+// 	DIDR0 = 0xF3;
+// // // set(DIDR2, ADC8D);	//D4
+// // // set(DIDR2, ADC9D);	//D6
+// // set(DIDR2, ADC10D);	//D7
+// // // set(DIDR2, ADC11D);	//B4 Used in motor controller
+// // set(DIDR2, ADC12D);	//B5
+// // // set(DIDR2, ADC13D);	//B6
+// 	DIDR2 = 0x14;
+// }
 
 /***********************************************************************************
 ***********************************************************************************/
@@ -54,8 +54,10 @@ void adc_init() {
 
 	//Disable Digital Inputs 
 
-	adc_dis_digi();
-	
+	// adc_dis_digi();
+	DIDR0 = 0xF3;
+	DIDR2 = 0x14;
+
 	//Set ADC Interrupt
 	set(ADCSRA, ADIE);
 
@@ -72,7 +74,7 @@ void adc_init() {
 	// 	ADCSRB |= 1 << MUX5; 
 	// }
 
-	ADMUX = (ADMUX & 0b11111000) + ADCsToRead[0] % 8;
+	ADMUX = (ADMUX & 0b11111000);// + ADCsToRead[0] % 8;
 	// set(ADMUX , MUX2);
 	// clr(ADMUX , MUX1);
 	// clr(ADMUX , MUX0);
@@ -88,23 +90,12 @@ void adc_read(uint16_t rawADCCounts[])
 	rawADCCounts[ADCIndex] = ADC;
 
 	//Choose which ADC to run next and set ADMUX register
-	ADCIndex = (ADCIndex + 1) % (NUMADCS+NUMADCS_HI_RES);
+	ADCIndex = (ADCIndex + 1) % NUMADCS;
   	clr(ADCSRA,ADEN); // turn off ADC while changing registers to avoid spurious behavior
 
-  	// //Setting high mosfet gate for hi_res reading
-  	// if (ADCIndex < NUMADCS) {
-  	// 	clr(PORTB,4);
-  	// }
-  	// else {
-  	// 	set(PORTB,4);
-  	// }
-
-	if (ADCsToRead[ADCIndex] < 8)
-	{
+	if (ADCsToRead[ADCIndex] < 8) {
 		clr(ADCSRB, MUX5); //ADCSRB &= 0 << MUX5; //clr(ADCSRB, MUX5);
-	}
-	else
-	{
+	} else {
 		ADCSRB |= 1 << MUX5; //set(ADCSRB, MUX5);
 	}
 	ADMUX = (ADMUX & 0b11111000) + ADCsToRead[ADCIndex] % 8;
