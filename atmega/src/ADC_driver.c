@@ -89,13 +89,13 @@ void adc_read(uint16_t rawADCCounts[])
 	ADCIndex = (ADCIndex + 1) % (NUMADCS+NUMADCS_HI_RES);
   	clr(ADCSRA,ADEN); // turn off ADC while changing registers to avoid spurious behavior
 
-  	//Setting high mosfet gate for hi_res reading
-  	if (ADCIndex < NUMADCS) {
-  		clr(PORTB,4);
-  	}
-  	else {
-  		set(PORTB,4);
-  	}
+  	// //Setting high mosfet gate for hi_res reading
+  	// if (ADCIndex < NUMADCS) {
+  	// 	clr(PORTB,4);
+  	// }
+  	// else {
+  	// 	set(PORTB,4);
+  	// }
 
 	if (ADCsToRead[ADCIndex] < 8)
 	{

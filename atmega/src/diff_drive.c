@@ -1,6 +1,5 @@
 
 #include "diff_drive.h"
-#include "m_usb.h"
 
 void dd_drive(dd *rob);
 void dd_toggle(pin *pinToToggle);
@@ -120,6 +119,27 @@ void dd_goto_spiral(dd *rob, float veloDes){
 	rob->omegaDesired = - (veloDes / r) *(K2 * (del - atan(-K1 * theta))
 	                    + ( 1 + K1 / (1 + K1 * K1 * theta * theta)) * sin(del));
 	
+}
+void dd_goto(dd *rob, pk *puck, float veloDes){
+	static float prevAlpha = 0;
+    static float prevPhi = 0;
+    float kp = 2;
+    float kd = 6;
+    float k1 = .4;
+    float k2 = 2;
+    float kap = 0;//1.5;
+    float kad = 0;//;.1;
+    float gamma = atan2(rob->desLoc.y - rob->global.y, rob->desLoc.x - rob->global.x);
+    float phi = ANG_REMAP(gamma - rob->global.th);
+    float alpha = ANG_REMAP(gamma - rob->desLoc.th);
+    rob->omegaDesired = kp * phi  + kd * (phi - prevPhi)+ kap * alpha - kad * prevAlpha;
+    rob->veloDesired = k1 / (k2 * ABS(rob->omegaDesired) + 1);
+    if (puck->isHave){
+    	rob->veloDesired = MAX(rob->veloDesired, 2 * MIN_PUCK_TURN_RAD * ABS(rob->omegaDesired) / WHEEL_RADIAL_LOC);
+    }
+    dd_norm(rob,.4);
+    prevAlpha = alpha;
+    prevPhi = phi;  
 }
 
 void dd_goto_spiral2(dd *robot, float veloDes){

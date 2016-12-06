@@ -14,6 +14,7 @@ pk puck;
 // Global flags for interrupts
 volatile bool CTRLreadyFlag = FALSE;	// Frequency control flag for control loop
 volatile bool isCommandReady = FALSE; // RF command flag
+volatile bool isADCRead = FALSE; 
 
 //Global Variable
 uint16_t rawADCCounts[12];	// Array of raw ADC values
@@ -40,15 +41,34 @@ int main(void) {
 	robot.desLoc.th = 0;
 	init_fsm();
 	m_green(ON); // Ready LED
-	while(1){
-		system_check(&robot);
-	}
+	// while(1){
+	// 	// system_check(&robot);
+	// 	// robot.solenoid = TRUE;
+	// 	// solenoid_update(&robot);
+
+	// }
 	//Main process loop
     while (1) //Stay in this loop forever
     {
+
+		//RF Command inputs
+		if (isCommandReady) {	
+			m_green(TOGGLE);
+			isCommandReady = FALSE;
+			m_rf_read(buffer,PACKET_LENGTH);// pull the packet
+			rf_parse(buffer, &robot);
+		}
+
+		if (isADCRead) {	
+			toggle(PORTB,4);
+			isADCRead = FALSE;
+			adc_read(rawADCCounts);
+		}
+
 		if (CTRLreadyFlag) {
 			
-			CTRLreadyFlag = FALSE; //Reset flag for interrupt
+			CTRLreadyFlag = FALSE; //Reset flag for interrupt	
+			localize_wii(&(robot.global));
 			puck_update(&puck, rawADCCounts);
 			find_state(&robot,&puck);
 
@@ -71,15 +91,7 @@ int main(void) {
 			count++;
 		}
 
-		//RF Command inputs
-		if (isCommandReady) {	
-			m_green(TOGGLE);
-			isCommandReady = FALSE;
-			rf_parse(buffer, &robot);
-		}
-
 		if(count%10 == 0) {
-			localize_wii(&(robot.global));
 			usb_debug(&robot, &puck); // USB Debug function below
 		}
 	}
@@ -91,14 +103,12 @@ int main(void) {
 // In theory 9.6 kHz (VALIDATED without load)
 ISR(ADC_vect)
 {
-	toggle(PORTD,4);
-	adc_read(rawADCCounts);
+	isADCRead = TRUE;
 }
 
 //RF Command Interupt Handler.
 ISR(INT2_vect){
 	isCommandReady = TRUE;
-	m_rf_read(buffer,PACKET_LENGTH);// pull the packet
 }
 
 //Interrupt for CTRL_FREQ frequency control loop
@@ -155,6 +165,10 @@ void usb_debug(dd *rob, pk *puck){
 	m_usb_tx_int(rob->global.y);
 	m_usb_tx_string(",");
 	m_usb_tx_int(100 * rob->global.th);
+	m_usb_tx_string(" Team:");
+	m_usb_tx_int(rob->team);
+	m_usb_tx_string(" Direction:");
+	m_usb_tx_int(rob->direction);
 
 	// m_usb_tx_string(" STATE: ");
 	// m_usb_tx_int(rob->nxtSt);

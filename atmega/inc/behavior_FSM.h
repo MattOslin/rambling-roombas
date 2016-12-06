@@ -4,6 +4,7 @@
 #define BEHAVIOR_FSM_H_
 
 #include "m_general.h"
+#include "m_usb.h"
 #include "init.h"
 
 void init_fsm();

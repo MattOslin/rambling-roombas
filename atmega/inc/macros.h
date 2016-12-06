@@ -13,9 +13,9 @@
 
 
 #define CHANNEL 1
-#define MY_ADDRESS 20 /*21*/ /*22*/
+#define MY_ADDRESS 21 /*21*/ /*22*/
 #define PACKET_LENGTH 10
-// #define USE_EEP_ADDRESS
+#define USE_EEP_ADDRESS
 
 #define NEG_Y -1
 #define POS_Y 1
@@ -27,7 +27,7 @@
 #define PIN_BLUE 6
 
 #define SOL_ON_TIME 200  //in milliseconds
-
+#define SOL_COOLDOWN_TIME 500 //in milliseconds
 //Helper Macros
 #define ABS(X)				(X < 0 ?-X : X)
 #define MIN(X,Y)			(X < Y ? X : Y)
@@ -35,6 +35,15 @@
 #define clr(reg,bit)		reg &= ~(1<<(bit))
 #define ANG_REMAP(TH)		(TH > PI ? TH - 2 * PI : (TH < -PI ? TH + 2 * PI : TH))
 
-#define SOLENOID(val)		set(DDRB,1); if(val==OFF){set(PORTB,1); }else if(val==ON){clr(PORTB,1);}else if(val==TOGGLE){toggle(PORTB,1);}
+#define SOLENOID(val)		set(DDRB,1); if(val==OFF){clr(PORTB,1); }else if(val==ON){set(PORTB,1);}else if(val==TOGGLE){toggle(PORTB,1);}
+
+typedef struct puckInfo {
+	float r;		//
+	float th;
+	float thPrev;
+	bool isFound;
+	bool isBehind;
+	bool isHave;
+} pk;
 
 #endif

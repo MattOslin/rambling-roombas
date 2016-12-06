@@ -9,21 +9,24 @@
 #include "comms.h"
 #include "eep_locations.h"
 
-typedef struct puckInfo {
-	float r;		//
-	float th;
-	float thPrev;
-	bool isFound;
-	bool isBehind;
-	bool isHave;
-} pk;
+// typedef struct puckInfo {
+// 	float r;		//
+// 	float th;
+// 	float thPrev;
+// 	bool isFound;
+// 	bool isBehind;
+// 	bool isHave;
+// } pk;
 
 // Initialize helper functions
 
 void m2_init(void);
 uint32_t millis(void); // Returns current milliseconds count
 void dd_init(dd *rob);
+
 void puck_update(pk *puck, uint16_t* ADCs);
+void shoot_puck(dd *rob, pk *puck);
+
 void solenoid_update(dd *rob);
 float atan2_aprox(float x, float y);
 bool system_check(dd*rob);

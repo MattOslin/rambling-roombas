@@ -3,6 +3,8 @@
 
 #include "m_general.h"
 #include "motor_driver.h"
+#include "macros.h"
+#include "m_usb.h"
 // Position,
 // contains x, y, and theta values 
 #define WHEEL_RADIAL_LOC 52 //mm
@@ -38,7 +40,9 @@ void dd_disable(dd *rob);
 void dd_update(dd *rob);
 void dd_norm(dd *rob, float maxV);
 
+
 bool dd_is_loc(dd *rob, float posThresh,float thThresh);
+void dd_goto(dd *rob, pk *puck, float veloDes);
 void dd_goto_spiral(dd *rob, float veloDes);
 void dd_goto_spiral2(dd *rob, float veloDes);
 bool dd_goto_rot_trans(dd *rob, float veloDes);

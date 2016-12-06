@@ -291,19 +291,36 @@ void puck_update(pk *puck, uint16_t *ADCs) {
 	puck->r = 0;
 	puck->isHave = ADCs[4]<900;
 }
+
+
+void shoot_puck(dd *rob, pk *puck){
+	
+}
+
 void solenoid_update(dd *rob){
 	static uint32_t time;
-	static bool isFiring;
-	if (rob->solenoid){
+	static bool isFiring = FALSE;
+	static bool isCooldown = FALSE;
+	if (isFiring){
+		if ((millis() - time) > SOL_ON_TIME ){
+			SOLENOID(OFF);
+			isFiring = FALSE;
+			time = millis();
+			isCooldown = TRUE;
+		}
+	}
+	else if (isCooldown){
+		if ((millis() - time) > SOL_COOLDOWN_TIME){
+			isCooldown = FALSE;
+		}
+	}
+	else if (rob->solenoid){
 		rob->solenoid = 0;
 		time = millis();
 		SOLENOID(ON);
 		isFiring = TRUE;
 	}
-	else if (isFiring && (millis() - time > SOL_ON_TIME)) {
-		SOLENOID(OFF);
-		isFiring = FALSE;
-	}
+
 }
 
 bool system_check(dd *rob){
