@@ -11,6 +11,11 @@
 #define CTRL_FREQ 100		// Control loop frequency w/1024 timer0 prscl 62 -> 5kHz
 #define POS_THRESH 2 //cm threshold for success
 
+#define GOAL_X 40// xdimension of the top of the goal (negated for bottom)
+#define GOAL_Y 300// y dimension of goal in the rink
+#define SHT_THRSH_NEAR 65
+#define SHT_THRSH_FAR 100
+
 
 #define CHANNEL 1
 #define MY_ADDRESS 21 /*21*/ /*22*/
