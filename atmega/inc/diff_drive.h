@@ -38,7 +38,6 @@ void dd_disable(dd *rob);
 void dd_update(dd *rob);
 void dd_norm(dd *rob, float maxV);
 
-void dd_comm_test(dd *rob);
 bool dd_is_loc(dd *rob, float posThresh,float thThresh);
 void dd_goto_spiral(dd *rob, float veloDes);
 void dd_goto_spiral2(dd *rob, float veloDes);

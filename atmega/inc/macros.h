@@ -23,6 +23,9 @@
 #define RED 0
 #define BLUE 1
 
+#define PIN_RED 5
+#define PIN_BLUE 6
+
 #define SOL_ON_TIME 200  //in milliseconds
 
 //Helper Macros
