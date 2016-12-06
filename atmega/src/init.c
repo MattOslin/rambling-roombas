@@ -222,49 +222,49 @@ uint32_t millis(void) {
 	return milliseconds;
 }
 
-float atan2_aprox(float x, float y) {
+// float atan2_aprox(float x, float y) {
 
-	const float k = .28125;
+// 	const float k = .28125;
 
-	if (x == 0 || y == 0){
-		if (x == y){
-			return 0;
-		}
-		else{
-			if (x == 0){
-				return y > 0 ? PI/2 : -PI/2;
-			}
-			else{
-				return x > 0 ? 0 : PI;
-			}
-		}
-	}
+// 	if (x == 0 || y == 0){
+// 		if (x == y){
+// 			return 0;
+// 		}
+// 		else{
+// 			if (x == 0){
+// 				return y > 0 ? PI/2 : -PI/2;
+// 			}
+// 			else{
+// 				return x > 0 ? 0 : PI;
+// 			}
+// 		}
+// 	}
 
-	if (ABS(x) > ABS(y)){
-		if( x > 0 ){
-				//1
-				//8
-			return (x * y / ( y * y + k * x * x));
-		}
-		else{
-				//4
-				//5
-			return (PI + x * y / ( y * y + k * x * x));
-		}
-	}
-	else{
-		if( y > 0 ){
-				//2
-				//3
-			return ((PI / 2) - x * y / ( x * x + k * y * y));
-		}
-		else{
-				//6
-				//7
-			return (-(PI / 2) - x * y / ( x * x + k * y * y));
-		}
-	}
-}
+// 	if (ABS(x) > ABS(y)){
+// 		if( x > 0 ){
+// 				//1
+// 				//8
+// 			return (x * y / ( y * y + k * x * x));
+// 		}
+// 		else{
+// 				//4
+// 				//5
+// 			return (PI + x * y / ( y * y + k * x * x));
+// 		}
+// 	}
+// 	else{
+// 		if( y > 0 ){
+// 				//2
+// 				//3
+// 			return ((PI / 2) - x * y / ( x * x + k * y * y));
+// 		}
+// 		else{
+// 				//6
+// 				//7
+// 			return (-(PI / 2) - x * y / ( x * x + k * y * y));
+// 		}
+// 	}
+// }
 
 
 //TEMP LOCATION OF PUCK UPDATE

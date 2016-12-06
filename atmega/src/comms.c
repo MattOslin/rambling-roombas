@@ -176,39 +176,44 @@ void flash_led(dd *robot) {
 		blinkPin = PIN_BLUE;
 	}
 
+	int i;
 	if (robot->direction == POS_Y) {
 		m_wait(250);
 		clr(PORTD, blinkPin);
-		m_wait(250);
-		set(PORTD, blinkPin);
-		m_wait(250);
-		clr(PORTD, blinkPin);
-		m_wait(250);
-		set(PORTD, blinkPin);
-		m_wait(250);
-		clr(PORTD, blinkPin);
+		for (i = 0; i < 2; i++) {
+			m_wait(250);
+			set(PORTD, blinkPin);
+			m_wait(250);
+			clr(PORTD, blinkPin);
+		}
+		// m_wait(250);
+		// set(PORTD, blinkPin);
+		// m_wait(250);
+		// clr(PORTD, blinkPin);
 	} else {
 		m_wait(75);
 		clr(PORTD, blinkPin);
-		m_wait(75);
-		set(PORTD, blinkPin);
-		m_wait(75);
-		clr(PORTD, blinkPin);
-		m_wait(75);
-		set(PORTD, blinkPin);
-		m_wait(75);
-		clr(PORTD, blinkPin);
-		m_wait(75);
-		set(PORTD, blinkPin);
-		m_wait(75);
-		clr(PORTD, blinkPin);
-		m_wait(75);
-		set(PORTD, blinkPin);
-		m_wait(75);
-		clr(PORTD, blinkPin);
-		m_wait(75);
-		set(PORTD, blinkPin);
-		m_wait(75);
-		clr(PORTD, blinkPin);
+		for(i = 0; i < 5; i++) {
+			m_wait(75);
+			set(PORTD, blinkPin);
+			m_wait(75);
+			clr(PORTD, blinkPin);
+		}
+		// m_wait(75);
+		// set(PORTD, blinkPin);
+		// m_wait(75);
+		// clr(PORTD, blinkPin);
+		// m_wait(75);
+		// set(PORTD, blinkPin);
+		// m_wait(75);
+		// clr(PORTD, blinkPin);
+		// m_wait(75);
+		// set(PORTD, blinkPin);
+		// m_wait(75);
+		// clr(PORTD, blinkPin);
+		// m_wait(75);
+		// set(PORTD, blinkPin);
+		// m_wait(75);
+		// clr(PORTD, blinkPin);
 	}
 }
