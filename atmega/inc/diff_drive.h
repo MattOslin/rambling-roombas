@@ -33,6 +33,7 @@ typedef struct diffDrive {
 	uint8_t team;
 	uint8_t solenoid;
 	uint8_t goalMade;
+	uint8_t myAddress;
 } dd;
 
 void dd_enable(dd *rob);

@@ -59,7 +59,7 @@ int main(void) {
 		}
 
 		if (isADCRead) {	
-			toggle(PORTB,4);
+			//toggle(PORTB,4);
 			isADCRead = FALSE;
 			adc_read(rawADCCounts);
 		}
@@ -169,6 +169,23 @@ void usb_debug(dd *rob, pk *puck){
 //	m_usb_tx_string(" Direction:");
 //	m_usb_tx_int(rob->direction);
 
+	// m_usb_tx_string(" STATE: ");
+	// m_usb_tx_int(rob->nxtSt);
+	// m_usb_tx_string(" EVENT: ");
+	// m_usb_tx_int(rob->ev);
+	// m_usb_tx_string(" enable: ");
+	// m_usb_tx_int(rob->enable);
+	
+  int i;
+  for(i=0;i<8;i++){
+	m_usb_tx_string(" ADC");
+	m_usb_tx_int(i);
+	m_usb_tx_string(" ");
+    m_usb_tx_int(rawADCCounts[i]);
+  }
+//   m_usb_tx_string(" Ping: ");
+//   m_usb_tx_int(rob->ping);
+
 //	 m_usb_tx_string(" STATE: ");
 //	 m_usb_tx_int(rob->nxtSt);
 //	 m_usb_tx_string(" EVENT: ");
@@ -186,16 +203,23 @@ void usb_debug(dd *rob, pk *puck){
 //  m_usb_tx_string(" Ping: ");
 //  m_usb_tx_int(rob->ping);
 
-	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepAddress));
-	// m_usb_tx_string(" ");
-	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepDirection));
-	// m_usb_tx_string(" ");
-	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepTeam));
+ // 	m_usb_tx_string(" Puck TH: ");
+ // 	m_usb_tx_int((int)100*puck->th);
+ // 	m_usb_tx_string(" isFound: ");
+ // 	m_usb_tx_int(puck->isFound);
+	// m_usb_tx_string(" puckHave ADC: ");
+ // 	m_usb_tx_int(rawADCCounts[4]);
+ // 	m_usb_tx_string(" isHave: ");
+ // 	m_usb_tx_int(puck->isHave);
+	// m_usb_tx_string(" commVelo: ");
+ // 	m_usb_tx_int(100*rob->veloDesired);
+	// m_usb_tx_string(" commOm: ");
+ // 	m_usb_tx_int(100*rob->omegaDesired);
+ 	// m_usb_tx_string(" state: ");
+ 	// m_usb_tx_int(rob->nxtSt);
+ 	
+	m_usb_tx_string("\n");
 
-	// m_usb_tx_string(" ADC L: ");
- // 	m_usb_tx_int(rawADCCounts[3]);
-	// m_usb_tx_string(" ADC R: ");
- // 	m_usb_tx_int(rawADCCounts[1]);
  // 	m_usb_tx_string(" Puck TH: ");
  // 	m_usb_tx_int((int)100*puck->th);
  // 	m_usb_tx_string(" isFound: ");
@@ -215,6 +239,5 @@ void usb_debug(dd *rob, pk *puck){
 
 //   	m_usb_tx_string("\n");
     
-
 
 }
