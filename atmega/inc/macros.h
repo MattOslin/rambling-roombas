@@ -17,6 +17,7 @@
 #define SHT_THRSH_FAR 100
 #define SHT_DIST_THRSH 20
 
+#define GOALIE_ADD 20
 #define CHANNEL 1
 #define MY_ADDRESS 21 /*21*/ /*22*/
 #define PACKET_LENGTH 10

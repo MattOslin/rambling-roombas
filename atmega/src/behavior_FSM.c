@@ -4,12 +4,13 @@
 #include <stdio.h>
 #include "behavior_FSM.h"
 #define DES_SPEED .4
+
 //http://stackoverflow.com/questions/1647631/c-state-machine-design/1647679#1647679
 
 //ONE OPTION
 //Default state must be ZERO
-typedef enum {ST_ERROR = -1, ST_STANDBY, ST_PK_SEARCH, ST_GO_BACK, ST_PK_BEHIND, ST_PK_PURSUE, ST_PK_TO_GOAL, ST_GOAL_MADE, NUM_ST} state;
-typedef enum {EV_ERROR = -1, EV_STANDBY, EV_GO_BACK, EV_DEF_READY, EV_PLAY, EV_PK_OBSCURED, EV_PK_FOUND, EV_PK_BEHIND, EV_PK_OBTAINED, EV_GOAL_MADE, NUM_EV} event;
+typedef enum {ST_ERROR = -1, ST_STANDBY, ST_PK_SEARCH/*, ST_GO_BACK*/, ST_PK_BEHIND, ST_PK_PURSUE, ST_PK_TO_GOAL, ST_GOAL_MADE, ST_GOALIE_RETURN, NUM_ST} state;
+typedef enum {EV_ERROR = -1, EV_STANDBY, /*EV_GO_BACK, EV_DEF_READY,*/ EV_PLAY, EV_PK_OBSCURED, EV_PK_FOUND, EV_PK_BEHIND, EV_PK_OBTAINED, EV_GOAL_MADE, NUM_EV} event;
 
 typedef state state_fn(dd *rob, pk *puck);
 
@@ -27,27 +28,26 @@ void init_fsm(){
 	}
 	transArr[ST_PK_SEARCH]	[EV_PK_OBSCURED]	= &puck_search;
 	transArr[ST_PK_SEARCH]	[EV_PK_FOUND]		= &puck_pursue;
-	transArr[ST_PK_SEARCH]	[EV_PK_BEHIND]		= &puck_behind;
-	transArr[ST_PK_SEARCH]	[EV_GO_BACK]		= &go_back;
+	// transArr[ST_PK_SEARCH]	[EV_PK_BEHIND]		= &puck_behind;
+	// transArr[ST_PK_SEARCH]	[EV_GO_BACK]		= &go_back;
 
 	transArr[ST_PK_BEHIND]	[EV_PK_FOUND]		= &puck_pursue;
-	transArr[ST_PK_BEHIND]	[EV_PK_BEHIND]		= &puck_behind_persist;
+	// transArr[ST_PK_BEHIND]	[EV_PK_BEHIND]		= &puck_behind_persist;
 	transArr[ST_PK_BEHIND]	[EV_PK_OBSCURED]	= &puck_search;
 	transArr[ST_PK_BEHIND]	[EV_PK_OBTAINED]	= &puck_to_goal;
-	transArr[ST_PK_BEHIND]	[EV_GO_BACK]		= &go_back;
+	// transArr[ST_PK_BEHIND]	[EV_GO_BACK]		= &go_back;
 
 	transArr[ST_PK_PURSUE]	[EV_PK_FOUND]		= &puck_pursue;
 	transArr[ST_PK_PURSUE]	[EV_PK_OBSCURED]	= &puck_search;
-	transArr[ST_PK_PURSUE]	[EV_PK_BEHIND]		= &puck_behind;
+	// transArr[ST_PK_PURSUE]	[EV_PK_BEHIND]		= &puck_behind;
 	transArr[ST_PK_PURSUE]	[EV_PK_OBTAINED]	= &puck_to_goal;
-	transArr[ST_PK_PURSUE]	[EV_GO_BACK]		= &go_back;
+	// transArr[ST_PK_PURSUE]	[EV_GO_BACK]		= &go_back;
 
-	transArr[ST_GO_BACK]	[EV_PK_FOUND]		= &go_back_persist;
-	transArr[ST_GO_BACK]	[EV_PK_OBSCURED]	= &go_back_persist;
-	transArr[ST_GO_BACK]	[EV_PK_BEHIND]		= &go_back_persist;
-	transArr[ST_GO_BACK]	[EV_PK_OBTAINED]	= &puck_to_goal;
-	transArr[ST_GO_BACK]	[EV_GO_BACK]		= &go_back_persist;
-	transArr[ST_GO_BACK]	[EV_DEF_READY]		= &puck_search;	
+	transArr[ST_GOALIE_RETURN]	[EV_PK_FOUND]		= &puck_search;
+	transArr[ST_GOALIE_RETURN]	[EV_PK_OBSCURED]	= &puck_search;
+	transArr[ST_GOALIE_RETURN]	[EV_PK_BEHIND]		= &puck_search;
+	transArr[ST_GOALIE_RETURN]	[EV_PK_OBTAINED]	= &puck_to_goal;
+	// transArr[ST_GOALIE_RETURN]	[EV_DEF_READY]		= &puck_search;	
 
 	transArr[ST_PK_TO_GOAL]	[EV_PK_OBTAINED]	= &puck_to_goal;
 	transArr[ST_PK_TO_GOAL]	[EV_PK_FOUND]		= &puck_pursue;
@@ -58,7 +58,7 @@ void init_fsm(){
 	transArr[ST_GOAL_MADE]	[EV_GOAL_MADE]		= &goal_made;
 	transArr[ST_GOAL_MADE]	[EV_PK_OBSCURED]	= &puck_search;
 	transArr[ST_GOAL_MADE]	[EV_PK_FOUND]		= &puck_pursue;
-	transArr[ST_GOAL_MADE]	[EV_PK_BEHIND]		= &puck_behind;
+	// transArr[ST_GOAL_MADE]	[EV_PK_BEHIND]		= &puck_behind;
 	transArr[ST_GOAL_MADE]	[EV_PK_OBTAINED]	= &puck_to_goal;
 
 	for (i = 0; i < NUM_ST; i++) {
@@ -66,7 +66,7 @@ void init_fsm(){
 	}
     transArr[ST_STANDBY]    [EV_PK_OBSCURED]    = &puck_search;
     transArr[ST_STANDBY]    [EV_PK_FOUND]		= &puck_pursue;
-    transArr[ST_STANDBY]    [EV_PK_BEHIND] 		= &puck_behind;
+    // transArr[ST_STANDBY]    [EV_PK_BEHIND] 		= &puck_behind;
     transArr[ST_STANDBY]    [EV_PK_OBTAINED]    = &puck_to_goal;
 }
 
@@ -146,56 +146,66 @@ state puck_search(dd *rob, pk *puck)
 
     rob->veloDesired  = 0;
     rob->omegaDesired = DES_SPEED; 
+
+    if( rob->myAddress == GOALIE_ADD){
+		if(!dd_in_goal(rob,20)){
+			rob->desLoc.x = 0;
+			rob->desLoc.y = -rob->direction * (GOAL_Y-10);
+			rob->desLoc.th = 0;
+    		dd_goto(rob, puck, DES_SPEED);
+			return ST_GOALIE_RETURN;
+		}
+    }
     // printf("puck_search\t");
     return ST_PK_SEARCH;
 }
 
 
-state puck_behind_persist(dd *rob, pk *puck)
-{
+// state puck_behind_persist(dd *rob, pk *puck)
+// {
 
-    dd_goto(rob,puck,DES_SPEED);
+//     dd_goto(rob,puck,DES_SPEED);
 
 
-    // printf("puck_behind\t");
-    return ST_PK_BEHIND;
-}
-state puck_behind(dd *rob, pk *puck)
-{
-    rob->desLoc.x = rob->global.x;
-	rob->desLoc.y = rob->global.y;
-	rob->desLoc.th = ANG_REMAP(rob->global.th + PI);
+//     // printf("puck_behind\t");
+//     return ST_PK_BEHIND;
+// }
+// state puck_behind(dd *rob, pk *puck)
+// {
+//     rob->desLoc.x = rob->global.x;
+// 	rob->desLoc.y = rob->global.y;
+// 	rob->desLoc.th = ANG_REMAP(rob->global.th + PI);
 
-    dd_goto(rob,puck,DES_SPEED);
-    // printf("puck_behind\t");
-    return ST_PK_BEHIND;
-}
+//     dd_goto(rob,puck,DES_SPEED);
+//     // printf("puck_behind\t");
+//     return ST_PK_BEHIND;
+// }
 
-state go_back_persist(dd *rob, pk *puck)
-{
+// state go_back_persist(dd *rob, pk *puck)
+// {
 
-    dd_goto(rob,puck,.5);
+//     dd_goto(rob,puck,.5);
 
-    // printf("puck_behind\t");
-    return ST_GO_BACK;
-}
-state go_back(dd *rob, pk *puck)
-{
-	if (rob->myAddress == 20){
-	    rob->desLoc.x = 0;
-		rob->desLoc.y = - rob->direction *(GOAL_Y - SHT_THRSH_NEAR);
-		rob->desLoc.th = rob->direction * PI/2;
-	}
-	else{
-	    rob->desLoc.x = rob->global.x;
-		rob->desLoc.y = - rob->direction *(GOAL_Y - SHT_THRSH_NEAR);
-		rob->desLoc.th = rob->direction * PI/2;
-	}
+//     // printf("puck_behind\t");
+//     return ST_GO_BACK;
+// }
+// state go_back(dd *rob, pk *puck)
+// {
+// 	if (rob->myAddress == GOALIE_ADD){
+// 	    rob->desLoc.x = 0;
+// 		rob->desLoc.y = - rob->direction *(GOAL_Y - SHT_THRSH_NEAR);
+// 		rob->desLoc.th = rob->direction * PI/2;
+// 	}
+// 	else{
+// 	    rob->desLoc.x = rob->global.x;
+// 		rob->desLoc.y = - rob->direction *(GOAL_Y - SHT_THRSH_NEAR);
+// 		rob->desLoc.th = rob->direction * PI/2;
+// 	}
 
-    dd_goto(rob,puck,DES_SPEED);
-    // printf("puck_behind\t");
-    return ST_GO_BACK;
-}
+//     dd_goto(rob,puck,DES_SPEED);
+//     // printf("puck_behind\t");
+//     return ST_GO_BACK;
+// }
 
 // state puck_pursue(dd *rob, pk *puck)
 // {
@@ -217,23 +227,23 @@ state puck_pursue(dd *rob, pk *puck)
 	float k2 = 2;
 	float kap = 0;
 	float kad = 0;
-	float phi = 0;
+	float phiDes = 0;
 
 	static float prevAlpha = 0;
 	float alpha = ANG_REMAP(rob->global.th + puck->th - rob->direction * PI/2);
 
-	if(puck->maxADC > 850){
-		kap = 0;//.6;
-		kad = 0;//.1;
+	if(puck->maxADC > 850 && alpha < PI / 6){
+	 	kap = 0;//.6;
+	 	kad = 0;//.1;
 	}
 	else if( ABS(alpha) > PI/3){
 		kap = 0;
 		kad = 0;
 		if(alpha > 0){
-			phi = -PI/6;
+			phiDes = -PI/6;
 		}
 		else{
-			phi = PI/6;
+			phiDes = PI/6;
 		}
 	}
 	else {
@@ -241,14 +251,14 @@ state puck_pursue(dd *rob, pk *puck)
 		kad = 0;//.1;
 	}
 
-	if(rob->myAddress == 20){
-		if(puck->maxADC > 500){
+	if(rob->myAddress == GOALIE_ADD){
+		if(puck->maxADC < 500){
 			alpha = 0;
 			k1 = 0;
 		}
 	}
 
-	rob->omegaDesired = kp * (puck->th-phi)  + kd * (puck->th - puck->thPrev)+ kap * alpha - CTRL_FREQ * kad * (alpha - prevAlpha);
+	rob->omegaDesired = kp * (puck->th - phiDes)  + kd * (puck->th - puck->thPrev)+ kap * alpha - CTRL_FREQ * kad * (alpha - prevAlpha);
 	rob->veloDesired = k1 / (k2 * ABS(rob->omegaDesired) + 1);
 	// dd_norm(rob,DES_SPEED);
 	prevAlpha = alpha;

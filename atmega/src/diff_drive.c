@@ -94,7 +94,7 @@ void dd_goto(dd *rob, pk *puck, float veloDes){
     static float prevPhi = 0;
     float kp = 2;
     float kd = 6;
-    float k1 = .4;
+    float k1 = 1;
     float k2 = 2;
     float kap = 0;//1.5;
     float kad = 0;//;.1;
@@ -106,11 +106,18 @@ void dd_goto(dd *rob, pk *puck, float veloDes){
     if (puck->isHave){
     	rob->veloDesired = MAX(rob->veloDesired, 2 * MIN_PUCK_TURN_RAD * ABS(rob->omegaDesired) / WHEEL_RADIAL_LOC);
     }
-    dd_norm(rob,veloDes);
+    // dd_norm(rob,veloDes);
     prevAlpha = alpha;
     prevPhi = phi;  
 }
-
+bool dd_in_goal(dd*rob , float posThresh){
+	if (ABS(rob->global.x) < posThresh && ABS(rob->global.y + rob->direction * GOAL_Y) < posThresh){
+		return TRUE;
+	}
+	
+	return FALSE;
+	
+}
 bool dd_is_loc(dd*rob , float posThresh, float thThresh){
 	float deltaX  = rob->desLoc.x  - rob->global.x;
 	float deltaY  = rob->desLoc.y  - rob->global.y;
