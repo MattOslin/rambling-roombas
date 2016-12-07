@@ -34,45 +34,4 @@ void puck_update(pk *puck, uint16_t *P) {
   }
   puck->r = 0;
   puck->isHave = P[7]<HAVE_PUCK;
-
-
 }
-
-
-//    int sensor_index = 5-((int)(temp+.5) + 5) / 2;
-//    float snapped_temp = 5 - 2 * sensor_index;
-//    float delta = (temp - snapped_temp);
-////
-////    int adjusted = P[sensor_index] + 50 * fabs(delta);
-////    m_usb_tx_int(P[sensor_index]);
-////    m_usb_tx_string(" ");
-////    m_usb_tx_int(delta*100);
-////    m_usb_tx_string(" ");
-////    m_usb_tx_int(adjusted);
-////    m_usb_tx_string(" ");
-//
-////    m_usb_tx_string(" ");
-////    m_usb_tx_int(snapped_temp);
-////    m_usb_tx_string(" ");
-////    m_usb_tx_int(P[peak_index]);
-////    m_usb_tx_string(" ");
-////    m_usb_tx_int(100*(peak_index-temp_peak));
-//
-//
-////    int max_val = 0;
-////    int max_index = 0;
-//    int i;
-//    for(i = 0; i < 6; i++) {
-//      m_usb_tx_int(P[i]);
-//      m_usb_tx_string(" ");
-//    }
-//
-//
-////    m_usb_tx_int(temp * 100);
-////    m_usb_tx_string(" ");
-////    m_usb_tx_int(5 - max_index * 2 );
-////    m_usb_tx_string(" ");
-////    m_usb_tx_int(max_val);
-////    m_usb_tx_string("\n");
-
-//    m_usb_tx_string("\n");

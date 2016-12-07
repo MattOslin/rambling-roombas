@@ -14,6 +14,7 @@
 #include "m_rf.h"
 #include "diff_drive.h"
 #include "eep_locations.h"
+#include "localize.h"
 #include "macros.h"
 
 enum rf_command {
@@ -22,6 +23,6 @@ enum rf_command {
 
 void rf_parse(unsigned char *buffer, dd *robot);
 void rf_diagnostics(dd *robot);
-void usb_read_command(void);
+// void usb_read_command(void);
 
 #endif /* COMMS_H_ */

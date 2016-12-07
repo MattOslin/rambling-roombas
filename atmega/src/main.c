@@ -17,7 +17,7 @@ volatile bool isCommandReady = FALSE; // RF command flag
 volatile bool isADCRead = FALSE; 
 
 //Global Variable
-uint16_t rawADCCounts[12];	// Array of raw ADC values
+uint16_t rawADCCounts[8];	// Array of raw ADC values
 volatile uint32_t milliseconds = 0;
 unsigned char buffer[PACKET_LENGTH] = {0};
 float speed;

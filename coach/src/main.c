@@ -22,7 +22,7 @@
 #define BLUE_PIN 6
 
 #define CHANNEL 1
-#define MY_ADDRESS 200 
+#define MY_ADDRESS 23 
 #define PACKET_LENGTH 10
 
 #define BOT20ADDR 20
@@ -44,7 +44,7 @@ bool configed22 = FALSE;
 
 //Global Variable
 volatile uint32_t milliseconds = 0;
-unsigned char buffer[PACKET_LENGTH] = {0};
+char buffer[PACKET_LENGTH] = {0};
 
 enum rf_command {
 	COMM_TEST = 0xA0, PLAY, GOAL_R, GOAL_B, PAUSE, HALFTIME, GAME_OVER, CONTROLLER, CALIBRATE, COACH
@@ -96,7 +96,7 @@ int main(void) {
 
 	// Enable global interrupts
 	sei();
-	uint16_t count = 0; //Used to not bog down processer or terminal with USB Transmissions
+	// uint16_t count = 0; //Used to not bog down processer or terminal with USB Transmissions
 	// robot.desLoc.x = 0;
 	// robot.desLoc.y = -280;
 	// robot.desLoc.th = PI/2;
@@ -143,23 +143,71 @@ int main(void) {
     		set(PORTD, BLUE_PIN);
     	}
 
-    	if(!check(PINB, BOT20PIN) && !configed20) {
+    	if(!check(PINB, BOT20PIN) && !check(PINB, BOT21PIN) && !check(PINB, BOT22PIN)) {
+    		toggle(PORTF,BOT20LED);
+			toggle(PORTF,BOT21LED);
+			toggle(PORTF,BOT22LED);
+    		buffer[0] = GAME_OVER;
+    		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
+    		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
+    		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
+    	}
+    	else if(!check(PINB, BOT21PIN) && !check(PINB, BOT22PIN)) {
+    		clr(PORTF,BOT20LED);
+			set(PORTF,BOT21LED);
+			set(PORTF,BOT22LED);
+    		buffer[0] = CALIBRATE;
+    		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
+    	}
+    	else if(!check(PINB, BOT20PIN) && !check(PINB, BOT22PIN)) {
+    		set(PORTF,BOT20LED);
+			clr(PORTF,BOT21LED);
+			set(PORTF,BOT22LED);
+    		buffer[0] = CALIBRATE;
+    		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
+    	}
+    	else if(!check(PINB, BOT20PIN) && !check(PINB, BOT21PIN)) {
+    		set(PORTF,BOT20LED);
+			set(PORTF,BOT21LED);
+			clr(PORTF,BOT22LED);
+    		buffer[0] = CALIBRATE;
+    		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
+    	}
+    	else if(!check(PINB, BOT20PIN) && !configed20) {
     		configed20 = send_config(BOT20ADDR, BOT20PIN, BOT20LED);
     	} 
 
-    	if(!check(PINB, BOT21PIN) && !configed21) {
+    	else if(!check(PINB, BOT21PIN) && !configed21) {
     		configed21 = send_config(BOT21ADDR, BOT21PIN, BOT21LED);
     	} 
 
-    	if(!check(PINB, BOT22PIN) && !configed22) {
+    	else if(!check(PINB, BOT22PIN) && !configed22) {
     		configed22 = send_config(BOT22ADDR, BOT22PIN, BOT22LED);
-    	} 
+    	} else {
+    		if(!configed20) {
+    			clr(PORTF,BOT20LED);
+    		} else {
+    			set(PORTF,BOT20LED);
+    		}
+    		if(!configed21) {
+    			clr(PORTF,BOT21LED);
+    		} else {
+    			set(PORTF,BOT21LED);
+    		}
+    		if(!configed22) {
+    			clr(PORTF,BOT22LED);
+    		} else {
+    			set(PORTF,BOT22LED);
+    		}
+    	}
 
 		//RF Command inputs
 		if (packetReceived) {	
 			m_green(TOGGLE);
 			packetReceived = FALSE;
 		}
+
+		m_wait(250);
 
 	}
 }

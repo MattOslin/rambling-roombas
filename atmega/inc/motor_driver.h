@@ -39,15 +39,15 @@ typedef struct motor {
 	pin direct1; 
 	pin encA;
 	pin encB;
-	//double dirEncoder;
-	double veloEncoder;
-	double countEncoder;
-	double veloDesired;
-	double prevError;
-	double integError;
-	double kp;
-	double ki;
-	double kd;
+	//float dirEncoder;
+	float veloEncoder;
+	float countEncoder;
+	float veloDesired;
+	float prevError;
+	float integError;
+	float kp;
+	float ki;
+	float kd;
 
 } motor;
 
