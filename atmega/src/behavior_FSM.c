@@ -242,7 +242,7 @@ state puck_pursue(dd *rob, pk *puck)
 	}
 
 	if(rob->myAddress == 20){
-		if(puck->r > 500){
+		if(puck->maxADC > 500){
 			alpha = 0;
 			k1 = 0;
 		}
