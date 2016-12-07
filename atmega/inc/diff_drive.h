@@ -12,9 +12,9 @@
 #define MIN_PUCK_TURN_RAD 100
 
 typedef struct position {
-	double x;
-	double y;
-	double th;
+	float x;
+	float y;
+	float th;
 } pos;
 
 typedef struct diffDrive {

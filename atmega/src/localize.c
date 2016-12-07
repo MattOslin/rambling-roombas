@@ -2,14 +2,14 @@
 #include "m_usb.h"
 
 #define eB 0.1
-const uint16_t distMatP[4][4] = {
-						{  (1+eB)*0,(1+eB)*100,(1+eB)*45,(1+eB)*55},
-						{(1+eB)*100,  (1+eB)*0,(1+eB)*90,(1+eB)*70},
-						{ (1+eB)*45, (1+eB)*90, (1+eB)*0,(1+eB)*80},
-						{ (1+eB)*55, (1+eB)*70,(1+eB)*80, (1+eB)*0}
+const uint8_t distMatP[4][4] = {
+						{         0,(1+eB)*100,(1+eB)*45,(1+eB)*55},
+						{(1+eB)*100,  		 0,(1+eB)*90,(1+eB)*70},
+						{ (1+eB)*45, (1+eB)*90, 	   0,(1+eB)*80},
+						{ (1+eB)*55, (1+eB)*70,(1+eB)*80,        0}
 					};
 
-const uint16_t distMatM[4][4] = {
+const uint8_t distMatM[4][4] = {
 						{  (1-eB)*0,(1-eB)*100,(1-eB)*45,(1-eB)*55},
 						{(1-eB)*100,  (1-eB)*0,(1-eB)*90,(1-eB)*70},
 						{ (1-eB)*45, (1-eB)*90, (1-eB)*0,(1-eB)*80},
@@ -30,7 +30,8 @@ const float angMat[4][4] = {
 						{2.2919, -2.1272,  2.8670, 	     0}
 					};
 
-float calX, calY;
+static float calX, calY;
+static unsigned int calBlob[2]; 
 
 bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t* badIdx, uint8_t* order);
 bool determine_order(unsigned int* blobs, uint8_t* badIdx, uint8_t* order);
@@ -43,13 +44,58 @@ void localize_init(void) {
 	calY = 0; //eeprom_read_float(&eepCalY);
 }
 
-bool localize_cal(void) {
-	return false;
+bool localize_cal(pos* posStruct) {
+	int8_t i;
+	uint16_t allCalBlobs[8][2];
+	uint8_t gotBlobs = 0x00;
+	float measureAngles[4] = {PI/8.0, 3*PI/8.0, 5*PI/8.0, 7*PI/8.0};
+
+	calX = 0;
+	calY = 0;
+
+	uint32_t startTime = millis();
+	while(gotBlobs != 0xFF) {
+		if(localize_wii(posStruct)) {
+			for (i = 0; i < 4; i++) {
+				if (ABS(posStruct->th - measureAngles[i]) < .01) {
+					if (!(gotBlobs & (1 << i))) {
+						allCalBlobs[i][0] = calBlob[0];
+						allCalBlobs[i][1] = calBlob[1];
+						gotBlobs |= (1 << i);
+					}
+				}
+				if (ABS(posStruct->th + measureAngles[i]) < .01) {
+					if (!(gotBlobs & (1 << (i+4)))) {
+						allCalBlobs[i+4][0] = calBlob[0];
+						allCalBlobs[i+4][1] = calBlob[1];
+						gotBlobs |= (1 << (i+4));
+					}
+				}
+			}
+		}
+		if(millis()-startTime > 10000) {
+			return false;
+		}
+	}
+
+	uint16_t blobXSum = 0;
+	uint16_t blobYSum = 0;
+	for (i = 0; i < 8; i++) {
+		blobXSum += allCalBlobs[i][0];
+		blobYSum += allCalBlobs[i][1];
+	}
+
+	calX = (float)blobXSum/8.0 - 512;
+	calY = 384 - (float)blobYSum/8.0;
+	eeprom_write_float(&eepCalX, calX);
+	eeprom_write_float(&eepCalY, calY);
+
+	return true;
 }
 
-void localize_enc(pos* posStruct, double encCountsL, double encCountsR) {
-	double mean = (encCountsR + encCountsL)/2;
-	double diff = (encCountsR - encCountsL)/(2*WHEEL_RADIAL_LOC);
+void localize_enc(pos* posStruct, float encCountsL, float encCountsR) {
+	float mean = (encCountsR + encCountsL)/2;
+	float diff = (encCountsR - encCountsL)/(2*WHEEL_RADIAL_LOC);
 	posStruct->th = posStruct->th + diff;
 	posStruct->x = posStruct->x + mean*cos(posStruct->th);
 	posStruct->y = posStruct->y + mean*sin(posStruct->th);
@@ -103,8 +149,12 @@ bool localize_wii(pos* posStruct) {
 		}
 	}
 
+	lastBadBlobN = badBlobN;
+	lastBadIdx = badIdx;
 	
-
+	calBlob[0] = wiiBuffer[0];
+	calBlob[1] = wiiBuffer[1];
+	
 	return localizeSuccessful;
 }
 
@@ -137,21 +187,21 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t* badIdx, ui
 	posStruct->th = angMat[ptA][ptB] - atan2(diffY, diffX);
 	// posStruct->th = ANG_REMAP(posStruct->th);
 
-	double cosTH = cos(posStruct->th);
-	double sinTH = sin(posStruct->th);
-	double vX, vY, yShift;
+	float cosTH = cos(posStruct->th);
+	float sinTH = sin(posStruct->th);
+	float vX, vY, yShift;
 
 	if (missingPoint > 1) {
-		vX =  511 + calX - (double) (blobs[3*pointIdx[0]]+blobs[3*pointIdx[1]])/2.0;
-		vY = -384 + calY + (double) (blobs[3*pointIdx[0]+1]+blobs[3*pointIdx[1]+1])/2.0;
+		vX =  511 + calX - (float) (blobs[3*pointIdx[0]]+blobs[3*pointIdx[1]])/2.0;
+		vY = -384 + calY + (float) (blobs[3*pointIdx[0]+1]+blobs[3*pointIdx[1]+1])/2.0;
 		yShift = 0;
 	} else if (missingPoint == 1) {
-		vX =  511 + calX - (double) blobs[3*pointIdx[0]];
-		vY = -384 + calY + (double) blobs[3*pointIdx[0]+1];
+		vX =  511 + calX - (float) blobs[3*pointIdx[0]];
+		vY = -384 + calY + (float) blobs[3*pointIdx[0]+1];
 		yShift = 50;
 	} else {
-		vX =  511 + calX - (double) blobs[3*pointIdx[1]];
-		vY = -384 + calY + (double) blobs[3*pointIdx[1]+1];
+		vX =  511 + calX - (float) blobs[3*pointIdx[1]];
+		vY = -384 + calY + (float) blobs[3*pointIdx[1]+1];
 		// vX = blobs[3*pointIdx[1]] - 512;
 		// vY = blobs[3*pointIdx[1]+1] - 384; 
 		yShift = -50;
@@ -162,6 +212,8 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t* badIdx, ui
 	posStruct->th = ANG_REMAP(posStruct->th+PI/2.0);
 	// posStruct->x = 1024 - ((cosTH*vX - sinTH*vY) + 512);
 	// posStruct->y = 768 - ((sinTH*vX + cosTH*vY) + 384 + yShift);
+	blobs[0] = blobs[3*pointIdx[0]];
+	blobs[1] = blobs[3*pointIdx[0]+1];
 	return true;
 }
 

@@ -8,8 +8,8 @@
 
 #define TIMER_3_PRSCL 1024
 #define TIMER_4_PRSCL 128
-#define CTRL_FREQ 100		// Control loop frequency w/1024 timer0 prscl 62 -> 5kHz
-#define POS_THRESH 2 //cm threshold for success
+#define CTRL_FREQ 100	 // Control loop frequency w/1024 timer0 prscl 62 -> 5kHz
+#define POS_THRESH 2 // cm threshold for success
 
 #define GOAL_X 40// xdimension of the top of the goal (negated for bottom)
 #define GOAL_Y 300// y dimension of goal in the rink
@@ -42,13 +42,15 @@
 
 #define SOLENOID(val)		set(DDRB,1); if(val==OFF){clr(PORTB,1); }else if(val==ON){set(PORTB,1);}else if(val==TOGGLE){toggle(PORTB,1);}
 
+#define PING_LOWPASS 1
+
 typedef struct puckInfo {
-	float r;		//
-	float th;
-	float thPrev;
-	bool isFound;
-	bool isBehind;
-	bool isHave;
+  float r;		//
+  float th;
+  float thPrev;
+  bool isFound;
+  bool isBehind;
+  bool isHave;
 } pk;
 
 #endif

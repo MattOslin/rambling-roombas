@@ -1,54 +1,35 @@
 #include "puck_sense.h"
 
-void puck_update(pk *puck, uint16_t *ADCs);
-
-void puck_update(pk *puck, uint16_t *ADCs) {
+void puck_update(pk *puck, uint16_t *P) {
 
   // Update the pucks information
   puck->thPrev = puck->th;
 
-  if (P0>NOISE || P1>NOISE || P2>NOISE || P3>NOISE || P4>NOISE || P5>NOISE){
+  if (P[0]>NOISE || P[1]>NOISE || P[2]>NOISE || P[3]>NOISE || P[4]>NOISE || P[5]>NOISE){
     puck->isFound = TRUE;
     puck->isBehind = FALSE;
 
-    puck->th = (PI/15)*((int)P2-(int)P3+3*(int)P1-3*(int)P4+5*(int)P0-5*(int)P5)
-    /(float)(P0+P1+P2+P3+P4+P5);
+    float temp = ((int)P[2]-(int)P[3]+3*(int)P[1]-3*(int)P[4]+5*(int)P[0]-5*(int)P[5])
+    /(float)(P[0]+P[1]+P[2]+P[3]+P[4]+P[5]);
+    puck->th = (PI/15)*temp;
+    m_usb_tx_int(puck->th*100);
+    m_usb_tx_string(" ");
+    int i;
+    for(i = 0; i < 6; i++) {
+      m_usb_tx_int(P[i]);
+      m_usb_tx_string(" ");
+    }
+    m_usb_tx_string("\n");
   }
   else if(PBACK>30){
-   puck->isBehind = FALSE;//TRUE;
-   puck->isFound = FALSE;
+      puck->isBehind = FALSE;//TRUE;
+      puck->isFound = FALSE;
    }
   else {
-    puck->isFound = FALSE;
-    puck->isBehind = FALSE;
-    puck->th = 0;
+      puck->isFound = FALSE;
+      puck->isBehind = FALSE;
+      puck->th = 0;
   }
   puck->r = 0;
-  puck->isHave = PPUCK<HAVE_PUCK;
+  puck->isHave = P[7]<HAVE_PUCK;
 }
-
-//void puck_update(pk *puck, uint16_t *ADCs) {
-//
-//  // Update the pucks information
-//  puck->thPrev = puck->th;
-//
-//  if (ADCs[3]>30 || ADCs[1]>30 || ADCs[5]>30 || ADCs[0]>30 || ADCs[6]>30 || ADCs[7]>30  ){
-//    puck->isFound = TRUE;
-//    puck->isBehind = FALSE;
-//
-//    puck->th = (PI/15)*((int)ADCs[3]-(int)ADCs[1]+3*(int)ADCs[5]-3*(int)ADCs[0]+5*(int)ADCs[6]-5*(int)ADCs[7])
-//    /(float)(ADCs[3]+ADCs[1]+ADCs[5]+ADCs[0]+ADCs[6]+ADCs[7]);
-//  }
-//  // else if(ADCs[2]>30){
-//  // puck->isBehind = TRUE;
-//  // puck->isFound = TRUE;
-//  // }
-//  else {
-//    puck->isFound = FALSE;
-//    puck->isBehind = FALSE;
-//    puck->th = 0;
-//  }
-//  puck->r = 0;
-//  puck->isHave = ADCs[4]<900;
-//}
-//

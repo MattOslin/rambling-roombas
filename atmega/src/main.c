@@ -17,11 +17,10 @@ volatile bool isCommandReady = FALSE; // RF command flag
 volatile bool isADCRead = FALSE; 
 
 //Global Variable
-uint16_t rawADCCounts[12];	// Array of raw ADC values
+uint16_t rawADCCounts[8];	// Array of raw ADC values
 volatile uint32_t milliseconds = 0;
 unsigned char buffer[PACKET_LENGTH] = {0};
 float speed;
-uint16_t ping;
 
 
 
@@ -133,7 +132,7 @@ ISR(INT6_vect){
 
 // interrupt for input capture on ping sensor
 ISR(TIMER3_CAPT_vect) {
-	robot.ping = ICR3;
+	robot.ping = PING_LOWPASS * ICR3 + (1-PING_LOWPASS) * robot.ping;
 }
 
 
@@ -187,16 +186,23 @@ void usb_debug(dd *rob, pk *puck){
 //   m_usb_tx_string(" Ping: ");
 //   m_usb_tx_int(rob->ping);
 
-	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepAddress));
-	// m_usb_tx_string(" ");
-	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepDirection));
-	// m_usb_tx_string(" ");
-	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepTeam));
+//	 m_usb_tx_string(" STATE: ");
+//	 m_usb_tx_int(rob->nxtSt);
+//	 m_usb_tx_string(" EVENT: ");
+//	 m_usb_tx_int(rob->ev);
+//	 m_usb_tx_string(" enable: ");
+//	 m_usb_tx_int(rob->enable);
 
-	// m_usb_tx_string(" ADC L: ");
- // 	m_usb_tx_int(rawADCCounts[3]);
-	// m_usb_tx_string(" ADC R: ");
- // 	m_usb_tx_int(rawADCCounts[1]);
+//  int i;
+//  for(i=0;i<8;i++){
+//  m_usb_tx_string(" ADC");
+//  m_usb_tx_int(i);
+//  m_usb_tx_string(" ");
+//    m_usb_tx_int(rawADCCounts[i]);
+//  }
+//  m_usb_tx_string(" Ping: ");
+//  m_usb_tx_int(rob->ping);
+
  	m_usb_tx_string(" Puck TH: ");
  	m_usb_tx_int((int)100*puck->th);
  	m_usb_tx_string(" isFound: ");
@@ -213,4 +219,25 @@ void usb_debug(dd *rob, pk *puck){
  	// m_usb_tx_int(rob->nxtSt);
  	
 	m_usb_tx_string("\n");
+
+ // 	m_usb_tx_string(" Puck TH: ");
+ // 	m_usb_tx_int((int)100*puck->th);
+ // 	m_usb_tx_string(" isFound: ");
+ // 	m_usb_tx_int(puck->isFound);
+	// m_usb_tx_string(" puckHave ADC: ");
+ // 	m_usb_tx_int(rawADCCounts[4]);
+ // 	m_usb_tx_string(" isHave: ");
+ // 	m_usb_tx_int(puck->isHave);
+	// m_usb_tx_string(" commVelo: ");
+ // 	m_usb_tx_int(100*rob->veloDesired);
+	// m_usb_tx_string(" commOm: ");
+ // 	m_usb_tx_int(100*rob->omegaDesired);
+ // 	m_usb_tx_string(" state: ");
+ // 	m_usb_tx_int(rob->nxtSt);
+
+//   	m_usb_tx_int(puck->th);
+
+//   	m_usb_tx_string("\n");
+    
+
 }

@@ -79,6 +79,16 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			dd_enable(robot);
 			robot->veloDesired = 0;
 			robot->omegaDesired = .2;
+			dd_update(robot);
+
+			if(localize_cal(&(robot->global))) {
+				set_led(0, TOGGLE);
+			}
+
+			robot->veloDesired = 0;
+			robot->omegaDesired = 0;
+			dd_update(robot);
+			dd_disable(robot);
 			break;
 
 		case COACH:
@@ -105,48 +115,48 @@ void rf_diagnostics(dd *robot) {
 	;
 }
 
-void usb_read_command() {	
-	char buff[8];
-	unsigned int indx = 0;
-	int val = 0;
-	int i;
+// void usb_read_command() {	
+// 	char buff[8];
+// 	unsigned int indx = 0;
+// 	int val = 0;
+// 	int i;
 
-	while(m_usb_rx_available()&&indx<8){
-		buff[indx] = m_usb_rx_char();
-		indx++;
-	}
+// 	while(m_usb_rx_available()&&indx<8){
+// 		buff[indx] = m_usb_rx_char();
+// 		indx++;
+// 	}
 	
-	for(i=indx-1; i > 0; i--){
-		val += ((int)buff[i]-'0')*pow(10, indx-i-1);//Introduces mistakes in integer math (rounds down)
-		m_usb_tx_int((int)buff[i]-'0');
-		m_usb_tx_string("\n");
-	}
-	switch(buff[0]){
-		case 'P':
-			//kpth = val;
-			m_usb_tx_string("\n");
-			m_usb_tx_string("KP: ");
-			//m_usb_tx_int(kpth);
-			m_usb_tx_string("\n");
-			break;
-		case 'D':
-			//kdth = val;
-			m_usb_tx_string("\n");
-			m_usb_tx_string("KD: ");
-			//m_usb_tx_int(kdth);
-			m_usb_tx_string("\n");
-			break;
-		case 'B':
-			//beta = val;
-			m_usb_tx_string("\n");
-			m_usb_tx_string("1/Beta: ");
-			//m_usb_tx_int(1.0/beta);
-			m_usb_tx_string("\n");
-			break;
-		default :
-			m_usb_tx_string("NO DATA");
-	}
-}
+// 	for(i=indx-1; i > 0; i--){
+// 		val += ((int)buff[i]-'0')*pow(10, indx-i-1);//Introduces mistakes in integer math (rounds down)
+// 		m_usb_tx_int((int)buff[i]-'0');
+// 		m_usb_tx_string("\n");
+// 	}
+// 	switch(buff[0]){
+// 		case 'P':
+// 			//kpth = val;
+// 			m_usb_tx_string("\n");
+// 			m_usb_tx_string("KP: ");
+// 			//m_usb_tx_int(kpth);
+// 			m_usb_tx_string("\n");
+// 			break;
+// 		case 'D':
+// 			//kdth = val;
+// 			m_usb_tx_string("\n");
+// 			m_usb_tx_string("KD: ");
+// 			//m_usb_tx_int(kdth);
+// 			m_usb_tx_string("\n");
+// 			break;
+// 		case 'B':
+// 			//beta = val;
+// 			m_usb_tx_string("\n");
+// 			m_usb_tx_string("1/Beta: ");
+// 			//m_usb_tx_int(1.0/beta);
+// 			m_usb_tx_string("\n");
+// 			break;
+// 		default :
+// 			m_usb_tx_string("NO DATA");
+// 	}
+// }
 
 void set_led(uint8_t team, uint8_t state) {
 	if (state == ON) {
@@ -157,6 +167,9 @@ void set_led(uint8_t team, uint8_t state) {
 			clr(PORTD, PIN_RED);
 			set(PORTD, PIN_BLUE);
 		}
+	} else if (state == TOGGLE) {
+		set(PORTD, PIN_RED);
+		set(PORTD, PIN_BLUE);
 	} else {
 		clr(PORTD, PIN_RED);
 		clr(PORTD, PIN_BLUE);

@@ -17,7 +17,7 @@ int main(void) {
 		m_usb_tx_string(" ");
 		m_usb_tx_uint(eeprom_read_byte(&eepTeam));
 		m_usb_tx_string(" ");
-		m_usb_tx_uint(eeprom_read_byte(&eepDirection));
+		m_usb_tx_int(eeprom_read_byte(&eepDirection));
 		m_usb_tx_string(" ");
 		m_usb_tx_int(eeprom_read_float(&eepCalX)*100);
 		m_usb_tx_string(" ");
