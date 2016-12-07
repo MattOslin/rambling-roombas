@@ -169,13 +169,13 @@ void usb_debug(dd *rob, pk *puck){
 //	m_usb_tx_string(" Direction:");
 //	m_usb_tx_int(rob->direction);
 
-	 m_usb_tx_string(" STATE: ");
-	 m_usb_tx_int(rob->nxtSt);
-	 m_usb_tx_string(" EVENT: ");
-	 m_usb_tx_int(rob->ev);
-	 m_usb_tx_string(" enable: ");
-	 m_usb_tx_int(rob->enable);
-	
+//	 m_usb_tx_string(" STATE: ");
+//	 m_usb_tx_int(rob->nxtSt);
+//	 m_usb_tx_string(" EVENT: ");
+//	 m_usb_tx_int(rob->ev);
+//	 m_usb_tx_string(" enable: ");
+//	 m_usb_tx_int(rob->enable);
+
 //  int i;
 //  for(i=0;i<8;i++){
 //  m_usb_tx_string(" ADC");
@@ -211,7 +211,10 @@ void usb_debug(dd *rob, pk *puck){
  // 	m_usb_tx_string(" state: ");
  // 	m_usb_tx_int(rob->nxtSt);
 
-   	m_usb_tx_string("\n");
+//   	m_usb_tx_int(puck->th);
+
+//   	m_usb_tx_string("\n");
+    
 
 
 }
