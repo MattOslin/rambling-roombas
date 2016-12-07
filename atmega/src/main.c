@@ -59,7 +59,7 @@ int main(void) {
 		}
 
 		if (isADCRead) {	
-			toggle(PORTB,4);
+			//toggle(PORTB,4);
 			isADCRead = FALSE;
 			adc_read(rawADCCounts);
 		}
@@ -203,18 +203,18 @@ void usb_debug(dd *rob, pk *puck){
 //  m_usb_tx_string(" Ping: ");
 //  m_usb_tx_int(rob->ping);
 
- 	m_usb_tx_string(" Puck TH: ");
- 	m_usb_tx_int((int)100*puck->th);
- 	m_usb_tx_string(" isFound: ");
- 	m_usb_tx_int(puck->isFound);
-	m_usb_tx_string(" puckHave ADC: ");
- 	m_usb_tx_int(rawADCCounts[4]);
- 	m_usb_tx_string(" isHave: ");
- 	m_usb_tx_int(puck->isHave);
-	m_usb_tx_string(" commVelo: ");
- 	m_usb_tx_int(100*rob->veloDesired);
-	m_usb_tx_string(" commOm: ");
- 	m_usb_tx_int(100*rob->omegaDesired);
+ // 	m_usb_tx_string(" Puck TH: ");
+ // 	m_usb_tx_int((int)100*puck->th);
+ // 	m_usb_tx_string(" isFound: ");
+ // 	m_usb_tx_int(puck->isFound);
+	// m_usb_tx_string(" puckHave ADC: ");
+ // 	m_usb_tx_int(rawADCCounts[4]);
+ // 	m_usb_tx_string(" isHave: ");
+ // 	m_usb_tx_int(puck->isHave);
+	// m_usb_tx_string(" commVelo: ");
+ // 	m_usb_tx_int(100*rob->veloDesired);
+	// m_usb_tx_string(" commOm: ");
+ // 	m_usb_tx_int(100*rob->omegaDesired);
  	// m_usb_tx_string(" state: ");
  	// m_usb_tx_int(rob->nxtSt);
  	
