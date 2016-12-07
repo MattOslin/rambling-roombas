@@ -15,8 +15,8 @@ void puck_update(pk *puck, uint16_t *ADCs) {
     /(float)(P0+P1+P2+P3+P4+P5);
   }
   else if(PBACK>30){
-   puck->isBehind = TRUE;
-   puck->isFound = TRUE;
+   puck->isBehind = FALSE;//TRUE;
+   puck->isFound = FALSE;
    }
   else {
     puck->isFound = FALSE;

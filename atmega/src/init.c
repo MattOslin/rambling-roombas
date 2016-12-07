@@ -29,13 +29,6 @@ void m2_init() {
 
 	m_disableJTAG(); //Allows use of some of the portF
 
-	#ifdef USE_EEP_ADDRESS
-		uint8_t myAddress = eeprom_read_byte(&eepAddress);
-		m_rf_open(CHANNEL, myAddress, PACKET_LENGTH);
-	#else
-		m_rf_open(CHANNEL, MY_ADDRESS, PACKET_LENGTH);// For RF comms 
-	#endif
-
 	set(DDRB,1); // Solenoid fire pin
 	set(DDRB,4); // Puck detection range change
 	set(DDRD,5); // LED Red
@@ -49,6 +42,14 @@ void m2_init() {
 }
 
 void dd_init(dd *rob) {
+
+	#ifdef USE_EEP_ADDRESS
+		rob->myAddress = eeprom_read_byte(&eepAddress);
+	#else
+		rob->myAddress = MY_ADDRESS;
+	#endif
+	m_rf_open(CHANNEL, rob->myAddress, PACKET_LENGTH);
+	
 	motor_GPIO_setup();
 	rob->enable = FALSE;
 	rob->nxtSt = 0;

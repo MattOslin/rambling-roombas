@@ -179,13 +179,13 @@ void usb_debug(dd *rob, pk *puck){
 	
   int i;
   for(i=0;i<8;i++){
-//  m_usb_tx_string(" ADC");
-//  m_usb_tx_int(i);
-  m_usb_tx_string(" ");
+	m_usb_tx_string(" ADC");
+	m_usb_tx_int(i);
+	m_usb_tx_string(" ");
     m_usb_tx_int(rawADCCounts[i]);
   }
-  m_usb_tx_string(" Ping: ");
-  m_usb_tx_int(rob->ping);
+//   m_usb_tx_string(" Ping: ");
+//   m_usb_tx_int(rob->ping);
 
 	// m_usb_tx_int((uint8_t) eeprom_read_byte(&eepAddress));
 	// m_usb_tx_string(" ");
@@ -197,20 +197,20 @@ void usb_debug(dd *rob, pk *puck){
  // 	m_usb_tx_int(rawADCCounts[3]);
 	// m_usb_tx_string(" ADC R: ");
  // 	m_usb_tx_int(rawADCCounts[1]);
- // 	m_usb_tx_string(" Puck TH: ");
- // 	m_usb_tx_int((int)100*puck->th);
- // 	m_usb_tx_string(" isFound: ");
- // 	m_usb_tx_int(puck->isFound);
-	// m_usb_tx_string(" puckHave ADC: ");
- // 	m_usb_tx_int(rawADCCounts[4]);
- // 	m_usb_tx_string(" isHave: ");
- // 	m_usb_tx_int(puck->isHave);
-	// m_usb_tx_string(" commVelo: ");
- // 	m_usb_tx_int(100*rob->veloDesired);
-	// m_usb_tx_string(" commOm: ");
- // 	m_usb_tx_int(100*rob->omegaDesired);
- // 	m_usb_tx_string(" state: ");
- // 	m_usb_tx_int(rob->nxtSt);
+ 	m_usb_tx_string(" Puck TH: ");
+ 	m_usb_tx_int((int)100*puck->th);
+ 	m_usb_tx_string(" isFound: ");
+ 	m_usb_tx_int(puck->isFound);
+	m_usb_tx_string(" puckHave ADC: ");
+ 	m_usb_tx_int(rawADCCounts[4]);
+ 	m_usb_tx_string(" isHave: ");
+ 	m_usb_tx_int(puck->isHave);
+	m_usb_tx_string(" commVelo: ");
+ 	m_usb_tx_int(100*rob->veloDesired);
+	m_usb_tx_string(" commOm: ");
+ 	m_usb_tx_int(100*rob->omegaDesired);
+ 	// m_usb_tx_string(" state: ");
+ 	// m_usb_tx_int(rob->nxtSt);
  	
 	m_usb_tx_string("\n");
 }
