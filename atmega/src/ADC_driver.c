@@ -16,8 +16,10 @@
 
 #define NUMADCS 8
 #define NUMADCS_HI_RES 0
-const int ADCsToRead[] = 
-	{ADC0,ADC1,ADC4,ADC5,ADC6,ADC7/*,ADC8,ADC9*/,ADC10/*,ADC11*/,ADC12/*,ADC13,ADC4, ADC5*/};
+const int ADCsToRead[] = {ADC10, ADC7, ADC5, ADC1, ADC0, ADC12, ADC4, ADC6};
+
+//const int ADCsToRead[] =
+//{ADC0,ADC1,ADC4,ADC5,ADC6,ADC7/*,ADC8,ADC9*/,ADC10/*,ADC11*/,ADC12/*,ADC13,ADC4, ADC5*/};
 //Disable Digital Inputs
 void adc_dis_digi()
 {
