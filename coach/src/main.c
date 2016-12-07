@@ -47,7 +47,7 @@ volatile uint32_t milliseconds = 0;
 char buffer[PACKET_LENGTH] = {0};
 
 enum rf_command {
-	COMM_TEST = 0xA0, PLAY, GOAL_R, GOAL_B, PAUSE, HALFTIME, GAME_OVER, CONTROLLER, CALIBRATE, COACH
+	COMM_TEST = 0xA0, PLAY, GOAL_R, GOAL_B, PAUSE, SKIP, HALFTIME, GAME_OVER, CALIBRATE, COACH, CONTROLLER
 };
 
 void timer4_init(void); // Millisecond timer
@@ -143,7 +143,11 @@ int main(void) {
     		set(PORTD, BLUE_PIN);
     	}
 
-    	if(!check(PINB, BOT20PIN) && !check(PINB, BOT21PIN) && !check(PINB, BOT22PIN)) {
+    	bool button1 = !check(PINB, BOT20PIN);
+    	bool button2 = !check(PINB, BOT21PIN);
+    	bool button3 = !check(PINB, BOT22PIN);
+
+    	if(button1 && button2 && button3) {
     		toggle(PORTF,BOT20LED);
 			toggle(PORTF,BOT21LED);
 			toggle(PORTF,BOT22LED);
@@ -151,37 +155,29 @@ int main(void) {
     		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
     		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
     		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
-    	}
-    	else if(!check(PINB, BOT21PIN) && !check(PINB, BOT22PIN)) {
+    	} else if(button2 && button3) {
     		clr(PORTF,BOT20LED);
 			set(PORTF,BOT21LED);
 			set(PORTF,BOT22LED);
     		buffer[0] = CALIBRATE;
     		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
-    	}
-    	else if(!check(PINB, BOT20PIN) && !check(PINB, BOT22PIN)) {
+    	} else if(button1 && button3) {
     		set(PORTF,BOT20LED);
 			clr(PORTF,BOT21LED);
 			set(PORTF,BOT22LED);
     		buffer[0] = CALIBRATE;
     		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
-    	}
-    	else if(!check(PINB, BOT20PIN) && !check(PINB, BOT21PIN)) {
+    	} else if(button1 && button2) {
     		set(PORTF,BOT20LED);
 			set(PORTF,BOT21LED);
 			clr(PORTF,BOT22LED);
     		buffer[0] = CALIBRATE;
     		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
-    	}
-    	else if(!check(PINB, BOT20PIN) && !configed20) {
+    	} else if(button1 && !configed20) {
     		configed20 = send_config(BOT20ADDR, BOT20PIN, BOT20LED);
-    	} 
-
-    	else if(!check(PINB, BOT21PIN) && !configed21) {
+    	} else if(button2 && !configed21) {
     		configed21 = send_config(BOT21ADDR, BOT21PIN, BOT21LED);
-    	} 
-
-    	else if(!check(PINB, BOT22PIN) && !configed22) {
+    	} else if(button3 && !configed22) {
     		configed22 = send_config(BOT22ADDR, BOT22PIN, BOT22LED);
     	} else {
     		if(!configed20) {
@@ -224,13 +220,13 @@ void reset_configs() {
 
 bool send_config(uint8_t botAddr, uint8_t botPin, uint8_t ledPin) {
 	bool configured = FALSE;
-	uint8_t direction;
+	int8_t direction;
 	uint8_t team;
 
 	if (!check(PINB,DIR_PIN) == POS_Y) {
-		direction = (uint8_t) POS_Y;
+		direction = POS_Y;
 	} else {
-		direction = (uint8_t) NEG_Y;
+		direction = NEG_Y;
 	}
 
 	if (check(PINB,TEAM_PIN) == RED) {
