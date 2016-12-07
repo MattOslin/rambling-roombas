@@ -273,12 +273,17 @@ void shoot_puck(dd *rob, pk *puck){
 	float botGoalAng=0;
 	float distToGoal = GOAL_Y - (rob->global.y)*rob->direction;
 	if( distToGoal < SHT_THRSH_FAR && (distToGoal > SHT_THRSH_NEAR) && (ABS(rob->global.x)<(GOAL_X + SHT_THRSH_NEAR))){
-		topGoalAng = atan2(rob->direction * distToGoal, topGoalAng - rob->global.x );
-		botGoalAng = atan2(rob->direction * distToGoal, botGoalAng - rob->global.x );
-		if (rob->direction == POS_Y && rob->global.th > topGoalAng && rob->global.th < botGoalAng){
+		topGoalAng = atan2(rob->direction * distToGoal, GOAL_X - rob->global.x );
+		botGoalAng = atan2(rob->direction * distToGoal, -GOAL_X - rob->global.x );
+	 	// m_usb_tx_string(" botGoal: ");
+	 	// m_usb_tx_int(100 * botGoalAng);
+	 	// m_usb_tx_string(" topGoal: ");
+	 	// m_usb_tx_int(100 * topGoalAng);
+	 	
+		if (rob->direction == POS_Y && rob->global.th > topGoalAng && rob->global.th < botGoalAng && rob->ping > SHT_DIST_THRSH){
 			rob->solenoid = ON;
 		}
-		else if (rob->direction == NEG_Y && rob->global.th < topGoalAng && rob->global.th > botGoalAng){
+		else if (rob->direction == NEG_Y && rob->global.th < topGoalAng && rob->global.th > botGoalAng && rob->ping > SHT_DIST_THRSH){
 			rob->solenoid = ON;
 		}
 	}

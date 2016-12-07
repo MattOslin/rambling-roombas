@@ -15,7 +15,7 @@
 #define GOAL_Y 300// y dimension of goal in the rink
 #define SHT_THRSH_NEAR 65
 #define SHT_THRSH_FAR 100
-
+#define SHT_DIST_THRSH 20
 
 #define CHANNEL 1
 #define MY_ADDRESS 21 /*21*/ /*22*/
@@ -48,6 +48,7 @@ typedef struct puckInfo {
   float r;		//
   float th;
   float thPrev;
+  unsigned int maxADC;
   bool isFound;
   bool isBehind;
   bool isHave;

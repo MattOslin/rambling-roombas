@@ -143,6 +143,8 @@ state standby(dd *rob, pk *puck){
 state puck_search(dd *rob, pk *puck)
 {
     //rob->veloDesired  = .1;
+
+    rob->veloDesired  = 0;
     rob->omegaDesired = DES_SPEED; 
     // printf("puck_search\t");
     return ST_PK_SEARCH;
@@ -209,15 +211,44 @@ state go_back(dd *rob, pk *puck)
 
 state puck_pursue(dd *rob, pk *puck)
 {
-	float kp = 2;
-	float kd = .03;
-	float k1 = .4;
+	float kp = 2.7;
+	float kd = .15 * CTRL_FREQ ;
+	float k1 = 1;
 	float k2 = 2;
-	float kap = 0;//.6;
-	float kad = 0;//.1;
+	float kap = 0;
+	float kad = 0;
+	float phi = 0;
+
 	static float prevAlpha = 0;
 	float alpha = ANG_REMAP(rob->global.th + puck->th - rob->direction * PI/2);
-	rob->omegaDesired = kp * puck->th  + kd * CTRL_FREQ * (puck->th - puck->thPrev)+ kap * alpha - CTRL_FREQ * kad * (alpha - prevAlpha);
+
+	if(puck->maxADC > 850){
+		kap = 0;//.6;
+		kad = 0;//.1;
+	}
+	else if( ABS(alpha) > PI/3){
+		kap = 0;
+		kad = 0;
+		if(alpha > 0){
+			phi = -PI/6;
+		}
+		else{
+			phi = PI/6;
+		}
+	}
+	else {
+		kap = 2;//.6;
+		kad = 0;//.1;
+	}
+
+	if(rob->myAddress == 20){
+		if(puck->maxADC > 500){
+			alpha = 0;
+			k1 = 0;
+		}
+	}
+
+	rob->omegaDesired = kp * (puck->th-phi)  + kd * (puck->th - puck->thPrev)+ kap * alpha - CTRL_FREQ * kad * (alpha - prevAlpha);
 	rob->veloDesired = k1 / (k2 * ABS(rob->omegaDesired) + 1);
 	// dd_norm(rob,DES_SPEED);
 	prevAlpha = alpha;

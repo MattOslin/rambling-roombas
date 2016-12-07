@@ -47,7 +47,7 @@ volatile uint32_t milliseconds = 0;
 char buffer[PACKET_LENGTH] = {0};
 
 enum rf_command {
-	COMM_TEST = 0xA0, PLAY, GOAL_R, GOAL_B, PAUSE, HALFTIME, GAME_OVER, CONTROLLER, CALIBRATE, COACH
+	COMM_TEST = 0xA0, PLAY, GOAL_R, GOAL_B, PAUSE, SKIP, HALFTIME, GAME_OVER, CALIBRATE, COACH, CONTROLLER
 };
 
 void timer4_init(void); // Millisecond timer
