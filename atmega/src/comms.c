@@ -79,6 +79,16 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			dd_enable(robot);
 			robot->veloDesired = 0;
 			robot->omegaDesired = .2;
+			dd_update(robot);
+
+			if(localize_cal(&(robot->global))) {
+				set_led(0, TOGGLE);
+			}
+
+			robot->veloDesired = 0;
+			robot->omegaDesired = 0;
+			dd_update(robot);
+			dd_disable(robot);
 			break;
 
 		case COACH:
@@ -157,6 +167,9 @@ void set_led(uint8_t team, uint8_t state) {
 			clr(PORTD, PIN_RED);
 			set(PORTD, PIN_BLUE);
 		}
+	} else if (state == TOGGLE) {
+		set(PORTD, PIN_RED);
+		set(PORTD, PIN_BLUE);
 	} else {
 		clr(PORTD, PIN_RED);
 		clr(PORTD, PIN_BLUE);

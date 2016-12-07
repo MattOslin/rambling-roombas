@@ -14,6 +14,7 @@
 #include "m_rf.h"
 #include "diff_drive.h"
 #include "eep_locations.h"
+#include "localize.h"
 #include "macros.h"
 
 enum rf_command {
