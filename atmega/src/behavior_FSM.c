@@ -241,8 +241,14 @@ state puck_pursue(dd *rob, pk *puck)
 		kad = 0;//.1;
 	}
 
+	if(rob->myAddress == 20){
+		if(puck->r > 500){
+			alpha = 0;
+			k1 = 0;
+		}
+	}
+
 	rob->omegaDesired = kp * (puck->th-phi)  + kd * (puck->th - puck->thPrev)+ kap * alpha - CTRL_FREQ * kad * (alpha - prevAlpha);
-	
 	rob->veloDesired = k1 / (k2 * ABS(rob->omegaDesired) + 1);
 	// dd_norm(rob,DES_SPEED);
 	prevAlpha = alpha;
