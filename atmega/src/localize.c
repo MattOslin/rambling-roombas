@@ -40,8 +40,8 @@ bool check_order(unsigned int* blobs, uint8_t* badIdx, uint8_t* order);
 
 void localize_init(void) {
 	while(m_wii_open() == 0);
-	calX = 0; //eeprom_read_float(&eepCalX);
-	calY = 0; //eeprom_read_float(&eepCalY);
+	calX = eeprom_read_float(&eepCalX);
+	calY = eeprom_read_float(&eepCalY);
 }
 
 bool localize_cal(pos* posStruct) {
@@ -74,6 +74,8 @@ bool localize_cal(pos* posStruct) {
 			}
 		}
 		if(millis()-startTime > 10000) {
+			eeprom_write_float(&eepCalX, 0);
+			eeprom_write_float(&eepCalY, 0);
 			return false;
 		}
 	}
