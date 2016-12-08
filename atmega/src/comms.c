@@ -78,7 +78,7 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 
 			dd_enable(robot);
 			robot->veloDesired = 0;
-			robot->omegaDesired = .2;
+			robot->omegaDesired = .4;
 			dd_update(robot);
 
 			if(localize_cal(&(robot->global))) {

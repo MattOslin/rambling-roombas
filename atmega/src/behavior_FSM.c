@@ -148,11 +148,14 @@ state puck_search(dd *rob, pk *puck)
     rob->omegaDesired = DES_SPEED; 
 
     if( rob->myAddress == GOALIE_ADD){
-		if(!dd_in_goal(rob,20)){
-			rob->desLoc.x = 0;
-			rob->desLoc.y = -rob->direction * (GOAL_Y-10);
-			rob->desLoc.th = 0;
-    		dd_goto(rob, puck, DES_SPEED);
+		if(rob->direction * rob->global.y > -200){
+		// 	rob->desLoc.x = 0;
+		// 	rob->desLoc.y = -rob->direction * (GOAL_Y-10);
+		// 	rob->desLoc.th = -rob->direction* PI/2;
+		    rob->desLoc.x = 0;
+			rob->desLoc.y = -rob->direction * 250;
+			rob->desLoc.th = -rob->direction * PI/2;
+     		dd_goto(rob, puck, DES_SPEED);
 			return ST_GOALIE_RETURN;
 		}
     }
@@ -227,32 +230,37 @@ state puck_pursue(dd *rob, pk *puck)
 	float k2 = 2;
 	float kap = 0;
 	float kad = 0;
-	float phiDes = 0;
+	static float phiDes = 0;
 
 	static float prevAlpha = 0;
 	float alpha = ANG_REMAP(rob->global.th + puck->th - rob->direction * PI/2);
 
-	if(puck->maxADC > 850 && alpha < PI / 6){
+	/*if(puck->maxADC > 850 && alpha < PI / 6){
 	 	kap = 0;//.6;
 	 	kad = 0;//.1;
 	}
-	else if( ABS(alpha) > PI/3){
+	else */
+	if( ABS(alpha) > PI/3){
+
 		kap = 0;
 		kad = 0;
-		if(alpha > 0){
-			phiDes = -PI/6;
-		}
-		else{
-			phiDes = PI/6;
+		if(rob->nxtSt != ST_PK_PURSUE){
+			if(alpha > 0){
+				phiDes = -PI/6;
+			}
+			else{
+				phiDes = PI/6;
+			}
 		}
 	}
 	else {
+		phiDes = 0;
 		kap = 2;//.6;
 		kad = 0;//.1;
 	}
 
 	if(rob->myAddress == GOALIE_ADD){
-		if(puck->maxADC < 500){
+		if(puck->maxADC < 200){
 			alpha = 0;
 			k1 = 0;
 		}

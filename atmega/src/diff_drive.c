@@ -94,14 +94,14 @@ void dd_goto(dd *rob, pk *puck, float veloDes){
     static float prevPhi = 0;
     float kp = 2;
     float kd = 6;
-    float k1 = 1;
+    float k1 = .4;
     float k2 = 2;
     float kap = 0;//1.5;
-    float kad = 0;//;.1;
+    float kad = CTRL_FREQ * 0;//;.1;
     float gamma = atan2(rob->desLoc.y - rob->global.y, rob->desLoc.x - rob->global.x);
     float phi = ANG_REMAP(gamma - rob->global.th);
     float alpha = ANG_REMAP(gamma - rob->desLoc.th);
-    rob->omegaDesired = kp * phi  + kd * (phi - prevPhi)+ kap * alpha - CTRL_FREQ * kad * (alpha - prevAlpha);
+    rob->omegaDesired = kp * phi  + kd * (phi - prevPhi)+ kap * alpha - kad * (alpha - prevAlpha);
     rob->veloDesired = k1 / (k2 * ABS(rob->omegaDesired) + 1);
     if (puck->isHave){
     	rob->veloDesired = MAX(rob->veloDesired, 2 * MIN_PUCK_TURN_RAD * ABS(rob->omegaDesired) / WHEEL_RADIAL_LOC);
@@ -111,7 +111,7 @@ void dd_goto(dd *rob, pk *puck, float veloDes){
     prevPhi = phi;  
 }
 bool dd_in_goal(dd*rob , float posThresh){
-	if (ABS(rob->global.x) < posThresh && ABS(rob->global.y + rob->direction * GOAL_Y) < posThresh){
+	if (ABS(rob->global.x) < posThresh && ABS(rob->global.y + rob->direction * 250) < posThresh){
 		return TRUE;
 	}
 	
