@@ -151,7 +151,7 @@ int main(void) {
     		toggle(PORTF,BOT20LED);
 			toggle(PORTF,BOT21LED);
 			toggle(PORTF,BOT22LED);
-    		buffer[0] = GAME_OVER;
+    		buffer[0] = (unsigned char) GAME_OVER;
     		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
     		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
     		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
@@ -159,19 +159,19 @@ int main(void) {
     		clr(PORTF,BOT20LED);
 			set(PORTF,BOT21LED);
 			set(PORTF,BOT22LED);
-    		buffer[0] = CALIBRATE;
+    		buffer[0] = (unsigned char) CALIBRATE;
     		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
     	} else if(button1 && button3) {
     		set(PORTF,BOT20LED);
 			clr(PORTF,BOT21LED);
 			set(PORTF,BOT22LED);
-    		buffer[0] = CALIBRATE;
+    		buffer[0] = (unsigned char) CALIBRATE;
     		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
     	} else if(button1 && button2) {
     		set(PORTF,BOT20LED);
 			set(PORTF,BOT21LED);
 			clr(PORTF,BOT22LED);
-    		buffer[0] = CALIBRATE;
+    		buffer[0] = (unsigned char) CALIBRATE;
     		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
     	} else if(button1 && !configed20) {
     		configed20 = send_config(BOT20ADDR, BOT20PIN, BOT20LED);
@@ -237,7 +237,7 @@ bool send_config(uint8_t botAddr, uint8_t botPin, uint8_t ledPin) {
 
 
 	while(!configured && !check(PINB, botPin)) {
-		buffer[0] = COACH;
+		buffer[0] = (unsigned char) COACH;
 		buffer[1] = MY_ADDRESS;
 		buffer[2] = direction;
 		buffer[3] = team;

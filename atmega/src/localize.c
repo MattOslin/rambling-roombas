@@ -1,6 +1,8 @@
 #include "localize.h"
 #include "m_usb.h"
 
+#define GOOD 1
+#define BAD 0
 #define eB 0.1
 const uint8_t distMatP[4][4] = {
 						{         0,(1+eB)*100,(1+eB)*45,(1+eB)*55},
@@ -31,7 +33,7 @@ const float angMat[4][4] = {
 					};
 
 static float calX, calY;
-static unsigned int calBlob[2]; 
+static unsigned int calBlob[3]; 
 
 bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t* badIdx, uint8_t* order);
 bool determine_order(unsigned int* blobs, uint8_t* badIdx, uint8_t* order);
@@ -56,21 +58,23 @@ bool localize_cal(pos* posStruct) {
 	uint32_t startTime = millis();
 	while(gotBlobs != 0xFF) {
 		if(localize_wii(posStruct)) {
-			for (i = 0; i < 4; i++) {
-				if (ABS(posStruct->th - measureAngles[i]) < .01) {
-					if (!(gotBlobs & (1 << i))) {
-						allCalBlobs[i][0] = calBlob[0];
-						allCalBlobs[i][1] = calBlob[1];
-						gotBlobs |= (1 << i);
+			if(calBlob[2] == GOOD) {
+				for (i = 0; i < 4; i++) {
+					if (fabsf(posStruct->th - measureAngles[i]) < .005) {
+						if (!((bool)(gotBlobs & (1 << i)))) {
+							allCalBlobs[i][0] = calBlob[0];
+							allCalBlobs[i][1] = calBlob[1];
+							gotBlobs |= (1 << i);
+						}
 					}
-				}
-				if (ABS(posStruct->th + measureAngles[i]) < .01) {
-					if (!(gotBlobs & (1 << (i+4)))) {
-						allCalBlobs[i+4][0] = calBlob[0];
-						allCalBlobs[i+4][1] = calBlob[1];
-						gotBlobs |= (1 << (i+4));
+					if (fabsf(posStruct->th + measureAngles[i]) < .005) {
+						if (!((bool)(gotBlobs & (1 << (i+4))))) {
+							allCalBlobs[i+4][0] = calBlob[0];
+							allCalBlobs[i+4][1] = calBlob[1];
+							gotBlobs |= (1 << (i+4));
+						}
 					}
-				}
+				}	
 			}
 		}
 		if(millis()-startTime > 10000) {
@@ -80,15 +84,16 @@ bool localize_cal(pos* posStruct) {
 		}
 	}
 
-	uint16_t blobXSum = 0;
-	uint16_t blobYSum = 0;
+	int16_t blobXSum = 0;
+	int16_t blobYSum = 0;
 	for (i = 0; i < 8; i++) {
-		blobXSum += allCalBlobs[i][0];
-		blobYSum += allCalBlobs[i][1];
+		blobXSum += (int16_t) allCalBlobs[i][0];
+		blobYSum += (int16_t) allCalBlobs[i][1];
 	}
 
-	calX = (float)blobXSum/8.0 - 512;
-	calY = 384 - (float)blobYSum/8.0;
+	calX = ((float)blobXSum)/8.0 - 512;
+	calY = 384 - ((float)blobYSum)/8.0;
+	
 	eeprom_write_float(&eepCalX, calX);
 	eeprom_write_float(&eepCalY, calY);
 
@@ -154,8 +159,9 @@ bool localize_wii(pos* posStruct) {
 	lastBadBlobN = badBlobN;
 	lastBadIdx = badIdx;
 	
-	calBlob[0] = wiiBuffer[0];
-	calBlob[1] = wiiBuffer[1];
+	// calBlob[0] = wiiBuffer[0];
+	// calBlob[1] = wiiBuffer[1];
+	// calBlob[2] = wiiBuffer[2];
 	
 	return localizeSuccessful;
 }
@@ -214,8 +220,20 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t* badIdx, ui
 	posStruct->th = ANG_REMAP(posStruct->th+PI/2.0);
 	// posStruct->x = 1024 - ((cosTH*vX - sinTH*vY) + 512);
 	// posStruct->y = 768 - ((sinTH*vX + cosTH*vY) + 384 + yShift);
-	blobs[0] = blobs[3*pointIdx[0]];
-	blobs[1] = blobs[3*pointIdx[0]+1];
+	// blobs[0] = blobs[3*pointIdx[0]];
+	// blobs[1] = blobs[3*pointIdx[0]+1];
+	// if(missingPoint != 0) {
+	// 	blobs[2] = GOOD;
+	// } else {
+	// 	blobs[2] = BAD;
+	// }
+	calBlob[0] = blobs[3*pointIdx[0]];
+	calBlob[1] = blobs[3*pointIdx[0]+1];
+	if(missingPoint != 0) {
+		calBlob[2] = GOOD;
+	} else {
+		calBlob[2] = BAD;
+	}
 	return true;
 }
 

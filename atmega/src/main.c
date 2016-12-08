@@ -89,11 +89,13 @@ int main(void) {
 
 			//Iterate count for slower loop
 			count++;
+
+			if(count%50 == 0) {
+				usb_debug(&robot, &puck); // USB Debug function below
+			}
 		}
 
-		if(count%10 == 0) {
-			usb_debug(&robot, &puck); // USB Debug function below
-		}
+
 	}
 }
 
@@ -159,16 +161,23 @@ void usb_debug(dd *rob, pk *puck){
 		// m_usb_tx_string(" M1_enc ");//m_usb_tx_int(10);
 	// m_usb_tx_int(robot.M1.veloEncoder);
 	// m_usb_tx_string(",");
-	m_usb_tx_string("  Location Data:  ");
+	// m_usb_tx_string("  Location Data:  ");
 	m_usb_tx_int(rob->global.x);
-	m_usb_tx_string(",");
+	m_usb_tx_string(" ");
 	m_usb_tx_int(rob->global.y);
-	m_usb_tx_string(",");
+	m_usb_tx_string(" ");
 	m_usb_tx_int(100 * rob->global.th);
+	m_usb_tx_string(" ");
 //	m_usb_tx_string(" Team:");
 //	m_usb_tx_int(rob->team);
 //	m_usb_tx_string(" Direction:");
 //	m_usb_tx_int(rob->direction);
+	m_usb_tx_int(eeprom_read_float(&eepCalX)*100);
+	m_usb_tx_string(" ");
+	m_usb_tx_int(eeprom_read_float(&eepCalY)*100);
+	m_usb_tx_string(" ");
+
+
 
 	// m_usb_tx_string(" STATE: ");
 	// m_usb_tx_int(rob->nxtSt);
@@ -204,20 +213,20 @@ void usb_debug(dd *rob, pk *puck){
 //  m_usb_tx_string(" Ping: ");
 //  m_usb_tx_int(rob->ping);
 
- 	m_usb_tx_string(" Puck TH: ");
- 	m_usb_tx_int((int)100*puck->th);
- 	m_usb_tx_string(" isFound: ");
- 	m_usb_tx_int(puck->isFound);
- 	m_usb_tx_string(" isHave: ");
- 	m_usb_tx_int(puck->isHave);
+ 	// m_usb_tx_string(" Puck TH: ");
+ 	// m_usb_tx_int((int)100*puck->th);
+ 	// m_usb_tx_string(" isFound: ");
+ 	// m_usb_tx_int(puck->isFound);
+ 	// m_usb_tx_string(" isHave: ");
+ 	// m_usb_tx_int(puck->isHave);
 	// m_usb_tx_string(" commVelo: ");
  // 	m_usb_tx_int(100*rob->veloDesired);
 	// m_usb_tx_string(" commOm: ");
- // 	m_usb_tx_int(100*rob->omegaDesired);
- 	m_usb_tx_string(" state: ");
- 	m_usb_tx_int(rob->nxtSt);
+ // // 	m_usb_tx_int(100*rob->omegaDesired);
+ // 	m_usb_tx_string(" state: ");
+ // 	m_usb_tx_int(rob->nxtSt);
  	
-	m_usb_tx_string("\n");
+	// m_usb_tx_string("\n");
 
  // 	m_usb_tx_string(" Puck TH: ");
  // 	m_usb_tx_int((int)100*puck->th);
@@ -236,7 +245,7 @@ void usb_debug(dd *rob, pk *puck){
 
 //   	m_usb_tx_int(puck->th);
 
-//   	m_usb_tx_string("\n");
+  	m_usb_tx_string("\n");
     
 
 }
