@@ -155,24 +155,24 @@ int main(void) {
     		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
     		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
     		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
-    	} else if(button2 && button3) {
-    		clr(PORTF,BOT20LED);
-			set(PORTF,BOT21LED);
-			set(PORTF,BOT22LED);
-    		buffer[0] = (unsigned char) CALIBRATE;
-    		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
-    	} else if(button1 && button3) {
-    		set(PORTF,BOT20LED);
-			clr(PORTF,BOT21LED);
-			set(PORTF,BOT22LED);
-    		buffer[0] = (unsigned char) CALIBRATE;
-    		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
-    	} else if(button1 && button2) {
-    		set(PORTF,BOT20LED);
-			set(PORTF,BOT21LED);
-			clr(PORTF,BOT22LED);
-    		buffer[0] = (unsigned char) CALIBRATE;
-    		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
+   //  	} else if(button2 && button3) {
+   //  		clr(PORTF,BOT20LED);
+			// set(PORTF,BOT21LED);
+			// set(PORTF,BOT22LED);
+   //  		buffer[0] = (unsigned char) CALIBRATE;
+   //  		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
+   //  	} else if(button1 && button3) {
+   //  		set(PORTF,BOT20LED);
+			// clr(PORTF,BOT21LED);
+			// set(PORTF,BOT22LED);
+   //  		buffer[0] = (unsigned char) CALIBRATE;
+   //  		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
+   //  	} else if(button1 && button2) {
+   //  		set(PORTF,BOT20LED);
+			// set(PORTF,BOT21LED);
+			// clr(PORTF,BOT22LED);
+   //  		buffer[0] = (unsigned char) CALIBRATE;
+   //  		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
     	} else if(button1 && !configed20) {
     		configed20 = send_config(BOT20ADDR, BOT20PIN, BOT20LED);
     	} else if(button2 && !configed21) {
