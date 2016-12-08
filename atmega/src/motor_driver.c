@@ -76,18 +76,18 @@ void drive_CL(motor *m){
   float kp = .6;
   float kd = 4;
 
-  m_usb_tx_int(m->veloEncoder);
-  m_usb_tx_string(" ");
-  m_usb_tx_int(veloEncoderScale*1000);
-  m_usb_tx_string(" ");
-  m_usb_tx_int(m->veloDesired*1000);
-  m_usb_tx_string(" ");
+//  m_usb_tx_int(m->veloEncoder);
+//  m_usb_tx_string(" ");
+//  m_usb_tx_int(veloEncoderScale*1000);
+//  m_usb_tx_string(" ");
+//  m_usb_tx_int(m->veloDesired*1000);
+//  m_usb_tx_string(" ");
 //  m_usb_tx_int(diff*1000);
 //  m_usb_tx_string(" ");
 
   float control = m->command + kp * p_error + kd * (p_error - m->prevError);
-  m_usb_tx_int(control);
-  m_usb_tx_string(" ");
+//  m_usb_tx_int(control);
+//  m_usb_tx_string(" ");
 //
 //  m_usb_tx_int(m->veloDesired*1000);
 //  m_usb_tx_string(" ");
@@ -97,7 +97,7 @@ void drive_CL(motor *m){
 //  m_usb_tx_string(" ");
 //  m_usb_tx_int(control);
 
-  m_usb_tx_string("\n");
+//  m_usb_tx_string("\n");
 
   command_update(m, (int) control);
 

@@ -67,7 +67,7 @@ int main(void) {
 		if (CTRLreadyFlag) {
 			
 			CTRLreadyFlag = FALSE; //Reset flag for interrupt	
-//			localize_wii(&(robot.global));
+			localize_wii(&(robot.global));
 			puck_update(&puck, rawADCCounts);
 			find_state(&robot,&puck);
 
@@ -89,7 +89,7 @@ int main(void) {
 			//Iterate count for slower loop
 			count++;
 
-			if(count%50 == 0) {
+			if(count%10 == 0) {
 				usb_debug(&robot, &puck); // USB Debug function below
 			}
 		}
@@ -195,12 +195,12 @@ void usb_debug(dd *rob, pk *puck){
 //   m_usb_tx_string(" Ping: ");
 //   m_usb_tx_int(rob->ping);
 
-//	 m_usb_tx_string(" STATE: ");
-//	 m_usb_tx_int(rob->nxtSt);
-//	 m_usb_tx_string(" EVENT: ");
-//	 m_usb_tx_int(rob->ev);
-//	 m_usb_tx_string(" enable: ");
-//	 m_usb_tx_int(rob->enable);
+	 m_usb_tx_string(" STATE: ");
+	 m_usb_tx_int(rob->nxtSt);
+	 m_usb_tx_string(" EVENT: ");
+	 m_usb_tx_int(rob->ev);
+	 m_usb_tx_string(" enable: ");
+	 m_usb_tx_int(rob->enable);
 
 //  int i;
 //  for(i=0;i<8;i++){
@@ -244,9 +244,9 @@ void usb_debug(dd *rob, pk *puck){
  // 	m_usb_tx_string(" state: ");
  // 	m_usb_tx_int(rob->nxtSt);
 
-//   	m_usb_tx_int(puck->th);
+   	m_usb_tx_int(puck->th*100);
 
-//  	m_usb_tx_string("\n");
+  	m_usb_tx_string("\n");
 
 
 }

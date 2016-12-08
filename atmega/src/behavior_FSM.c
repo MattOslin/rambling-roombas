@@ -148,7 +148,7 @@ state puck_search(dd *rob, pk *puck)
     static int8_t leftRight = 1;
 
     rob->veloDesired  = 0;
-    rob->omegaDesired = DES_SPEED;
+    rob->omegaDesired = DES_SPEED/2;
 
     if( rob->myAddress == GOALIE_ADD){
 
@@ -263,15 +263,18 @@ state puck_search(dd *rob, pk *puck)
 
 state puck_pursue(dd *rob, pk *puck)
 {
-	float kp = 2.7;
-	float kd = .15 * CTRL_FREQ ;
+	float kp = .55;
+	float kd = 3 * CTRL_FREQ ;
+  float ki = 0.01;
 	float k1 = 1;
 	float k2 = 2;
-	float kap = 0;
-	float kad = 0;
+  float ka = 0;
+//	float kap = 0;
+//	float kad = 0;
 
 	static float phiDes = 0;
-	static float prevAlpha = 0;
+  static float phiInt = 0;
+	//static float prevAlpha = 0;
 	float alpha = ANG_REMAP(rob->global.th + puck->th - rob->direction * PI/2);
 
 	/*if(puck->maxADC > 850 && alpha < PI / 6){
@@ -280,23 +283,24 @@ state puck_pursue(dd *rob, pk *puck)
 	}
 	else */
 	if( ABS(alpha) > PI/3){
-
-		kap = 0;
-		kad = 0;
+//		kap = 0;
+//		kad = 0;
 		if(rob->nxtSt != ST_PK_PURSUE){
-			if(alpha > 0){
-				phiDes = -PI/6;
-			}
-			else{
-				phiDes = PI/6;
-			}
+//			if(alpha > 0){
+//				phiDes = -PI/6;
+//			}
+//			else{
+//				phiDes = PI/6;
+//			}
 		}
 	}
 	else {
-		phiDes = 0;
-		kap = 2;//.6;
-		kad = 0;//.1;
+    phiDes = - ka * alpha;
+//		kap = 2;//.6;
+//		kad = 0;//.1;
 	}
+
+  //PHI CAP?
 
 	if(rob->myAddress == GOALIE_ADD){
 		if(puck->maxADC < 200){
@@ -305,12 +309,18 @@ state puck_pursue(dd *rob, pk *puck)
 		}
 	}
 
-	rob->omegaDesired = kp * (puck->th - phiDes)  + kd * (puck->th - puck->thPrev)+ kap * alpha - CTRL_FREQ * kad * (alpha - prevAlpha);
+  rob->omegaDesired = kp * (puck->th - phiDes) + kd * (puck->th - puck->thPrev); //+ kap * alpha - CTRL_FREQ * kad * (alpha - prevAlpha);
+
+  m_usb_tx_string(" w: ");
+  m_usb_tx_int(rob->omegaDesired);
+  m_usb_tx_string(" w: ");
 	rob->veloDesired = k1 / (k2 * ABS(rob->omegaDesired) + 1);
 
 	// dd_norm(rob,DES_SPEED);
-	
-	prevAlpha = alpha;
+
+  phiInt += ki *(puck->th - phiDes);
+
+	//prevAlpha = alpha;
 
     //printf("puck_pursue\t");
 
