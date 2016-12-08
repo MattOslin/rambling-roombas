@@ -31,6 +31,7 @@ int main(void) {
 
 	// Initialize diffDrive (motors, encoders, localization)
 	dd_init(&robot); 
+	//dd_enable(&robot);
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t count = 0; //Used to not bog down processer or terminal with USB Transmissions
@@ -38,8 +39,6 @@ int main(void) {
 	robot.desLoc.y = 0;
 	robot.desLoc.th = 0;
 	init_fsm();
-	
-	//dd_enable(&robot);
 	m_green(ON); // Ready LED
 	// while(1){
 	// 	// system_check(&robot);
@@ -222,9 +221,11 @@ void usb_debug(dd *rob, pk *puck){
 	// m_usb_tx_string(" commVelo: ");
  // 	m_usb_tx_int(100*rob->veloDesired);
 	// m_usb_tx_string(" commOm: ");
- // // 	m_usb_tx_int(100*rob->omegaDesired);
- // 	m_usb_tx_string(" state: ");
- // 	m_usb_tx_int(rob->nxtSt);
+ // 	m_usb_tx_int(100*rob->omegaDesired);
+ 	m_usb_tx_string(" state: ");
+ 	m_usb_tx_int(rob->nxtSt);
+ 	m_usb_tx_string(" event: ");
+ 	m_usb_tx_int(rob->ev);
  	
 	// m_usb_tx_string("\n");
 
