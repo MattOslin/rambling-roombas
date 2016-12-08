@@ -367,3 +367,19 @@ bool system_check(dd *rob){
 }
 
 
+
+void wall_adjust(dd *rob){
+	float k = .5;
+
+	if (rob->global.x > 100){
+		if (ABS(rob->global.th) < (80 * PI / 180)){
+			rob->omegaDesired += k * rob->global.th;
+		}
+	}
+	else if(rob->global.x <-100){
+		if (ABS(ANG_REMAP(rob->global.th - PI)) < (80 * PI / 180)){
+			rob->omegaDesired += k * ANG_REMAP(PI - rob->global.th);	
+		}
+	}
+
+}
