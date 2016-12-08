@@ -76,6 +76,19 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 		case CALIBRATE:
 			//calibrate_routine();
 
+			set_led(0, OFF);
+			m_wait(50);
+			set_led(0, TOGGLE);
+			m_wait(50);
+			set_led(0, OFF);
+			m_wait(50);
+			set_led(0, TOGGLE);
+			m_wait(50);
+			set_led(0, OFF);
+			m_wait(50);
+			set_led(0, TOGGLE);
+			m_wait(50);
+
 			dd_enable(robot);
 			robot->veloDesired = 0;
 			robot->omegaDesired = .2;

@@ -86,12 +86,14 @@ int main(void) {
 	clr(DDRB,2);
 	clr(DDRB,3);
 	clr(DDRB,7);
+	clr(DDRD,3);
 
 	set(PORTB, 0);
 	set(PORTB, 1);
 	set(PORTB, 2);
 	set(PORTB, 3);
 	set(PORTB, 7);
+	set(PORTD, 3);
 	
 
 	// Enable global interrupts
@@ -105,6 +107,7 @@ int main(void) {
 
 	uint8_t lastTeam = 0xFF;
 	int8_t lastDir = 0;
+	uint8_t lastCommand = 0x00;
 	//Main process loop
     while (1) {
     	if(!check(PINB,DIR_PIN) == POS_Y) {
@@ -146,6 +149,13 @@ int main(void) {
     	bool button1 = !check(PINB, BOT20PIN);
     	bool button2 = !check(PINB, BOT21PIN);
     	bool button3 = !check(PINB, BOT22PIN);
+    	bool calButton = !check(PIND, 3);
+
+    	if (calButton) {
+    		m_red(ON);
+    	} else {
+    		m_red(OFF);
+    	}
 
     	if(button1 && button2 && button3) {
     		toggle(PORTF,BOT20LED);
@@ -155,24 +165,39 @@ int main(void) {
     		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
     		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
     		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
-   //  	} else if(button2 && button3) {
-   //  		clr(PORTF,BOT20LED);
-			// set(PORTF,BOT21LED);
-			// set(PORTF,BOT22LED);
-   //  		buffer[0] = (unsigned char) CALIBRATE;
-   //  		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
-   //  	} else if(button1 && button3) {
-   //  		set(PORTF,BOT20LED);
-			// clr(PORTF,BOT21LED);
-			// set(PORTF,BOT22LED);
-   //  		buffer[0] = (unsigned char) CALIBRATE;
-   //  		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
-   //  	} else if(button1 && button2) {
-   //  		set(PORTF,BOT20LED);
-			// set(PORTF,BOT21LED);
-			// clr(PORTF,BOT22LED);
-   //  		buffer[0] = (unsigned char) CALIBRATE;
-   //  		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
+    	} else if(calButton && button1) {
+    		set(PORTD, RED_PIN);
+    		set(PORTD, BLUE_PIN);
+    		clr(PORTF,BOT20LED);
+			set(PORTF,BOT21LED);
+			set(PORTF,BOT22LED);
+    		if (lastCommand != CALIBRATE) {
+				lastCommand = CALIBRATE;
+	    		buffer[0] = (unsigned char) CALIBRATE;
+	    		m_rf_send(BOT20ADDR, buffer, PACKET_LENGTH);
+	    	}
+    	} else if(calButton && button2) {
+    		set(PORTD, RED_PIN);
+    		set(PORTD, BLUE_PIN);
+    		set(PORTF,BOT20LED);
+			clr(PORTF,BOT21LED);
+			set(PORTF,BOT22LED);
+    		if (lastCommand != CALIBRATE) {
+				lastCommand = CALIBRATE;
+	    		buffer[0] = (unsigned char) CALIBRATE;
+	    		m_rf_send(BOT21ADDR, buffer, PACKET_LENGTH);
+	    	}
+    	} else if(calButton && button3) {
+    		set(PORTD, RED_PIN);
+    		set(PORTD, BLUE_PIN);
+    		set(PORTF,BOT20LED);
+			set(PORTF,BOT21LED);
+			clr(PORTF,BOT22LED);
+			if (lastCommand != CALIBRATE) {
+				lastCommand = CALIBRATE;
+	    		buffer[0] = (unsigned char) CALIBRATE;
+	    		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
+	    	}
     	} else if(button1 && !configed20) {
     		configed20 = send_config(BOT20ADDR, BOT20PIN, BOT20LED);
     	} else if(button2 && !configed21) {
@@ -180,6 +205,7 @@ int main(void) {
     	} else if(button3 && !configed22) {
     		configed22 = send_config(BOT22ADDR, BOT22PIN, BOT22LED);
     	} else {
+    		lastCommand = SKIP;
     		if(!configed20) {
     			clr(PORTF,BOT20LED);
     		} else {
