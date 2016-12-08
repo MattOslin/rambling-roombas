@@ -29,8 +29,8 @@ void dd_drive(dd *rob){
 		}
 
 		//Set desired velocity for motors
-		rob->M1.veloDesired = rightMotorV;
-		rob->M2.veloDesired = leftMotorV;
+		rob->M1.veloDesired = -leftMotorV*.8;
+    rob->M2.veloDesired = -rightMotorV*.8;
 	}
 	else{
 
@@ -165,8 +165,8 @@ void dd_update(dd *rob) {
  	dd_drive( rob );
 	encoder_velocity( &(rob->M1) );
 	encoder_velocity( &(rob->M2) );
- 	drive_OL( &(rob->M1) );
- 	drive_OL( &(rob->M2) );
+ 	drive_CL( &(rob->M1) );
+ 	drive_CL( &(rob->M2) );
  	motor_update( &(rob->M1) );
  	motor_update( &(rob->M2) );
  }

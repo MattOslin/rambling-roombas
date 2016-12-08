@@ -31,7 +31,6 @@ int main(void) {
 
 	// Initialize diffDrive (motors, encoders, localization)
 	dd_init(&robot); 
-	//dd_enable(&robot);
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t count = 0; //Used to not bog down processer or terminal with USB Transmissions
@@ -39,6 +38,7 @@ int main(void) {
 	robot.desLoc.y = 0;
 	robot.desLoc.th = 0;
 	init_fsm();
+  dd_enable(&robot);
 	m_green(ON); // Ready LED
 	// while(1){
 	// 	// system_check(&robot);
@@ -67,7 +67,7 @@ int main(void) {
 		if (CTRLreadyFlag) {
 			
 			CTRLreadyFlag = FALSE; //Reset flag for interrupt	
-			localize_wii(&(robot.global));
+//			localize_wii(&(robot.global));
 			puck_update(&puck, rawADCCounts);
 			find_state(&robot,&puck);
 
@@ -124,12 +124,12 @@ ISR(TIMER4_OVF_vect) {
 
 //interrupt for encoders
 ISR(INT3_vect){
-	encoder_update(&(robot.M1));
+	encoder_update(&(robot.M2),1);
 }
 
 //interrupt for encoders
 ISR(INT6_vect){
-	encoder_update(&(robot.M2));
+	encoder_update(&(robot.M1),-1);
 }
 
 // interrupt for input capture on ping sensor
@@ -161,20 +161,20 @@ void usb_debug(dd *rob, pk *puck){
 	// m_usb_tx_int(robot.M1.veloEncoder);
 	// m_usb_tx_string(",");
 	// m_usb_tx_string("  Location Data:  ");
-	m_usb_tx_int(rob->global.x);
-	m_usb_tx_string(" ");
-	m_usb_tx_int(rob->global.y);
-	m_usb_tx_string(" ");
-	m_usb_tx_int(100 * rob->global.th);
-	m_usb_tx_string(" ");
+//	m_usb_tx_int(rob->global.x);
+//	m_usb_tx_string(" ");
+//	m_usb_tx_int(rob->global.y);
+//	m_usb_tx_string(" ");
+//	m_usb_tx_int(100 * rob->global.th);
+//	m_usb_tx_string(" ");
 //	m_usb_tx_string(" Team:");
 //	m_usb_tx_int(rob->team);
 //	m_usb_tx_string(" Direction:");
 //	m_usb_tx_int(rob->direction);
-	m_usb_tx_int(eeprom_read_float(&eepCalX)*100);
-	m_usb_tx_string(" ");
-	m_usb_tx_int(eeprom_read_float(&eepCalY)*100);
-	m_usb_tx_string(" ");
+//	m_usb_tx_int(eeprom_read_float(&eepCalX)*100);
+//	m_usb_tx_string(" ");
+//	m_usb_tx_int(eeprom_read_float(&eepCalY)*100);
+//	m_usb_tx_string(" ");
 
 
 
@@ -222,11 +222,11 @@ void usb_debug(dd *rob, pk *puck){
  // 	m_usb_tx_int(100*rob->veloDesired);
 	// m_usb_tx_string(" commOm: ");
  // 	m_usb_tx_int(100*rob->omegaDesired);
- 	m_usb_tx_string(" state: ");
- 	m_usb_tx_int(rob->nxtSt);
- 	m_usb_tx_string(" event: ");
- 	m_usb_tx_int(rob->ev);
- 	
+// 	m_usb_tx_string(" state: ");
+// 	m_usb_tx_int(rob->nxtSt);
+// 	m_usb_tx_string(" event: ");
+// 	m_usb_tx_int(rob->ev);
+
 	// m_usb_tx_string("\n");
 
  // 	m_usb_tx_string(" Puck TH: ");
@@ -246,7 +246,7 @@ void usb_debug(dd *rob, pk *puck){
 
 //   	m_usb_tx_int(puck->th);
 
-  	m_usb_tx_string("\n");
-    
+//  	m_usb_tx_string("\n");
+
 
 }

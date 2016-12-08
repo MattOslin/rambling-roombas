@@ -148,8 +148,7 @@ state puck_search(dd *rob, pk *puck)
     static int8_t leftRight = 1;
 
     rob->veloDesired  = 0;
-    rob->omegaDesired = DES_SPEED; 
-
+    rob->omegaDesired = DES_SPEED;
 
     if( rob->myAddress == GOALIE_ADD){
 
