@@ -41,7 +41,7 @@ void dd_disable(dd *rob);
 void dd_update(dd *rob);
 void dd_norm(dd *rob, float maxV);
 bool dd_in_goal(dd*rob , float posThresh);
-
+bool dd_theta_control(dd*rob , float theta_desired);
 
 bool dd_is_loc(dd *rob, float posThresh,float thThresh);
 void dd_goto(dd *rob, pk *puck, float veloDes);

@@ -131,6 +131,35 @@ bool dd_is_loc(dd*rob , float posThresh, float thThresh){
 
 }
 
+bool dd_theta_control(dd *rob, float theta_desired){
+
+	static float theta_prev = 0;
+	static float theta_int = 0;
+	float kpa = 1;
+	float kia = .03;
+	float kda = -.05;
+
+	float w = ANG_REMAP(rob->global.th - theta_prev) * CTRL_FREQ;
+	float d_th = ANG_REMAP(theta_desired-rob->global.th);
+
+	rob->veloDesired  = 0;
+	rob->omegaDesired = kpa * d_th + theta_int + kda * w;
+	theta_int += kia * d_th;
+	theta_prev = rob->global.th;
+	//  m_usb_tx_int(100*d_th);
+	//  m_usb_tx_string(" ");
+	//  m_usb_tx_int(100*w);
+	//  m_usb_tx_string(" ");
+	if(ABS(d_th) < .03 && ABS(w) < .1) {
+		theta_int = 0;
+		return true;
+	} 
+	else {
+		return false;
+	}
+
+}
+
 void dd_update(dd *rob) {
  	// Update the state of the diff drive robot
  	dd_drive( rob );

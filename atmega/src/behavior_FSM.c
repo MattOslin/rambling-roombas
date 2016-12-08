@@ -143,12 +143,17 @@ state standby(dd *rob, pk *puck){
 state puck_search(dd *rob, pk *puck)
 {
     //rob->veloDesired  = .1;
+
 	static bool isInGoal = FALSE;
+    static int8_t leftRight = 1;
+
     rob->veloDesired  = 0;
     rob->omegaDesired = DES_SPEED; 
 
+
     if( rob->myAddress == GOALIE_ADD){
-    	if(rob->direction * rob->global.y > -200){
+
+    	if(rob->direction * rob->global.y > -230){
 			isInGoal = FALSE;
 		}
 		if(rob->direction * rob->global.y < -280){
@@ -157,10 +162,15 @@ state puck_search(dd *rob, pk *puck)
 
     	if(!isInGoal){
     		rob->desLoc.x = 0;
-			rob->desLoc.y = -rob->direction * 250;
+			rob->desLoc.y = -rob->direction * (GOAL_Y-10);
 			rob->desLoc.th = -rob->direction * PI/2;
      		dd_goto(rob, puck, 1);
 			return ST_GOALIE_RETURN;
+    	}
+    	else{
+    		if( dd_theta_control( rob , rob->direction * PI/2 + leftRight * PI / 6 ) ){
+    			leftRight = -leftRight;
+    		}
     	}
 
 		// 	rob->desLoc.x = 0;
