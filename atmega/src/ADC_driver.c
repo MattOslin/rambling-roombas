@@ -16,6 +16,7 @@
 
 #define NUMADCS 8
 #define NUMADCS_HI_RES 0
+#define LPF_ALPHA 0.5
 const int ADCsToRead[] = {ADC10, ADC7, ADC5, ADC12, ADC0, ADC1, ADC4, ADC6};
 //Disable Digital Inputs
 // void adc_dis_digi()
@@ -86,7 +87,7 @@ void adc_init() {
 void adc_read(uint16_t rawADCCounts[])
 {
 	static uint8_t ADCIndex = 0;
-	rawADCCounts[ADCIndex] = ADC;
+	rawADCCounts[ADCIndex] = (1-LPF_ALPHA)*rawADCCounts[ADCIndex] + LPF_ALPHA*ADC;
 
 	//Choose which ADC to run next and set ADMUX register
 	ADCIndex = (ADCIndex + 1) % NUMADCS;
