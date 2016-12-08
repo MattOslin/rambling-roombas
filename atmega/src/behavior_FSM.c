@@ -148,7 +148,7 @@ state puck_search(dd *rob, pk *puck)
     static int8_t leftRight = 1;
 
     rob->veloDesired  = 0;
-    rob->omegaDesired = DES_SPEED/2;
+    rob->omegaDesired = DES_SPEED;
 
     if( rob->myAddress == GOALIE_ADD){
 
@@ -264,7 +264,7 @@ state puck_search(dd *rob, pk *puck)
 state puck_pursue(dd *rob, pk *puck)
 {
 	float kp = .55;
-	float kd = 3 * CTRL_FREQ ;
+	float kd = .05 * CTRL_FREQ ;
   float ki = 0.01;
 	float k1 = 1;
 	float k2 = 2;
