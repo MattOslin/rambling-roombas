@@ -13,8 +13,8 @@
 
 #define GOAL_X 40// xdimension of the top of the goal (negated for bottom)
 #define GOAL_Y 300// y dimension of goal in the rink
-#define SHT_THRSH_NEAR 65
-#define SHT_THRSH_FAR 100
+#define SHT_THRSH_NEAR 75
+#define SHT_THRSH_FAR 120
 #define SHT_DIST_THRSH 20
 
 #define GOALIE_ADD 20

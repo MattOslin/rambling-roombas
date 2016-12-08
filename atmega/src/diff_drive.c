@@ -94,7 +94,7 @@ void dd_goto(dd *rob, pk *puck, float veloDes){
     static float prevPhi = 0;
     float kp = 2;
     float kd = 6;
-    float k1 = .4;
+    float k1 = veloDes;//.4;
     float k2 = 2;
     float kap = 0;//1.5;
     float kad = CTRL_FREQ * 0;//;.1;
