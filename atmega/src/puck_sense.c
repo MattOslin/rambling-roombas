@@ -1,5 +1,5 @@
 #include "puck_sense.h"
-#define PK_ALPHA_LPF .5
+#define PK_ALPHA_LPF 0.5
 void puck_update(pk *puck, uint16_t *P) {
 
   // Update the pucks information

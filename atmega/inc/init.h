@@ -29,6 +29,7 @@ void puck_update(pk *puck, uint16_t* ADCs);
 void shoot_puck(dd *rob, pk *puck);
 
 void solenoid_update(dd *rob);
+void wall_adjust(dd *rob);
 // float atan2_aprox(float x, float y);
 bool system_check(dd*rob);
 

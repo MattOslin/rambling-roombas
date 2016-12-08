@@ -81,6 +81,7 @@ int main(void) {
 			// }
 
 			solenoid_update(&robot);
+			wall_adjust(&robot);
 			dd_update(&robot);
 			 //UPDATES THE CONTROLS
 			// dd_goto_rot_trans(&robot, .2);
