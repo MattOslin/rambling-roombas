@@ -8,6 +8,7 @@
 #include "behavior_FSM.h"
 void usb_debug(dd *rob, pk *puck);
 
+bool run_cal(dd* robot);
 dd robot;
 pk puck;
 
@@ -31,7 +32,6 @@ int main(void) {
 
 	// Initialize diffDrive (motors, encoders, localization)
 	dd_init(&robot); 
-	//dd_enable(&robot);
 	// Initialize Variables
 	//const float deltaT = 1.0/CTRL_FREQ;
 	uint16_t count = 0; //Used to not bog down processer or terminal with USB Transmissions
@@ -39,6 +39,7 @@ int main(void) {
 	robot.desLoc.y = 0;
 	robot.desLoc.th = 0;
 	init_fsm();
+//  dd_enable(&robot);
 	m_green(ON); // Ready LED
 	// while(1){
 	// 	// system_check(&robot);
@@ -55,7 +56,11 @@ int main(void) {
 			m_green(TOGGLE);
 			isCommandReady = FALSE;
 			m_rf_read(buffer,PACKET_LENGTH);// pull the packet
-			rf_parse(buffer, &robot);
+						if(rf_parse(buffer, &robot)) {
+				if(run_cal(&robot)) {
+					set_led(0, TOGGLE);
+				}
+			}
 		}
 
 		if (isADCRead) {	
@@ -81,7 +86,7 @@ int main(void) {
 			// }
 
 			solenoid_update(&robot);
-			wall_adjust(&robot);
+//			wall_adjust(&robot);
 			dd_update(&robot);
 			 //UPDATES THE CONTROLS
 			// dd_goto_rot_trans(&robot, .2);
@@ -90,7 +95,7 @@ int main(void) {
 			//Iterate count for slower loop
 			count++;
 
-			if(count%50 == 0) {
+			if(count%10 == 0) {
 				usb_debug(&robot, &puck); // USB Debug function below
 			}
 		}
@@ -125,12 +130,12 @@ ISR(TIMER4_OVF_vect) {
 
 //interrupt for encoders
 ISR(INT3_vect){
-	encoder_update(&(robot.M1));
+	encoder_update(&(robot.M2),1);
 }
 
 //interrupt for encoders
 ISR(INT6_vect){
-	encoder_update(&(robot.M2));
+	encoder_update(&(robot.M1),-1);
 }
 
 // interrupt for input capture on ping sensor
@@ -161,7 +166,7 @@ void usb_debug(dd *rob, pk *puck){
 		// m_usb_tx_string(" M1_enc ");//m_usb_tx_int(10);
 	// m_usb_tx_int(robot.M1.veloEncoder);
 	// m_usb_tx_string(",");
-	// m_usb_tx_string("  Location Data:  ");
+	 m_usb_tx_string("  Location Data:  ");
 	m_usb_tx_int(rob->global.x);
 	m_usb_tx_string(" ");
 	m_usb_tx_int(rob->global.y);
@@ -172,10 +177,10 @@ void usb_debug(dd *rob, pk *puck){
 //	m_usb_tx_int(rob->team);
 //	m_usb_tx_string(" Direction:");
 //	m_usb_tx_int(rob->direction);
-	m_usb_tx_int(eeprom_read_float(&eepCalX)*100);
-	m_usb_tx_string(" ");
-	m_usb_tx_int(eeprom_read_float(&eepCalY)*100);
-	m_usb_tx_string(" ");
+//	m_usb_tx_int(eeprom_read_float(&eepCalX)*100);
+//	m_usb_tx_string(" ");
+//	m_usb_tx_int(eeprom_read_float(&eepCalY)*100);
+//	m_usb_tx_string(" ");
 
 
 
@@ -223,11 +228,11 @@ void usb_debug(dd *rob, pk *puck){
  // 	m_usb_tx_int(100*rob->veloDesired);
 	// m_usb_tx_string(" commOm: ");
  // 	m_usb_tx_int(100*rob->omegaDesired);
- 	m_usb_tx_string(" state: ");
- 	m_usb_tx_int(rob->nxtSt);
- 	m_usb_tx_string(" event: ");
- 	m_usb_tx_int(rob->ev);
- 	
+// 	m_usb_tx_string(" state: ");
+// 	m_usb_tx_int(rob->nxtSt);
+// 	m_usb_tx_string(" event: ");
+// 	m_usb_tx_int(rob->ev);
+
 	// m_usb_tx_string("\n");
 
  // 	m_usb_tx_string(" Puck TH: ");
@@ -245,9 +250,67 @@ void usb_debug(dd *rob, pk *puck){
  // 	m_usb_tx_string(" state: ");
  // 	m_usb_tx_int(rob->nxtSt);
 
-//   	m_usb_tx_int(puck->th);
+   	m_usb_tx_int(puck->th*100);
 
   	m_usb_tx_string("\n");
-    
+
 
 }
+
+bool run_cal(dd* rob) {
+	int8_t i;
+	uint16_t calBlob[2];
+	uint16_t allCalBlobs[8][2];
+	uint8_t gotBlobs = 0x00;
+	float measureAngles[4] = {PI/8.0, 3*PI/8.0, 5*PI/8.0, 7*PI/8.0};
+	
+	pos *posStruct = &(rob->global);
+	dd_enable(rob);
+	rob->veloDesired = 0;
+	rob->omegaDesired = .05;
+
+	uint32_t startTime = millis();
+
+	while(gotBlobs != 0xFF) {
+		if (CTRLreadyFlag) {
+			CTRLreadyFlag = FALSE; 
+			dd_update(rob);
+
+			if(localize_blob(posStruct, calBlob)) {
+				for (i = 0; i < 4; i++) {
+					if (fabsf(posStruct->th - measureAngles[i]) < .005) {
+						if (!((bool)(gotBlobs & (1 << i)))) {
+							allCalBlobs[i][0] = calBlob[0];
+							allCalBlobs[i][1] = calBlob[1];
+							gotBlobs |= (1 << i);
+						}
+					}
+					if (fabsf(posStruct->th + measureAngles[i]) < .005) {
+						if (!((bool)(gotBlobs & (1 << (i+4))))) {
+							allCalBlobs[i+4][0] = calBlob[0];
+							allCalBlobs[i+4][1] = calBlob[1];
+							gotBlobs |= (1 << (i+4));
+						}
+					}
+				}	
+			}
+			if(millis()-startTime > 10000) {
+				localize_set_cals(0,0);
+				return false;
+			}
+		}
+	}
+
+	int16_t blobXSum = 0;
+	int16_t blobYSum = 0;
+	for (i = 0; i < 8; i++) {
+		blobXSum += (int16_t) allCalBlobs[i][0];
+		blobYSum += (int16_t) allCalBlobs[i][1];
+	}
+
+	float calXnew = ((float)blobXSum)/8.0 - 512;
+	float calYnew = 384 - ((float)blobYSum)/8.0;
+	localize_set_cals(calXnew, calYnew);
+
+	return true;
+ }

@@ -67,12 +67,13 @@ void dd_init(dd *rob) {
 	
 	rob->M1.command = 0;  // initialize command to motor to zero
 
+  // switched
+
   rob->M1.encA.reg = (uint8_t *) (&PINE); // Encoder A Input Pin E6
   rob->M1.encA.bit = 6;
 
   rob->M1.encB.reg = (uint8_t *) (&PINB); // Encoder B Input Pin B0
   rob->M1.encB.bit = 0;
-
 
 	rob->M1.kp = CL_VEL_KP; // Motor gain for closed loop velocity control
 	rob->M1.ki = CL_VEL_KI; //     These parameters are here 
@@ -88,11 +89,13 @@ void dd_init(dd *rob) {
 	
 	rob->M2.command = 0;  // initialize command to motor to zero
 
-  rob->M2.encA.reg = (uint8_t *) (&PIND); // Encoder A Input Pin D3
-  rob->M2.encA.bit = 3;
+  rob->M2.encB.reg = (uint8_t *) (&PIND); // Encoder A Input Pin D3
+  rob->M2.encB.bit = 3;
 
-  rob->M2.encB.reg = (uint8_t *) (&PIND); // Encoder B Input Pin D4
-  rob->M2.encB.bit = 4;
+  rob->M2.encA.reg = (uint8_t *) (&PIND); // Encoder B Input Pin D4
+  rob->M2.encA.bit = 4;
+
+
 
 	rob->M2.kp = CL_VEL_KP; // Motor gain for closed loop velocity control
 	rob->M2.ki = CL_VEL_KI; //     These parameters are here 

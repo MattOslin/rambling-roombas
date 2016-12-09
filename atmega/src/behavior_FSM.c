@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include "behavior_FSM.h"
-#define DES_SPEED .6
+#define DES_SPEED .3
 
 //http://stackoverflow.com/questions/1647631/c-state-machine-design/1647679#1647679
 
@@ -142,29 +142,34 @@ state standby(dd *rob, pk *puck){
 
 state puck_search(dd *rob, pk *puck)
 {
+    m_green(OFF);
     //rob->veloDesired  = .1;
-
-	static bool isInGoal = FALSE;
+//
+    static bool isInGoal = FALSE;
     static int8_t leftRight = 1;
-
+//
     rob->veloDesired  = 0;
-    rob->omegaDesired = DES_SPEED; 
+    rob->omegaDesired = 0.4;
 
-
+//
     if( rob->myAddress == GOALIE_ADD){
+//      m_usb_tx_int( rob->myAddress);
+//      m_usb_tx_string(" ");
+//      m_usb_tx_int( GOALIE_ADD);
+//      m_usb_tx_string("\n");
 
     	if(rob->direction * rob->global.y > -230){
-			isInGoal = FALSE;
-		}
-		if(rob->direction * rob->global.y < -280){
-			isInGoal = TRUE;
-		}
+        isInGoal = FALSE;
+      }
+      if(rob->direction * rob->global.y < -280){
+        isInGoal = TRUE;
+      }
 
     	if(!isInGoal){
     		rob->desLoc.x = 0;
-			rob->desLoc.y = -rob->direction * (GOAL_Y-10);
-			rob->desLoc.th = -rob->direction * PI/2;
-     		dd_goto(rob, puck, 1);
+        rob->desLoc.y = -rob->direction * (GOAL_Y-10);
+        rob->desLoc.th = -rob->direction * PI/2;
+     		dd_goto(rob, puck, 0.7);
 			return ST_GOALIE_RETURN;
     	}
     	else{
@@ -173,9 +178,9 @@ state puck_search(dd *rob, pk *puck)
     		}
     	}
 
-		// 	rob->desLoc.x = 0;
-		// 	rob->desLoc.y = -rob->direction * (GOAL_Y-10);
-		// 	rob->desLoc.th = -rob->direction* PI/2;
+		 	rob->desLoc.x = 0;
+		 	rob->desLoc.y = -rob->direction * (GOAL_Y-10);
+		 	rob->desLoc.th = -rob->direction* PI/2;
 		    
     }
     // printf("puck_search\t");
@@ -264,15 +269,20 @@ state puck_search(dd *rob, pk *puck)
 
 state puck_pursue(dd *rob, pk *puck)
 {
-	float kp = 2.7;
-	float kd = .15 * CTRL_FREQ ;
-	float k1 = 1;
+  m_green(ON);
+	float kp = .55;
+	float kd = .05 * CTRL_FREQ ;
+  float ki = 0.002;
+	float k1 = 0.7;
 	float k2 = 2;
-	float kap = 0;
-	float kad = 0;
+  float ka = 1;
+  float phiCap = PI/6;
+//	float kap = 0;
+//	float kad = 0;
 
 	static float phiDes = 0;
-	static float prevAlpha = 0;
+  static float phiInt = 0;
+	//static float prevAlpha = 0;
 	float alpha = ANG_REMAP(rob->global.th + puck->th - rob->direction * PI/2);
 
 	/*if(puck->maxADC > 850 && alpha < PI / 6){
@@ -281,9 +291,8 @@ state puck_pursue(dd *rob, pk *puck)
 	}
 	else */
 	if( ABS(alpha) > PI/3){
-
-		kap = 0;
-		kad = 0;
+//		kap = 0;
+//		kad = 0;
 		if(rob->nxtSt != ST_PK_PURSUE){
 			if(alpha > 0){
 				phiDes = -PI/6;
@@ -294,24 +303,33 @@ state puck_pursue(dd *rob, pk *puck)
 		}
 	}
 	else {
-		phiDes = 0;
-		kap = 2;//.6;
-		kad = 0;//.1;
+    phiDes = - ka * alpha;
+//		kap = 2;//.6;
+//		kad = 0;//.1;
 	}
+
+  phiDes = MIN(phiDes, phiCap);
+  phiDes = MAX(phiDes, -phiCap);
 
 	if(rob->myAddress == GOALIE_ADD){
 		if(puck->maxADC < 200){
-			alpha = 0;
+      phiDes = 0;
 			k1 = 0;
 		}
 	}
 
-	rob->omegaDesired = kp * (puck->th - phiDes)  + kd * (puck->th - puck->thPrev)+ kap * alpha - CTRL_FREQ * kad * (alpha - prevAlpha);
+  rob->omegaDesired = phiInt + kp * (puck->th - phiDes) + kd * (puck->th - puck->thPrev); //+ kap * alpha - CTRL_FREQ * kad * (alpha - prevAlpha);
+//
+//  m_usb_tx_string(" w: ");
+//  m_usb_tx_int(rob->omegaDesired);
+//  m_usb_tx_string(" w: ");
 	rob->veloDesired = k1 / (k2 * ABS(rob->omegaDesired) + 1);
 
 	// dd_norm(rob,DES_SPEED);
-	
-	prevAlpha = alpha;
+
+  phiInt += ki *(puck->th - phiDes);
+
+	//prevAlpha = alpha;
 
     //printf("puck_pursue\t");
 
@@ -324,7 +342,7 @@ state puck_to_goal(dd *rob, pk *puck)
 	rob->desLoc.y = rob->direction * 300;
 	rob->desLoc.th = rob->direction * PI/2;
 	
-	dd_goto(rob, puck, DES_SPEED);
+	dd_goto(rob, puck, 0.6);
 	shoot_puck(rob, puck);
     // static float prevAlpha = 0;
     // static float prevPhi = 0;

@@ -10,12 +10,12 @@ bool dd_check(pin *pinToToggle);
 void dd_drive(dd *rob){
 	if(rob->enable){
 
-		// Updates desired motor velocities based on 
+		// Updates desired motor velocities based on
 		//	unicycle commands of velocity and omega
 		float leftMotorV, rightMotorV;
 
-		leftMotorV = rob->veloDesired - rob->omegaDesired ;//* WHEEL_RADIAL_LOC;
-		rightMotorV = rob->veloDesired + rob->omegaDesired ;//* WHEEL_RADIAL_LOC;
+		leftMotorV = -rob->veloDesired - rob->omegaDesired ;//* WHEEL_RADIAL_LOC;
+		rightMotorV = -rob->veloDesired + rob->omegaDesired ;//* WHEEL_RADIAL_LOC;
 
 		// Normalize the velocities to the highest velocities if greater than 1
 
@@ -29,8 +29,8 @@ void dd_drive(dd *rob){
 		}
 
 		//Set desired velocity for motors
-		rob->M1.veloDesired = rightMotorV;
-		rob->M2.veloDesired = leftMotorV;
+    rob->M1.veloDesired = leftMotorV*.8;
+    rob->M2.veloDesired = rightMotorV*.8;
 	}
 	else{
 
@@ -92,8 +92,8 @@ void dd_norm(dd *rob, float maxV){
 void dd_goto(dd *rob, pk *puck, float veloDes){
 	static float prevAlpha = 0;
     static float prevPhi = 0;
-    float kp = 2;
-    float kd = 6;
+    float kp = .55;
+    float kd = .05 * CTRL_FREQ ;
     float k1 = veloDes;//.4;
     float k2 = 2;
     float kap = 0;//1.5;
@@ -165,8 +165,8 @@ void dd_update(dd *rob) {
  	dd_drive( rob );
 	encoder_velocity( &(rob->M1) );
 	encoder_velocity( &(rob->M2) );
- 	drive_OL( &(rob->M1) );
- 	drive_OL( &(rob->M2) );
+ 	drive_CL( &(rob->M1) );
+ 	drive_CL( &(rob->M2) );
  	motor_update( &(rob->M1) );
  	motor_update( &(rob->M2) );
  }

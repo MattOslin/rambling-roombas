@@ -12,8 +12,11 @@ void puck_update(pk *puck, uint16_t *P) {
     float temp = ((int)P[2]-(int)P[3]+3*(int)P[1]-3*(int)P[4]+5*(int)P[0]-5*(int)P[5])
     /(float)(P[0]+P[1]+P[2]+P[3]+P[4]+P[5]);
     // puck->th =(PI/15)*temp;
-
+    if(puck->thPrev == PI){
+      puck->th = (PI/15) * temp;
+    }else{
     puck->th = PK_ALPHA_LPF * (PI/15) * temp + ( 1 - PK_ALPHA_LPF ) * puck->thPrev;
+    }
     // m_usb_tx_int(puck->th*100);
     // m_usb_tx_string(" ")
     // int i;
@@ -26,12 +29,12 @@ void puck_update(pk *puck, uint16_t *P) {
   else if(P[6]>30){
       puck->isBehind = FALSE;//TRUE;
       puck->isFound = FALSE;
-      puck->th = -PI;
+      puck->th = PI;
    }
   else {
       puck->isFound = FALSE;
       puck->isBehind = FALSE;
-      puck->th = -PI;
+      puck->th = PI;
   }
   puck->r = 1024 - (P[2]+P[3])/2;
   puck->maxADC = MAX(MAX(MAX(MAX(MAX(P[0],P[1]),P[2]),P[3]),P[4]),P[5]);
