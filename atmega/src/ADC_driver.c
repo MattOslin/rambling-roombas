@@ -15,27 +15,9 @@
 ***********************************************************************************/
 
 #define NUMADCS 8
-#define NUMADCS_HI_RES 0
 #define LPF_ALPHA 0.5
-const int ADCsToRead[] = {ADC10, ADC7, ADC5, ADC12, ADC0, ADC1, ADC4, ADC6};
-//Disable Digital Inputs
-// void adc_dis_digi()
-// {
-// // set(DIDR0, ADC0D);	//F0
-// // set(DIDR0, ADC1D);	//F1
-// // set(DIDR0, ADC4D);	//F4
-// // set(DIDR0, ADC5D);	//F5
-// // set(DIDR0, ADC6D);	//F6
-// // set(DIDR0, ADC7D);	//F7
-// 	DIDR0 = 0xF3;
-// // // set(DIDR2, ADC8D);	//D4
-// // // set(DIDR2, ADC9D);	//D6
-// // set(DIDR2, ADC10D);	//D7
-// // // set(DIDR2, ADC11D);	//B4 Used in motor controller
-// // set(DIDR2, ADC12D);	//B5
-// // // set(DIDR2, ADC13D);	//B6
-// 	DIDR2 = 0x14;
-// }
+
+const uint8_t ADCsToRead[] = {ADC10, ADC7, ADC5, ADC12, ADC0, ADC1, ADC4, ADC6};
 
 /***********************************************************************************
 ***********************************************************************************/
@@ -53,8 +35,6 @@ void adc_init() {
 	set(ADCSRA, ADPS1);
 
 	//Disable Digital Inputs 
-
-	// adc_dis_digi();
 	DIDR0 = 0xF3;
 	DIDR2 = 0x14;
 
@@ -64,20 +44,10 @@ void adc_init() {
 	//Do not use  ADC in FREE RUNNING MODE
 	clr(ADCSRA, ADATE);
 	
-	//Set which ADC to use first
-	// if (ADCsToRead[0] < 8)
-	// {
-		clr(ADCSRB, MUX5); //ADCSRB &= 0 << MUX5; 
-	// }
-	// else
-	// {
-	// 	ADCSRB |= 1 << MUX5; 
-	// }
-
-	ADMUX = (ADMUX & 0b11111000);// + ADCsToRead[0] % 8;
-	// set(ADMUX , MUX2);
-	// clr(ADMUX , MUX1);
-	// clr(ADMUX , MUX0);
+	//Set which ADC to use first (ADC10)
+	set(ADCSRB, MUX5); // |= 1 << MUX5; 
+	ADMUX = 0x40 + ADC10 % 8;
+	// ADMUX = (ADMUX & 0b11111000);// + ADCsToRead[0] % 8;
 
 	// ENABLE ADC AND RUN FIRST READING
 	set(ADCSRA, ADEN);
@@ -98,7 +68,9 @@ void adc_read(uint16_t rawADCCounts[])
 	} else {
 		ADCSRB |= 1 << MUX5; //set(ADCSRB, MUX5);
 	}
-	ADMUX = (ADMUX & 0b11111000) + ADCsToRead[ADCIndex] % 8;
+
+	// ADMUX = (ADMUX & 0b11111000) + ADCsToRead[ADCIndex] % 8;
+	ADMUX = 0x40 + ADCsToRead[ADCIndex] % 8;
 
 	set(ADCSRA,ADEN); // re enable ADC
 
