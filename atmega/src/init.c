@@ -272,13 +272,16 @@ void shoot_puck(dd *rob, pk *puck){
 	 	// m_usb_tx_int(100 * botGoalAng);
 	 	// m_usb_tx_string(" topGoal: ");
 	 	// m_usb_tx_int(100 * topGoalAng);
-	 	
-		if (rob->direction == POS_Y && rob->global.th > topGoalAng && rob->global.th < botGoalAng && rob->ping > SHT_DIST_THRSH){
-			rob->solenoid = ON;
-		}
-		else if (rob->direction == NEG_Y && rob->global.th < topGoalAng && rob->global.th > botGoalAng && rob->ping > SHT_DIST_THRSH){
-			rob->solenoid = ON;
-		}
+    int supposed_ping = -.3142 * rob->global.y * rob->direction + 117;
+    int delta = supposed_ping - rob->ping;
+    if(delta < SHT_PING_DELTA && fabs(rob->global.th - PI / 2 * rob->direction) < PI / 5) {
+      if (rob->direction == POS_Y && rob->global.th > topGoalAng && rob->global.th < botGoalAng){
+        rob->solenoid = ON;
+      }
+      else if (rob->direction == NEG_Y && rob->global.th < topGoalAng && rob->global.th > botGoalAng){
+        rob->solenoid = ON;
+      }
+    }
 	}
 	return;
 }

@@ -1,6 +1,7 @@
 #include "puck_sense.h"
 #define PK_ALPHA_LPF 0.5
 void puck_update(pk *puck, uint16_t *P) {
+  static int puckCounter = 0;
 
   // Update the pucks information
   puck->thPrev = puck->th;
@@ -40,8 +41,13 @@ void puck_update(pk *puck, uint16_t *P) {
   puck->maxADC = MAX(MAX(MAX(MAX(MAX(P[0],P[1]),P[2]),P[3]),P[4]),P[5]);
   if(P[7]<HAVE_PUCK){
     puck->isHave = TRUE;
+    puckCounter = 0;
   }
   if(P[7]>HAVE_PUCK+50){
-    puck->isHave = FALSE;
+    puckCounter++;
+    if(puckCounter > 75) {
+      puck->isHave = FALSE;
+    }
   }
+
 }
