@@ -38,5 +38,10 @@ void puck_update(pk *puck, uint16_t *P) {
   }
   puck->r = 1024 - (P[2]+P[3])/2;
   puck->maxADC = MAX(MAX(MAX(MAX(MAX(P[0],P[1]),P[2]),P[3]),P[4]),P[5]);
-  puck->isHave = P[7]<HAVE_PUCK;
+  if(P[7]<HAVE_PUCK){
+    puck->isHave = TRUE;
+  }
+  if(P[7]>HAVE_PUCK+50){
+    puck->isHave = FALSE;
+  }
 }
