@@ -39,7 +39,7 @@ int main(void) {
 	robot.desLoc.y = 0;
 	robot.desLoc.th = 0;
 	init_fsm();
-  dd_enable(&robot);
+//  dd_enable(&robot);
 	m_green(ON); // Ready LED
 	// while(1){
 	// 	// system_check(&robot);
@@ -86,7 +86,7 @@ int main(void) {
 			// }
 
 			solenoid_update(&robot);
-			wall_adjust(&robot);
+//			wall_adjust(&robot);
 			dd_update(&robot);
 			 //UPDATES THE CONTROLS
 			// dd_goto_rot_trans(&robot, .2);
@@ -166,13 +166,13 @@ void usb_debug(dd *rob, pk *puck){
 		// m_usb_tx_string(" M1_enc ");//m_usb_tx_int(10);
 	// m_usb_tx_int(robot.M1.veloEncoder);
 	// m_usb_tx_string(",");
-	// m_usb_tx_string("  Location Data:  ");
-//	m_usb_tx_int(rob->global.x);
-//	m_usb_tx_string(" ");
-//	m_usb_tx_int(rob->global.y);
-//	m_usb_tx_string(" ");
-//	m_usb_tx_int(100 * rob->global.th);
-//	m_usb_tx_string(" ");
+	 m_usb_tx_string("  Location Data:  ");
+	m_usb_tx_int(rob->global.x);
+	m_usb_tx_string(" ");
+	m_usb_tx_int(rob->global.y);
+	m_usb_tx_string(" ");
+	m_usb_tx_int(100 * rob->global.th);
+	m_usb_tx_string(" ");
 //	m_usb_tx_string(" Team:");
 //	m_usb_tx_int(rob->team);
 //	m_usb_tx_string(" Direction:");
@@ -201,12 +201,12 @@ void usb_debug(dd *rob, pk *puck){
 //   m_usb_tx_string(" Ping: ");
 //   m_usb_tx_int(rob->ping);
 
-	 m_usb_tx_string(" STATE: ");
-	 m_usb_tx_int(rob->nxtSt);
-	 m_usb_tx_string(" EVENT: ");
-	 m_usb_tx_int(rob->ev);
-	 m_usb_tx_string(" enable: ");
-	 m_usb_tx_int(rob->enable);
+//	 m_usb_tx_string(" STATE: ");
+//	 m_usb_tx_int(rob->nxtSt);
+//	 m_usb_tx_string(" EVENT: ");
+//	 m_usb_tx_int(rob->ev);
+//	 m_usb_tx_string(" enable: ");
+//	 m_usb_tx_int(rob->enable);
 
 //  int i;
 //  for(i=0;i<8;i++){

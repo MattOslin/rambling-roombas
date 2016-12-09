@@ -91,19 +91,12 @@ bool rf_parse(unsigned char *buffer, dd *robot) {
 			set_led(0,OFF);
 
 
-			// dd_enable(robot);
-			// robot->veloDesired = 0;
-			// robot->omegaDesired = .4;
-			// dd_update(robot);
-
 			// if(localize_cal(&(robot->global))) {
 			// 	set_led(0, TOGGLE);
-			// }
+   //    		} else {
+   //      		set_led(BLUE,ON);
+   //    		}
 
-			// robot->veloDesired = 0;
-			// robot->omegaDesired = 0;
-			// dd_update(robot);
-			// dd_disable(robot);
 			return true;
 			break;
 

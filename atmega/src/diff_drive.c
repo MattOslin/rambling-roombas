@@ -92,8 +92,8 @@ void dd_norm(dd *rob, float maxV){
 void dd_goto(dd *rob, pk *puck, float veloDes){
 	static float prevAlpha = 0;
     static float prevPhi = 0;
-    float kp = 2;
-    float kd = 6;
+    float kp = .55;
+    float kd = .05 * CTRL_FREQ ;
     float k1 = veloDes;//.4;
     float k2 = 2;
     float kap = 0;//1.5;
