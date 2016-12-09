@@ -2,7 +2,6 @@
 //extern unsigned char buffer[PACKET_LENGTH];
 
 void flash_led(dd *robot);
-// void set_led(uint8_t team, uint8_t state);
 
 bool rf_parse(unsigned char *buffer, dd *robot) {
 	switch(buffer[0]) {
@@ -14,7 +13,7 @@ bool rf_parse(unsigned char *buffer, dd *robot) {
 		
 		case PLAY:
 			// SET STATE TO PLAY 
-			set_led(robot->team, ON);
+			set_led(robot->team);
 			dd_enable(robot);
 			break;
 			
@@ -43,7 +42,7 @@ bool rf_parse(unsigned char *buffer, dd *robot) {
 		
 		case PAUSE:
 			//PAUSE
-			set_led(0, OFF);
+			set_led(NONE);
 			dd_disable(robot);
 			break;
 		
@@ -63,7 +62,7 @@ bool rf_parse(unsigned char *buffer, dd *robot) {
 
 		case GAME_OVER:
 			//PAUSE
-			set_led(0, OFF);
+			set_led(NONE);
 			dd_disable(robot);
 			break;
 
@@ -76,23 +75,23 @@ bool rf_parse(unsigned char *buffer, dd *robot) {
 		case CALIBRATE:
 			//calibrate_routine();
 
-			set_led(0, OFF);
+			set_led(NONE);
 			m_wait(50);
-			set_led(0, TOGGLE);
+			set_led(PURPLE);
 			m_wait(50);
-			set_led(0, OFF);
+			set_led(NONE);
 			m_wait(50);
-			set_led(0, TOGGLE);
+			set_led(PURPLE);
 			m_wait(50);
-			set_led(0, OFF);
+			set_led(NONE);
 			m_wait(50);
-			set_led(0, TOGGLE);
+			set_led(PURPLE);
 			m_wait(50);
-			set_led(0,OFF);
+			set_led(NONE);
 
 
 			// if(localize_cal(&(robot->global))) {
-			// 	set_led(0, TOGGLE);
+			// 	set_led(PURPLE);
    //    		} else {
    //      		set_led(BLUE,ON);
    //    		}
@@ -121,64 +120,15 @@ bool rf_parse(unsigned char *buffer, dd *robot) {
 	return false;
 }
 
-void rf_diagnostics(dd *robot) {
-	;
-}
-
-// void usb_read_command() {	
-// 	char buff[8];
-// 	unsigned int indx = 0;
-// 	int val = 0;
-// 	int i;
-
-// 	while(m_usb_rx_available()&&indx<8){
-// 		buff[indx] = m_usb_rx_char();
-// 		indx++;
-// 	}
-	
-// 	for(i=indx-1; i > 0; i--){
-// 		val += ((int)buff[i]-'0')*pow(10, indx-i-1);//Introduces mistakes in integer math (rounds down)
-// 		m_usb_tx_int((int)buff[i]-'0');
-// 		m_usb_tx_string("\n");
-// 	}
-// 	switch(buff[0]){
-// 		case 'P':
-// 			//kpth = val;
-// 			m_usb_tx_string("\n");
-// 			m_usb_tx_string("KP: ");
-// 			//m_usb_tx_int(kpth);
-// 			m_usb_tx_string("\n");
-// 			break;
-// 		case 'D':
-// 			//kdth = val;
-// 			m_usb_tx_string("\n");
-// 			m_usb_tx_string("KD: ");
-// 			//m_usb_tx_int(kdth);
-// 			m_usb_tx_string("\n");
-// 			break;
-// 		case 'B':
-// 			//beta = val;
-// 			m_usb_tx_string("\n");
-// 			m_usb_tx_string("1/Beta: ");
-// 			//m_usb_tx_int(1.0/beta);
-// 			m_usb_tx_string("\n");
-// 			break;
-// 		default :
-// 			m_usb_tx_string("NO DATA");
-// 	}
-// }
-
-void set_led(uint8_t team, uint8_t state) {
-	if (state == ON) {
-		if(team == RED) {
-			set(PORTD, PIN_RED);
-			clr(PORTD, PIN_BLUE);
-		} else {
-			clr(PORTD, PIN_RED);
-			set(PORTD, PIN_BLUE);
-		}
-	} else if (state == TOGGLE) {
+void set_led(uint8_t led_command) {
+	if (led_command == PURPLE) {
 		set(PORTD, PIN_RED);
+		set(PORTD, PIN_BLUE);
+	} else if (led_command == RED) {
+		set(PORTD, PIN_RED);
+		clr(PORTD, PIN_BLUE);
+	} else if (led_command == BLUE) {
+		clr(PORTD, PIN_RED);
 		set(PORTD, PIN_BLUE);
 	} else {
 		clr(PORTD, PIN_RED);
@@ -209,10 +159,6 @@ void flash_led(dd *robot) {
 			m_wait(250);
 			clr(PORTD, blinkPin);
 		}
-		// m_wait(250);
-		// set(PORTD, blinkPin);
-		// m_wait(250);
-		// clr(PORTD, blinkPin);
 	} else {
 		m_wait(75);
 		clr(PORTD, blinkPin);
@@ -222,21 +168,5 @@ void flash_led(dd *robot) {
 			m_wait(75);
 			clr(PORTD, blinkPin);
 		}
-		// m_wait(75);
-		// set(PORTD, blinkPin);
-		// m_wait(75);
-		// clr(PORTD, blinkPin);
-		// m_wait(75);
-		// set(PORTD, blinkPin);
-		// m_wait(75);
-		// clr(PORTD, blinkPin);
-		// m_wait(75);
-		// set(PORTD, blinkPin);
-		// m_wait(75);
-		// clr(PORTD, blinkPin);
-		// m_wait(75);
-		// set(PORTD, blinkPin);
-		// m_wait(75);
-		// clr(PORTD, blinkPin);
 	}
 }

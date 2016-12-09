@@ -20,7 +20,7 @@
 enum rf_command {
 	COMM_TEST = 0xA0, PLAY, GOAL_R, GOAL_B, PAUSE, SKIP, HALFTIME, GAME_OVER, CALIBRATE, COACH, CONTROLLER
 };
-void set_led(uint8_t team, uint8_t state);
+void set_led(uint8_t led_command);
 bool rf_parse(unsigned char *buffer, dd *robot);
 void rf_diagnostics(dd *robot);
 // void usb_read_command(void);

@@ -6,11 +6,11 @@
 #define eB 0.1
 
 const uint8_t distMat[4][4] = {
-						{         0,(1-eB)*100,(1-eB)*45,(1-eB)*55},
-						{(1+eB)*100,  		 0,(1-eB)*90,(1-eB)*70},
-						{ (1+eB)*45, (1+eB)*90, 	   0,(1-eB)*80},
-						{ (1+eB)*55, (1+eB)*70,(1+eB)*80,        0}
-					};
+	{         0,(1-eB)*100,(1-eB)*45,(1-eB)*55},
+	{(1+eB)*100,  		 0,(1-eB)*90,(1-eB)*70},
+	{ (1+eB)*45, (1+eB)*90, 	   0,(1-eB)*80},
+	{ (1+eB)*55, (1+eB)*70,(1+eB)*80,        0}
+};
 // const uint8_t distMatP[4][4] = {
 // 						{         0,(1+eB)*100,(1+eB)*45,(1+eB)*55},
 // 						{(1+eB)*100,  		 0,(1+eB)*90,(1+eB)*70},
@@ -61,61 +61,61 @@ void localize_set_cals(float calXnew, float calYnew) {
 	calY = calYnew;
 	eeprom_write_float(&eepCalX, calXnew);
 	eeprom_write_float(&eepCalY, calYnew);
- }
-
-bool localize_cal(pos* posStruct) {
-	int8_t i;
-	uint16_t allCalBlobs[8][2];
-	uint8_t gotBlobs = 0x00;
-	float measureAngles[4] = {PI/8.0, 3*PI/8.0, 5*PI/8.0, 7*PI/8.0};
-
-	calX = 0;
-	calY = 0;
-
-	uint32_t startTime = millis();
-	while(gotBlobs != 0xFF) {
-		if(localize_wii(posStruct)) {
-			if(calBlob[2] == GOOD) {
-				for (i = 0; i < 4; i++) {
-					if (fabsf(posStruct->th - measureAngles[i]) < .005) {
-						if (!((bool)(gotBlobs & (1 << i)))) {
-							allCalBlobs[i][0] = calBlob[0];
-							allCalBlobs[i][1] = calBlob[1];
-							gotBlobs |= (1 << i);
-						}
-					}
-					if (fabsf(posStruct->th + measureAngles[i]) < .005) {
-						if (!((bool)(gotBlobs & (1 << (i+4))))) {
-							allCalBlobs[i+4][0] = calBlob[0];
-							allCalBlobs[i+4][1] = calBlob[1];
-							gotBlobs |= (1 << (i+4));
-						}
-					}
-				}	
-			}
-		}
-		if(millis()-startTime > 10000) {
-			eeprom_write_float(&eepCalX, 0);
-			eeprom_write_float(&eepCalY, 0);
-			return false;
-		}
-	}
-
-	int16_t blobXSum = 0;
-	int16_t blobYSum = 0;
-	for (i = 0; i < 8; i++) {
-		blobXSum += (int16_t) allCalBlobs[i][0];
-		blobYSum += (int16_t) allCalBlobs[i][1];
-	}
-
-	calX = ((float)blobXSum)/8.0 - 512;
-	calY = 384 - ((float)blobYSum)/8.0;
-	
-	eeprom_write_float(&eepCalX, calX);
-	eeprom_write_float(&eepCalY, calY);
-
-	return true;
 }
+
+// bool localize_cal(pos* posStruct) {
+// 	int8_t i;
+// 	uint16_t allCalBlobs[8][2];
+// 	uint8_t gotBlobs = 0x00;
+// 	float measureAngles[4] = {PI/8.0, 3*PI/8.0, 5*PI/8.0, 7*PI/8.0};
+
+// 	calX = 0;
+// 	calY = 0;
+
+// 	uint32_t startTime = millis();
+// 	while(gotBlobs != 0xFF) {
+// 		if(localize_wii(posStruct)) {
+// 			if(calBlob[2] == GOOD) {
+// 				for (i = 0; i < 4; i++) {
+// 					if (fabsf(posStruct->th - measureAngles[i]) < .005) {
+// 						if (!((bool)(gotBlobs & (1 << i)))) {
+// 							allCalBlobs[i][0] = calBlob[0];
+// 							allCalBlobs[i][1] = calBlob[1];
+// 							gotBlobs |= (1 << i);
+// 						}
+// 					}
+// 					if (fabsf(posStruct->th + measureAngles[i]) < .005) {
+// 						if (!((bool)(gotBlobs & (1 << (i+4))))) {
+// 							allCalBlobs[i+4][0] = calBlob[0];
+// 							allCalBlobs[i+4][1] = calBlob[1];
+// 							gotBlobs |= (1 << (i+4));
+// 						}
+// 					}
+// 				}	
+// 			}
+// 		}
+// 		if(millis()-startTime > 10000) {
+// 			eeprom_write_float(&eepCalX, 0);
+// 			eeprom_write_float(&eepCalY, 0);
+// 			return false;
+// 		}
+// 	}
+
+// 	int16_t blobXSum = 0;
+// 	int16_t blobYSum = 0;
+// 	for (i = 0; i < 8; i++) {
+// 		blobXSum += (int16_t) allCalBlobs[i][0];
+// 		blobYSum += (int16_t) allCalBlobs[i][1];
+// 	}
+
+// 	calX = ((float)blobXSum)/8.0 - 512;
+// 	calY = 384 - ((float)blobYSum)/8.0;
+
+// 	eeprom_write_float(&eepCalX, calX);
+// 	eeprom_write_float(&eepCalY, calY);
+
+// 	return true;
+// }
 
 void localize_enc(pos* posStruct, float encCountsL, float encCountsR) {
 	float mean = (encCountsR + encCountsL)/2;
@@ -333,35 +333,35 @@ bool determine_order(unsigned int* blobs, uint8_t* badIdx, uint8_t* order) {
 	// and pseudo-truth tables to make any sense.
 	switch (maxIdx) {
 		case 0:
-			if (minIdx == 1) {
-				order[0] = 0; order[1] = 1; order[2] = 2;
-			} else {
-				order[0] = 1; order[1] = 0; order[2] = 2;
-			}
-			order[0] += orderShift1;
-			order[1] += orderShift1;
-			order[2] += orderShift2;
-			break;
+		if (minIdx == 1) {
+			order[0] = 0; order[1] = 1; order[2] = 2;
+		} else {
+			order[0] = 1; order[1] = 0; order[2] = 2;
+		}
+		order[0] += orderShift1;
+		order[1] += orderShift1;
+		order[2] += orderShift2;
+		break;
 		case 1:
-			if (minIdx == 0) {
-				order[0] = 0; order[1] = 2; order[2] = 1;
-			} else {
-				order[0] = 1; order[1] = 2; order[2] = 0;
-			}
-			order[0] += orderShift1;
-			order[1] += orderShift2;
-			order[2] += orderShift1;
-			break;
+		if (minIdx == 0) {
+			order[0] = 0; order[1] = 2; order[2] = 1;
+		} else {
+			order[0] = 1; order[1] = 2; order[2] = 0;
+		}
+		order[0] += orderShift1;
+		order[1] += orderShift2;
+		order[2] += orderShift1;
+		break;
 		case 2:
-			if (minIdx == 0) {
-				order[0] = 2; order[1] = 0; order[2] = 1;
-			} else {
-				order[0] = 2; order[1] = 1; order[2] = 0;
-			}
-			order[0] += orderShift2;
-			order[1] += orderShift1;
-			order[2] += orderShift1;
-			break;
+		if (minIdx == 0) {
+			order[0] = 2; order[1] = 0; order[2] = 1;
+		} else {
+			order[0] = 2; order[1] = 1; order[2] = 0;
+		}
+		order[0] += orderShift2;
+		order[1] += orderShift1;
+		order[2] += orderShift1;
+		break;
 	}
 
 	// The above switch statement ignored where the bad index was, so here
@@ -394,24 +394,24 @@ bool check_order(unsigned int* blobs, uint8_t* badIdx, uint8_t* order) {
 	uint8_t j[3] = {1,2,3};
 	switch (*badIdx) {
 		case 0:
-			i[0] = 1; i[1] = 1; i[2] = 2;
-			j[0] = 2; j[2] = 3; j[3] = 3;
-			break;
+		i[0] = 1; i[1] = 1; i[2] = 2;
+		j[0] = 2; j[2] = 3; j[3] = 3;
+		break;
 		case 1:
-			i[0] = 2;
-			j[0] = 3;
-			break;
+		i[0] = 2;
+		j[0] = 3;
+		break;
 		case 2:
-			i[1] = 1;
-			j[1] = 3;
-			break;
+		i[1] = 1;
+		j[1] = 3;
+		break;
 		case 3:
-			i[2] = 1;
-			i[3] = 2;
-			break;
+		i[2] = 1;
+		i[3] = 2;
+		break;
 		case 4:
 			// Initialized order is fine in this case
-			break;
+		break;
 	}
 
 	uint8_t k;

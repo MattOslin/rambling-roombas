@@ -28,6 +28,8 @@
 
 #define RED 0
 #define BLUE 1
+#define PURPLE 2
+#define NONE 3
 
 #define PIN_RED 5
 #define PIN_BLUE 6
