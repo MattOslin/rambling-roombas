@@ -17,10 +17,7 @@
 #define PWM_MAX (F_CPU/(TIMER_1_PRSCL*PWM_FREQ))	// PWM Duty Cycle max (inversely proportional with frequency)
 #define MOTOR_SPEED_MAX 8.3   // Max attempted Rotations per second
 #define ENC_RES 32*18.75	//Number of edges per rotation of output shaft in the encoders (using one interrupt)
-#define OL_MOTOR_MATCH 0    // Open loop motor matching calibration
-#define CL_VEL_KP 2
-#define CL_VEL_KI 0
-#define CL_VEL_KD 0
+
 #define ALPHA_EN_LPF .7
 
 // Pin class contains register and bit for set or clearing
@@ -45,9 +42,6 @@ typedef struct motor {
 	float veloDesired;
 	float prevError;
 	float integError;
-	float kp;
-	float ki;
-	float kd;
 
 } motor;
 

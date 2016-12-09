@@ -74,11 +74,6 @@ void dd_init(dd *rob) {
 
   rob->M1.encB.reg = (uint8_t *) (&PINB); // Encoder B Input Pin B0
   rob->M1.encB.bit = 0;
-
-	rob->M1.kp = CL_VEL_KP; // Motor gain for closed loop velocity control
-	rob->M1.ki = CL_VEL_KI; //     These parameters are here 
-	rob->M1.kd = CL_VEL_KD; //     to allow for tuning
-
 	/***********
 	 * MOTOR 2 Specifics
 	***********/
@@ -94,12 +89,6 @@ void dd_init(dd *rob) {
 
   rob->M2.encA.reg = (uint8_t *) (&PIND); // Encoder B Input Pin D4
   rob->M2.encA.bit = 4;
-
-
-
-	rob->M2.kp = CL_VEL_KP; // Motor gain for closed loop velocity control
-	rob->M2.ki = CL_VEL_KI; //     These parameters are here 
-	rob->M2.kd = CL_VEL_KD; //     to allow for tuning
 }
 
 void motor_GPIO_setup() {
