@@ -88,6 +88,7 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			m_wait(50);
 			set_led(0, TOGGLE);
 			m_wait(50);
+      set_led(0, OFF);
 
 			dd_enable(robot);
 			robot->veloDesired = 0;
@@ -96,7 +97,9 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 
 			if(localize_cal(&(robot->global))) {
 				set_led(0, TOGGLE);
-			}
+      } else {
+        set_led(BLUE,ON);
+      }
 
 			robot->veloDesired = 0;
 			robot->omegaDesired = 0;
