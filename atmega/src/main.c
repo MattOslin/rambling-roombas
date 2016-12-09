@@ -73,7 +73,7 @@ int main(void) {
 		if (CTRLreadyFlag) {
 			
 			CTRLreadyFlag = FALSE; //Reset flag for interrupt	
-			localize_wii(&(robot.global));
+//			localize_wii(&(robot.global));
 			puck_update(&puck, rawADCCounts);
 			find_state(&robot,&puck);
 
