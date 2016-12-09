@@ -43,11 +43,11 @@ void m2_init() {
 
 void dd_init(dd *rob) {
 
-	#ifdef USE_EEP_ADDRESS
+//	#ifdef USE_EEP_ADDRESS
 		rob->myAddress = eeprom_read_byte(&eepAddress);
-	#else
-		rob->myAddress = MY_ADDRESS;
-	#endif
+//	#else
+//		rob->myAddress = MY_ADDRESS;
+//	#endif
 	m_rf_open(CHANNEL, rob->myAddress, PACKET_LENGTH);
 	
 	motor_GPIO_setup();

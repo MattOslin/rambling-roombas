@@ -26,29 +26,34 @@ void motor_update(motor *m){
 */
 void encoder_update(motor *m, int dir){
 	// Determine direction and update encoder count from the logic levels of the encoder's A and B outputs.
-	if(check(*(m->encA.reg), m->encA.bit) == 1){
-		// Rising edge of A.
-		if(check(*(m->encB.reg), m->encB.bit) == 1){
-			//m->dirEncoder = 1;
-			m->countEncoder-=dir;
-		}
-		else{
-			//m->dirEncoder = -1;
-			m->countEncoder+=dir;
-		}
-	}
-	else{
-		// Falling edge of A.
-		if(check(*(m->encB.reg), m->encB.bit) == 1){
-			//m->dirEncoder = -1;
-			m->countEncoder+=dir;
-		}
-		else{
-			//m->dirEncoder = 1;
-			m->countEncoder-=dir;
-		}
-	}
+  if(check(*(m->encA.reg), m->encA.bit) != check(*(m->encB.reg), m->encB.bit)) {
+    m->countEncoder += dir;
+  } else {
+    m->countEncoder -= dir;
+  }//	if(check(*(m->encA.reg), m->encA.bit) == 1){
+//		// Rising edge of A.
+//		if(check(*(m->encB.reg), m->encB.bit) == 1){
+//			//m->dirEncoder = 1;
+//			m->countEncoder-=dir;
+//		}
+//		else{
+//			//m->dirEncoder = -1;
+//			m->countEncoder+=dir;
+//		}
+//	}
+//	else{
+//		// Falling edge of A.
+//		if(check(*(m->encB.reg), m->encB.bit) == 1){
+//			//m->dirEncoder = -1;
+//			m->countEncoder+=dir;
+//		}
+//		else{
+//			//m->dirEncoder = 1;
+//			m->countEncoder-=dir;
+//		}
+//	}
 }
+
 void encoder_velocity(motor *m)
 {
 	m->veloEncoder =  (1 - ALPHA_EN_LPF) * m->veloEncoder + ALPHA_EN_LPF * m->countEncoder;

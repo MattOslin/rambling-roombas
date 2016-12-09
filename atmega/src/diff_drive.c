@@ -23,6 +23,7 @@ void dd_drive(dd *rob){
 			rightMotorV /= ABS(leftMotorV);
 			leftMotorV /= ABS(leftMotorV);
 		}
+
 		else if((ABS(rightMotorV) > 1.0) && (ABS(rightMotorV) > ABS(leftMotorV))){
 			leftMotorV /= ABS(rightMotorV);
 			rightMotorV /= ABS(rightMotorV);
@@ -34,8 +35,10 @@ void dd_drive(dd *rob){
 	}
 	else{
 
-		rob->M1.veloDesired = 0;
-		rob->M2.veloDesired = 0;
+    rob->M1.command = 0;
+    rob->M2.command = 0;
+//    rob->M1.veloDesired = 0;
+//    rob->M2.veloDesired = 0;
 	}
 	
 }
@@ -165,8 +168,13 @@ void dd_update(dd *rob) {
  	dd_drive( rob );
 	encoder_velocity( &(rob->M1) );
 	encoder_velocity( &(rob->M2) );
- 	drive_CL( &(rob->M1) );
- 	drive_CL( &(rob->M2) );
+  if(rob->enable) {
+    drive_CL( &(rob->M1) );
+    drive_CL( &(rob->M2) );
+  } else {
+    rob->M1.command = 0;
+    rob->M2.command = 0;
+  }
  	motor_update( &(rob->M1) );
  	motor_update( &(rob->M2) );
  }
