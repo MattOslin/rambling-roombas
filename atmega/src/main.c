@@ -54,7 +54,7 @@ int main(void) {
 		if (isCommandReady) {	
 			m_green(TOGGLE);
 			isCommandReady = FALSE;
-			m_rf_read(buffer,PACKET_LENGTH);// pull the packet
+      m_rf_read(buffer,PACKET_LENGTH);// pull the packet
 			rf_parse(buffer, &robot);
 		}
 

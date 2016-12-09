@@ -19,9 +19,9 @@
 
 #define GOALIE_ADD 20
 #define CHANNEL 1
-#define MY_ADDRESS 21 /*21*/ /*22*/
+//#define MY_ADDRESS 21 /*21*/ /*22*/
 #define PACKET_LENGTH 10
-#define USE_EEP_ADDRESS
+//#define USE_EEP_ADDRESS
 
 #define NEG_Y -1
 #define POS_Y 1
