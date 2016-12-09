@@ -8,6 +8,7 @@
 #include "behavior_FSM.h"
 void usb_debug(dd *rob, pk *puck);
 
+bool run_cal(dd* robot);
 dd robot;
 pk puck;
 
@@ -55,7 +56,11 @@ int main(void) {
 			m_green(TOGGLE);
 			isCommandReady = FALSE;
 			m_rf_read(buffer,PACKET_LENGTH);// pull the packet
-			rf_parse(buffer, &robot);
+						if(rf_parse(buffer, &robot)) {
+				if(run_cal(&robot)) {
+					set_led(0, TOGGLE);
+				}
+			}
 		}
 
 		if (isADCRead) {	
@@ -251,3 +256,61 @@ void usb_debug(dd *rob, pk *puck){
 
 
 }
+
+bool run_cal(dd* rob) {
+	int8_t i;
+	uint16_t calBlob[2];
+	uint16_t allCalBlobs[8][2];
+	uint8_t gotBlobs = 0x00;
+	float measureAngles[4] = {PI/8.0, 3*PI/8.0, 5*PI/8.0, 7*PI/8.0};
+	
+	pos *posStruct = &(rob->global);
+	dd_enable(rob);
+	rob->veloDesired = 0;
+	rob->omegaDesired = .05;
+
+	uint32_t startTime = millis();
+
+	while(gotBlobs != 0xFF) {
+		if (CTRLreadyFlag) {
+			CTRLreadyFlag = FALSE; 
+			dd_update(rob);
+
+			if(localize_blob(posStruct, calBlob)) {
+				for (i = 0; i < 4; i++) {
+					if (fabsf(posStruct->th - measureAngles[i]) < .005) {
+						if (!((bool)(gotBlobs & (1 << i)))) {
+							allCalBlobs[i][0] = calBlob[0];
+							allCalBlobs[i][1] = calBlob[1];
+							gotBlobs |= (1 << i);
+						}
+					}
+					if (fabsf(posStruct->th + measureAngles[i]) < .005) {
+						if (!((bool)(gotBlobs & (1 << (i+4))))) {
+							allCalBlobs[i+4][0] = calBlob[0];
+							allCalBlobs[i+4][1] = calBlob[1];
+							gotBlobs |= (1 << (i+4));
+						}
+					}
+				}	
+			}
+			if(millis()-startTime > 10000) {
+				localize_set_cals(0,0);
+				return false;
+			}
+		}
+	}
+
+	int16_t blobXSum = 0;
+	int16_t blobYSum = 0;
+	for (i = 0; i < 8; i++) {
+		blobXSum += (int16_t) allCalBlobs[i][0];
+		blobYSum += (int16_t) allCalBlobs[i][1];
+	}
+
+	float calXnew = ((float)blobXSum)/8.0 - 512;
+	float calYnew = 384 - ((float)blobYSum)/8.0;
+	localize_set_cals(calXnew, calYnew);
+
+	return true;
+ }

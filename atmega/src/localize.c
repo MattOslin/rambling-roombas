@@ -46,6 +46,22 @@ void localize_init(void) {
 	calY = eeprom_read_float(&eepCalY);
 }
 
+bool localize_blob(pos* posStruct, uint16_t* newBlob) {
+	calX = 0;
+	calY = 0;
+	bool localized = localize_wii(posStruct);
+	newBlob[0] = calBlob[0];
+	newBlob[1] = calBlob[1];
+	return localized && (calBlob[2] == GOOD);
+}
+
+void localize_set_cals(float calXnew, float calYnew) {
+	calX = calXnew;
+	calY = calYnew;
+	eeprom_write_float(&eepCalX, calXnew);
+	eeprom_write_float(&eepCalY, calYnew);
+ }
+
 bool localize_cal(pos* posStruct) {
 	int8_t i;
 	uint16_t allCalBlobs[8][2];

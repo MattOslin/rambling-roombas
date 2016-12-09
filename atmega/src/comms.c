@@ -2,9 +2,9 @@
 //extern unsigned char buffer[PACKET_LENGTH];
 
 void flash_led(dd *robot);
-void set_led(uint8_t team, uint8_t state);
+// void set_led(uint8_t team, uint8_t state);
 
-void rf_parse(unsigned char *buffer, dd *robot) {
+bool rf_parse(unsigned char *buffer, dd *robot) {
 	switch(buffer[0]) {
 		case COMM_TEST:
 			//FLASH LEDS
@@ -88,20 +88,23 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			m_wait(50);
 			set_led(0, TOGGLE);
 			m_wait(50);
+			set_led(0,OFF);
 
-			dd_enable(robot);
-			robot->veloDesired = 0;
-			robot->omegaDesired = .4;
-			dd_update(robot);
 
-			if(localize_cal(&(robot->global))) {
-				set_led(0, TOGGLE);
-			}
+			// dd_enable(robot);
+			// robot->veloDesired = 0;
+			// robot->omegaDesired = .4;
+			// dd_update(robot);
 
-			robot->veloDesired = 0;
-			robot->omegaDesired = 0;
-			dd_update(robot);
-			dd_disable(robot);
+			// if(localize_cal(&(robot->global))) {
+			// 	set_led(0, TOGGLE);
+			// }
+
+			// robot->veloDesired = 0;
+			// robot->omegaDesired = 0;
+			// dd_update(robot);
+			// dd_disable(robot);
+			return true;
 			break;
 
 		case COACH:
@@ -122,6 +125,7 @@ void rf_parse(unsigned char *buffer, dd *robot) {
 			dd_disable(robot);
 			break;
 	}
+	return false;
 }
 
 void rf_diagnostics(dd *robot) {
