@@ -1,36 +1,37 @@
 #include "localize.h"
-#include "m_usb.h"
+// #include "m_usb.h"
 
 #define GOOD 1
 #define BAD 0
 #define eB 0.1
-const uint8_t distMatP[4][4] = {
-						{         0,(1+eB)*100,(1+eB)*45,(1+eB)*55},
-						{(1+eB)*100,  		 0,(1+eB)*90,(1+eB)*70},
-						{ (1+eB)*45, (1+eB)*90, 	   0,(1+eB)*80},
+
+const uint8_t distMat[4][4] = {
+						{         0,(1-eB)*100,(1-eB)*45,(1-eB)*55},
+						{(1+eB)*100,  		 0,(1-eB)*90,(1-eB)*70},
+						{ (1+eB)*45, (1+eB)*90, 	   0,(1-eB)*80},
 						{ (1+eB)*55, (1+eB)*70,(1+eB)*80,        0}
 					};
-
-const uint8_t distMatM[4][4] = {
-						{  (1-eB)*0,(1-eB)*100,(1-eB)*45,(1-eB)*55},
-						{(1-eB)*100,  (1-eB)*0,(1-eB)*90,(1-eB)*70},
-						{ (1-eB)*45, (1-eB)*90, (1-eB)*0,(1-eB)*80},
-						{ (1-eB)*55, (1-eB)*70,(1-eB)*80, (1-eB)*0}
-					};
-
-// const float angMat[4][4] = {
-// 						{	   0,  3.1416, 2.0297, -2.4205},
-// 						{	   0,       0, 0.4648, -0.5564},
-// 						{-1.1119, -2.6768,      0, -1.8453},
-// 						{ 0.7211,  2.5852, 1.2962,       0}
+// const uint8_t distMatP[4][4] = {
+// 						{         0,(1+eB)*100,(1+eB)*45,(1+eB)*55},
+// 						{(1+eB)*100,  		 0,(1+eB)*90,(1+eB)*70},
+// 						{ (1+eB)*45, (1+eB)*90, 	   0,(1+eB)*80},
+// 						{ (1+eB)*55, (1+eB)*70,(1+eB)*80,        0}
 // 					};
 
-const float angMat[4][4] = {
-						{     0, -1.5708, -2.6827, -0.8497},
-						{1.5708,       0,  2.0356,  1.0144},
-						{0.4589, -1.1060,       0, -0.2746},
-						{2.2919, -2.1272,  2.8670, 	     0}
-					};
+// const uint8_t distMatM[4][4] = {
+// 						{  (1-eB)*0,(1-eB)*100,(1-eB)*45,(1-eB)*55},
+// 						{(1-eB)*100,  (1-eB)*0,(1-eB)*90,(1-eB)*70},
+// 						{ (1-eB)*45, (1-eB)*90, (1-eB)*0,(1-eB)*80},
+// 						{ (1-eB)*55, (1-eB)*70,(1-eB)*80, (1-eB)*0}
+// 					};
+
+const float angVect[3] = {-1.5708, -2.6827, -1.1060};
+// const float angMat[4][4] = {
+// 						{     0, -1.5708, -2.6827, -0.8497},
+// 						{1.5708,       0,  2.0356,  1.0144},
+// 						{0.4589, -1.1060,       0, -0.2746},
+// 						{2.2919, -2.1272,  2.8670, 	     0}
+// 					};
 
 static float calX, calY;
 static unsigned int calBlob[3]; 
@@ -192,8 +193,8 @@ bool determine_position(pos* posStruct, unsigned int* blobs, uint8_t* badIdx, ui
 	int16_t diffX = (int16_t) blobs[3*pointIdx[ptA]] - (int16_t) blobs[3*pointIdx[ptB]];
 	int16_t diffY = (int16_t) blobs[3*pointIdx[ptB]+1] - (int16_t) blobs[3*pointIdx[ptA]+1];
 
-	posStruct->th = angMat[ptA][ptB] - atan2(diffY, diffX);
-	// posStruct->th = ANG_REMAP(posStruct->th);
+	posStruct->th = angVect[ptA+ptB-1] - atan2(diffY, diffX);
+	// posStruct->th = angMat[ptA][ptB] - atan2(diffY, diffX);
 
 	float cosTH = cos(posStruct->th);
 	float sinTH = sin(posStruct->th);
@@ -401,10 +402,16 @@ bool check_order(unsigned int* blobs, uint8_t* badIdx, uint8_t* order) {
 	for (k = 0; k < 3; k++) {
 		uint8_t blobI = order[i[k]];
 		uint8_t blobJ = order[j[k]];
+		if (blobJ > blobI) {
+			uint8_t temp = blobI;
+			blobI = blobJ;
+			blobJ = temp;
+		}
 		int16_t diffX = (int16_t) blobs[3*i[k]]-blobs[3*j[k]];
 		int16_t diffY = (int16_t) blobs[3*i[k]+1]-blobs[3*j[k]+1];
 		uint16_t dist = sqrt(((long)diffX)*diffX+((long)diffY)*diffY);
-		orderGood = orderGood && (dist >= distMatM[blobI][blobJ]) && (dist <= distMatP[blobI][blobJ]);
+		// orderGood = orderGood && (dist >= distMatM[blobI][blobJ]) && (dist <= distMatP[blobI][blobJ]);
+		orderGood = orderGood && (dist >= distMat[blobI][blobJ]) && (dist <= distMat[blobJ][blobI]);
 	}
 
 	return orderGood;
