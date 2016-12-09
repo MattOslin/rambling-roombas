@@ -39,7 +39,7 @@ int main(void) {
 	robot.desLoc.y = 0;
 	robot.desLoc.th = 0;
 	init_fsm();
-  dd_enable(&robot);
+//  dd_enable(&robot);
 	m_green(ON); // Ready LED
 	// while(1){
 	// 	// system_check(&robot);
@@ -73,7 +73,7 @@ int main(void) {
 		if (CTRLreadyFlag) {
 			
 			CTRLreadyFlag = FALSE; //Reset flag for interrupt	
-//			localize_wii(&(robot.global));
+			localize_wii(&(robot.global));
 			puck_update(&puck, rawADCCounts);
 			find_state(&robot,&puck);
 
