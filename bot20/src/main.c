@@ -3,6 +3,12 @@
 #include "m_usb.h"
 #include "eep_locations.h"
 
+#define NEG_Y -1
+#define POS_Y 1
+
+#define RED 0
+#define BLUE 1
+
 #define BOT_ADDRESS 20
 
 int main(void) {
@@ -11,6 +17,8 @@ int main(void) {
 	m_usb_init();
 
 	eeprom_write_byte(&eepAddress, BOT_ADDRESS);
+	// eeprom_write_byte(&eepTeam, *TEAM_COLOR_HERE*);
+	// eeprom_write_byte(&eepDirection, (uint8_t) *DIRECTION_HERE*);
 
 	while(true) {
 		m_usb_tx_uint(eeprom_read_byte(&eepAddress));

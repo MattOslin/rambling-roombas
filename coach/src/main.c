@@ -199,11 +199,20 @@ int main(void) {
 	    		m_rf_send(BOT22ADDR, buffer, PACKET_LENGTH);
 	    	}
     	} else if(button1 && !configed20) {
-    		configed20 = send_config(BOT20ADDR, BOT20PIN, BOT20LED);
+    		if (lastCommand != COACH) {
+    			lastCommand = COACH;
+    			configed20 = send_config(BOT20ADDR, BOT20PIN, BOT20LED);
+    		}
     	} else if(button2 && !configed21) {
-    		configed21 = send_config(BOT21ADDR, BOT21PIN, BOT21LED);
+    		if (lastCommand != COACH) {
+    			lastCommand = COACH;
+    			configed21 = send_config(BOT21ADDR, BOT21PIN, BOT21LED);
+	    	}
     	} else if(button3 && !configed22) {
-    		configed22 = send_config(BOT22ADDR, BOT22PIN, BOT22LED);
+    		if (lastCommand != COACH) {
+    			lastCommand = COACH;
+    			configed22 = send_config(BOT22ADDR, BOT22PIN, BOT22LED);
+    		}
     	} else {
     		lastCommand = SKIP;
     		if(!configed20) {
@@ -262,33 +271,31 @@ bool send_config(uint8_t botAddr, uint8_t botPin, uint8_t ledPin) {
 	}
 
 
-	while(!configured && !check(PINB, botPin)) {
-		buffer[0] = (unsigned char) COACH;
-		buffer[1] = MY_ADDRESS;
-		buffer[2] = direction;
-		buffer[3] = team;
+	buffer[0] = (unsigned char) COACH;
+	buffer[1] = MY_ADDRESS;
+	buffer[2] = direction;
+	buffer[3] = team;
 
-		m_rf_send(botAddr, buffer, PACKET_LENGTH);
+	m_rf_send(botAddr, buffer, PACKET_LENGTH);
 
-		uint32_t startTime = millis();
-		while(!packetReceived) {
-			if(millis()-startTime > 1000) {
-				break;
-			}
-			if(millis() % 100 > 90) {
-				set(PORTF, ledPin);
-			} else {
-				clear(PORTF, ledPin);
-			}
+	uint32_t startTime = millis();
+	while(!packetReceived) {
+		if(millis()-startTime > 1000) {
+			break;
 		}
-
-		clear(PORTF, ledPin);
-
-		if (packetReceived) {
-			configured = (botAddr == buffer[4]) && (direction == buffer[5]) && (team == buffer[6]);
+		if(millis() % 100 > 90) {
+			set(PORTF, ledPin);
+		} else {
+			clear(PORTF, ledPin);
 		}
-		packetReceived = FALSE;
 	}
+
+	clear(PORTF, ledPin);
+
+	if (packetReceived) {
+		configured = (botAddr == buffer[4]) && (direction == buffer[5]) && (team == buffer[6]);
+	}
+	packetReceived = FALSE;
 
 	if(configured) {
 		set(PORTF, ledPin);
