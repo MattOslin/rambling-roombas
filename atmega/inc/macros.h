@@ -11,11 +11,11 @@
 #define CTRL_FREQ 100	 // Control loop frequency w/1024 timer0 prscl 62 -> 5kHz
 #define POS_THRESH 2 // cm threshold for success
 
-#define GOAL_X 40// xdimension of the top of the goal (negated for bottom)
-#define GOAL_Y 300// y dimension of goal in the rink
-#define SHT_THRSH_NEAR 75
-#define SHT_THRSH_FAR 120
-#define SHT_DIST_THRSH 20
+#define GOAL_X 70 // xdimension of the top of the goal (negated for bottom)
+#define GOAL_Y 340 // y dimension of goal in the rink
+#define SHT_THRSH_NEAR 35
+#define SHT_THRSH_FAR 70
+#define SHT_PING_DELTA 8
 
 #define GOALIE_ADD 20
 #define CHANNEL 1
@@ -35,7 +35,7 @@
 #define PIN_BLUE 6
 
 #define SOL_ON_TIME 200  //in milliseconds
-#define SOL_COOLDOWN_TIME 500 //in milliseconds
+#define SOL_COOLDOWN_TIME 200 //in milliseconds
 //Helper Macros
 #define ABS(X)				(X < 0 ?-X : X)
 #define MIN(X,Y)			(X < Y ? X : Y)

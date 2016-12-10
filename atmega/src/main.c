@@ -167,6 +167,8 @@ void usb_debug(dd *rob, pk *puck){
 		// m_usb_tx_string(" M1_enc ");//m_usb_tx_int(10);
 	// m_usb_tx_int(robot.M1.veloEncoder);
 	// m_usb_tx_string(",");
+
+
 	m_usb_tx_string("  Location Data:  ");
 	m_usb_tx_int(rob->global.x);
 	m_usb_tx_string(" ");
@@ -174,6 +176,9 @@ void usb_debug(dd *rob, pk *puck){
 	m_usb_tx_string(" ");
 	m_usb_tx_int(100 * rob->global.th);
 	m_usb_tx_string(" ");
+
+
+
 //	m_usb_tx_string(" Team:");
 //	m_usb_tx_int(rob->team);
 //	m_usb_tx_string(" Direction:");
@@ -185,12 +190,12 @@ void usb_debug(dd *rob, pk *puck){
 
 
 
-	// m_usb_tx_string(" STATE: ");
-	// m_usb_tx_int(rob->nxtSt);
-	// m_usb_tx_string(" EVENT: ");
-	// m_usb_tx_int(rob->ev);
-	// m_usb_tx_string(" enable: ");
-	// m_usb_tx_int(rob->enable);
+//	 m_usb_tx_string(" STATE: ");
+//	 m_usb_tx_int(rob->nxtSt);
+//	 m_usb_tx_string(" EVENT: ");
+//	 m_usb_tx_int(rob->ev);
+//	 m_usb_tx_string(" enable: ");
+//	 m_usb_tx_int(rob->enable);
 	
  //  int i;
  //  for(i=0;i<8;i++){
@@ -202,12 +207,21 @@ void usb_debug(dd *rob, pk *puck){
 //   m_usb_tx_string(" Ping: ");
 //   m_usb_tx_int(rob->ping);
 
-//	 m_usb_tx_string(" STATE: ");
-//	 m_usb_tx_int(rob->nxtSt);
-//	 m_usb_tx_string(" EVENT: ");
-//	 m_usb_tx_int(rob->ev);
-//	 m_usb_tx_string(" enable: ");
-//	 m_usb_tx_int(rob->enable);
+  m_usb_tx_string(" STATE: ");
+  m_usb_tx_int(rob->nxtSt);
+  m_usb_tx_string(" EVENT: ");
+  m_usb_tx_int(rob->ev);
+  m_usb_tx_string(" enable: ");
+  m_usb_tx_int(rob->enable);
+  m_usb_tx_string(" theta: ");
+  m_usb_tx_string(" Puck TH: ");
+  m_usb_tx_int((int)100*puck->th);
+  m_usb_tx_string(" ping: ");
+  m_usb_tx_int(rob->ping);
+  m_usb_tx_string(" supposed ping: ");
+
+  int supposed_p = -.3142 * rob->global.y * rob->direction + 117;
+  m_usb_tx_int(supposed_p);
 
 //  int i;
 //  for(i=0;i<8;i++){
@@ -250,10 +264,12 @@ void usb_debug(dd *rob, pk *puck){
  // 	m_usb_tx_int(100*rob->omegaDesired);
  // 	m_usb_tx_string(" state: ");
  // 	m_usb_tx_int(rob->nxtSt);
+//
+//
 
-	m_usb_tx_int(puck->th*100);
-
-	m_usb_tx_string("\n");
+//  m_usb_tx_int(rob->M1.command);
+//  m_usb_tx_int(rob->M2.command);
+//	m_usb_tx_string("\n");
 
 
 }

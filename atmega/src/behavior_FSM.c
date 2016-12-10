@@ -169,11 +169,12 @@ state puck_search(dd *rob, pk *puck)
     		rob->desLoc.x = 0;
         rob->desLoc.y = -rob->direction * (GOAL_Y-10);
         rob->desLoc.th = -rob->direction * PI/2;
-     		dd_goto(rob, puck, 0.7);
-			return ST_GOALIE_RETURN;
+        //     		dd_goto(rob, puck, 0.7);
+        dd_goto(rob, puck, 1);
+        return ST_GOALIE_RETURN;
     	}
     	else{
-    		if( dd_theta_control( rob , rob->direction * PI/2 + leftRight * PI / 6 ) ){
+    		if( dd_theta_control( rob , rob->direction * PI/2 + leftRight * 5 * PI / 12 ) ){
     			leftRight = -leftRight;
     		}
     	}
@@ -269,19 +270,31 @@ state puck_search(dd *rob, pk *puck)
 
 state puck_pursue(dd *rob, pk *puck)
 {
-  m_green(ON);
-	float kp = .55;
-	float kd = .05 * CTRL_FREQ ;
+  float kp = .55;
+  float kd = .05 * CTRL_FREQ ;
   float ki = 0.002;
-	float k1 = 0.7;
-	float k2 = 2;
+  float k1 = 0.7;
+  float k2 = 2;
   float ka = 1;
   float phiCap = PI/6;
+
+//  m_green(ON);
+//	float kp = .35;
+//	float kd = .45 * CTRL_FREQ ;
+//  float ki = 0.00;
+//	float k1 = 0.7;
+//	float k2 = 1;
+//  float ka = 1;
+//  float phiCap = PI/6;
 //	float kap = 0;
 //	float kad = 0;
 
 	static float phiDes = 0;
   static float phiInt = 0;
+
+  m_usb_tx_int(phiInt*1000);
+  m_usb_tx_string("\n");
+
 	//static float prevAlpha = 0;
 	float alpha = ANG_REMAP(rob->global.th + puck->th - rob->direction * PI/2);
 
@@ -308,6 +321,10 @@ state puck_pursue(dd *rob, pk *puck)
 //		kad = 0;//.1;
 	}
 
+
+//  if(fabs(phiInt) > 9000) {
+//  }
+
   phiDes = MIN(phiDes, phiCap);
   phiDes = MAX(phiDes, -phiCap);
 
@@ -317,6 +334,12 @@ state puck_pursue(dd *rob, pk *puck)
 			k1 = 0;
 		}
 	}
+
+  static float prevThetaGlobal = 0;
+
+  if(rob->global.th - prevThetaGlobal > .1) {
+    phiInt = 0;
+  }
 
   rob->omegaDesired = phiInt + kp * (puck->th - phiDes) + kd * (puck->th - puck->thPrev); //+ kap * alpha - CTRL_FREQ * kad * (alpha - prevAlpha);
 //
@@ -333,16 +356,19 @@ state puck_pursue(dd *rob, pk *puck)
 
     //printf("puck_pursue\t");
 
+  prevThetaGlobal = rob->global.th;
+
     return ST_PK_PURSUE;
+
 }
 
 state puck_to_goal(dd *rob, pk *puck)
 {
 	rob->desLoc.x = 0;
-	rob->desLoc.y = rob->direction * 300;
+	rob->desLoc.y = rob->direction * (GOAL_Y+20);
 	rob->desLoc.th = rob->direction * PI/2;
 	
-	dd_goto(rob, puck, 0.6);
+	dd_goto(rob, puck, 1);
 	shoot_puck(rob, puck);
     // static float prevAlpha = 0;
     // static float prevPhi = 0;

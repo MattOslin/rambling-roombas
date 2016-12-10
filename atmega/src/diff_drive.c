@@ -93,22 +93,28 @@ void dd_norm(dd *rob, float maxV){
 }
 
 void dd_goto(dd *rob, pk *puck, float veloDes){
+
+
+
+
 	static float prevAlpha = 0;
     static float prevPhi = 0;
-    float kp = .55;
-    float kd = .05 * CTRL_FREQ ;
-    float k1 = veloDes;//.4;
-    float k2 = 2;
-    float kap = 0;//1.5;
-    float kad = CTRL_FREQ * 0;//;.1;
-    float gamma = atan2(rob->desLoc.y - rob->global.y, rob->desLoc.x - rob->global.x);
-    float phi = ANG_REMAP(gamma - rob->global.th);
-    float alpha = ANG_REMAP(gamma - rob->desLoc.th);
+
+  float kp = .55;
+  float kd = .05 * CTRL_FREQ ;
+  float k1 = veloDes;//.4;
+  float k2 = 2;
+  float kap = 0;//1.5;
+  float kad = CTRL_FREQ * 0;//;.1;
+  float gamma = atan2(rob->desLoc.y - rob->global.y, rob->desLoc.x - rob->global.x);
+  float phi = ANG_REMAP(gamma - rob->global.th);
+  float alpha = ANG_REMAP(gamma - rob->desLoc.th);
+
     rob->omegaDesired = kp * phi  + kd * (phi - prevPhi)+ kap * alpha - kad * (alpha - prevAlpha);
     rob->veloDesired = k1 / (k2 * ABS(rob->omegaDesired) + 1);
-    if (puck->isHave){
-    	rob->veloDesired = MAX(rob->veloDesired, 2 * MIN_PUCK_TURN_RAD * ABS(rob->omegaDesired) / WHEEL_RADIAL_LOC);
-    }
+//    if (puck->isHave){
+//    	rob->veloDesired = MAX(rob->veloDesired, 2 * MIN_PUCK_TURN_RAD * ABS(rob->omegaDesired) / WHEEL_RADIAL_LOC);
+//    }
     // dd_norm(rob,veloDes);
     prevAlpha = alpha;
     prevPhi = phi;  
@@ -138,9 +144,12 @@ bool dd_theta_control(dd *rob, float theta_desired){
 
 	static float theta_prev = 0;
 	static float theta_int = 0;
-	float kpa = 1;
-	float kia = .03;
-	float kda = -.05;
+//  float kpa = 1;
+//  float kia = .03;
+//  float kda = -.05;
+  float kpa = .55;
+  float kia = 0;
+  float kda = 0;
 
 	float w = ANG_REMAP(rob->global.th - theta_prev) * CTRL_FREQ;
 	float d_th = ANG_REMAP(theta_desired-rob->global.th);
